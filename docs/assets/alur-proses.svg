@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="450" viewBox="0 0 1240 450" role="img" aria-label="Alur proses E-1: login, pilih invoice, unggah e-Faktur, kelola faktur, rekap, pembayaran, ekspor, ringkasan">
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="1240" height="450" rx="24" fill="#f8fafc"/>
+  <text x="620" y="50" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f172a">Alur proses E-1: dari login sampai ringkasan pajak</text>
+
+  <g>
+    <rect x="40" y="86" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="40" y="86" width="9" height="128" rx="4.5" fill="#2563eb"/>
+    <circle cx="80" cy="124" r="20" fill="#2563eb"/>
+    <text x="80" y="132" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">1</text>
+    <text x="112" y="132" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Login</text>
+    <text x="66" y="166" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">Token Bearer dari F-1</text>
+    <rect x="66" y="178" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="171" y="196" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">POST /dev/f1/login</text>
+  </g>
+  <g>
+    <rect x="346" y="86" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="346" y="86" width="9" height="128" rx="4.5" fill="#2563eb"/>
+    <circle cx="386" cy="124" r="20" fill="#2563eb"/>
+    <text x="386" y="132" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">2</text>
+    <text x="418" y="132" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Pilih invoice</text>
+    <text x="372" y="166" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">Invoice proyek dari D-2</text>
+    <rect x="372" y="178" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="477" y="196" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">inv-demo-001 s.d. 005</text>
+  </g>
+  <g>
+    <rect x="652" y="86" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="652" y="86" width="9" height="128" rx="4.5" fill="#0891b2"/>
+    <circle cx="692" cy="124" r="20" fill="#0891b2"/>
+    <text x="692" y="132" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">3</text>
+    <text x="724" y="132" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Unggah e-Faktur</text>
+    <text x="678" y="166" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">PDF maks 5 MB, dibaca otomatis</text>
+    <rect x="678" y="178" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="783" y="196" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">API-01 · API-02</text>
+  </g>
+  <g>
+    <rect x="958" y="86" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="958" y="86" width="9" height="128" rx="4.5" fill="#0891b2"/>
+    <circle cx="998" cy="124" r="20" fill="#0891b2"/>
+    <text x="998" y="132" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">4</text>
+    <text x="1030" y="132" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Kelola faktur</text>
+    <text x="984" y="166" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">cari · detail · koreksi · batal</text>
+    <rect x="984" y="178" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="1089" y="196" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">API-03 s.d. API-06</text>
+  </g>
+  <g>
+    <rect x="40" y="286" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="40" y="286" width="9" height="128" rx="4.5" fill="#059669"/>
+    <circle cx="80" cy="324" r="20" fill="#059669"/>
+    <text x="80" y="332" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">5</text>
+    <text x="112" y="332" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Rekap bulanan</text>
+    <text x="66" y="366" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">hanya faktur aktif dihitung</text>
+    <rect x="66" y="378" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="171" y="396" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">API-07</text>
+  </g>
+  <g>
+    <rect x="346" y="286" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="346" y="286" width="9" height="128" rx="4.5" fill="#059669"/>
+    <circle cx="386" cy="324" r="20" fill="#059669"/>
+    <text x="386" y="332" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">6</text>
+    <text x="418" y="332" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Pembayaran pajak</text>
+    <text x="372" y="366" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">Draft lalu Terkonfirmasi</text>
+    <rect x="372" y="378" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="477" y="396" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">API-08 · API-11</text>
+  </g>
+  <g>
+    <rect x="652" y="286" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="652" y="286" width="9" height="128" rx="4.5" fill="#7c3aed"/>
+    <circle cx="692" cy="324" r="20" fill="#7c3aed"/>
+    <text x="692" y="332" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">7</text>
+    <text x="724" y="332" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Ekspor laporan</text>
+    <text x="678" y="366" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">Excel (xlsx) atau PDF</text>
+    <rect x="678" y="378" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="783" y="396" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">API-09</text>
+  </g>
+  <g>
+    <rect x="958" y="286" width="262" height="128" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="958" y="286" width="9" height="128" rx="4.5" fill="#7c3aed"/>
+    <circle cx="998" cy="324" r="20" fill="#7c3aed"/>
+    <text x="998" y="332" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">8</text>
+    <text x="1030" y="332" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="22" font-weight="800" fill="#0f172a">Ringkasan E-2</text>
+    <text x="984" y="366" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="16" fill="#475569">agregat untuk dasbor</text>
+    <rect x="984" y="378" width="210" height="26" rx="13" fill="#f1f5f9"/>
+    <text x="1089" y="396" text-anchor="middle" font-family="'Cascadia Mono', Consolas, 'Courier New', monospace" font-size="13.5" fill="#334155">API-10</text>
+  </g><path d="M306 150 L340 150" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/><path d="M612 150 L646 150" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/><path d="M918 150 L952 150" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/><path d="M306 350 L340 350" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/><path d="M612 350 L646 350" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/><path d="M918 350 L952 350" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/><path d="M1089 218 V250 H171 V280" stroke="#64748b" stroke-width="3" fill="none" marker-end="url(#head)"/>
+  <text x="620" y="464" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Roboto, Arial, sans-serif" font-size="17" fill="#64748b">Warna kotak: biru = akses dan sumber data · cyan = faktur · hijau = rekap dan pembayaran · ungu = keluaran</text>
+</svg>

@@ -1,0 +1,3008 @@
+{
+  "info": {
+    "name": "E-1 Pajak Proyek API (Laravel)",
+    "description": "Koleksi uji API E-1 (Pencatatan e-Faktur dan pajak proyek).\n\nPersiapan: (1) `php artisan migrate:fresh` pada database kosong, (2) `composer serve`, (3) di Postman: File > Settings > Working directory = folder docs/postman, atau pilih ulang berkas PDF pada tiap form-data, (4) jalankan folder 0 lebih dulu, lalu folder 1 sampai 7 berurutan (atau Run collection).\n\nVariabel: baseUrl, token, tokenCto, tokenE2, taxInvoiceId, taxInvoiceIdB, originalTaxInvoiceId, replacementTaxInvoiceId, cancelTaxInvoiceId, taxPaymentId.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "tokenCto",
+      "value": ""
+    },
+    {
+      "key": "tokenE2",
+      "value": ""
+    },
+    {
+      "key": "taxInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "taxInvoiceIdB",
+      "value": ""
+    },
+    {
+      "key": "originalTaxInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "replacementTaxInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "cancelTaxInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "taxPaymentId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Login (F-1 tiruan, hanya lokal)",
+      "description": "E1 tidak memiliki endpoint login: login dimiliki F-1. Untuk lokal, `POST /api/dev/f1/login` (E1_DEV_LOGIN=true) menerbitkan token palsu yang diterima API seperti token F-1. Jalankan 0.1 lebih dulu; token tersimpan otomatis di variabel `token`.",
+      "item": [
+        {
+          "name": "0.1 Login sebagai Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('token', j.data.accessToken);",
+                  "pm.test(\"Token bertipe Bearer\", function () { pm.expect(j.data.tokenType === 'Bearer').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/f1/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dev",
+                "f1",
+                "login"
+              ]
+            },
+            "description": "Body JSON: `akunId` dan `kodePeran` (Admin, CEO, atau COO berhak penuh). Opsional `ttl` detik (60 sampai 86400, bawaan 3600). Token disimpan ke variabel `token`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"akunId\": \"AKN-0002\",\n  \"kodePeran\": \"Admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "0.2 Login sebagai CTO (untuk uji 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('tokenCto', j.data.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/f1/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dev",
+                "f1",
+                "login"
+              ]
+            },
+            "description": "Peran selain Admin/CEO/COO sah sebagai token tetapi ditolak 403 oleh API E-1. Token disimpan ke `tokenCto`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"akunId\": \"AKN-0009\",\n  \"kodePeran\": \"CTO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "0.3 Login sebagai layanan E-2 (opsional, uji API-KE01-10)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('tokenE2', j.data.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/f1/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dev",
+                "f1",
+                "login"
+              ]
+            },
+            "description": "Hanya berguna bila `E1_SUMMARY_EXTRA_ROLES=LayananE2` diisi di .env (peran layanan konsumen yang hanya boleh membaca ringkasan). Token disimpan ke `tokenE2`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"akunId\": \"SVC-E2\",\n  \"kodePeran\": \"LayananE2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1. Faktur (API-KE01-01 sampai 06)",
+      "description": "Alur utama pada database kosong (`php artisan migrate:fresh`). Invoice D-2 tiruan: inv-demo-001..005.",
+      "item": [
+        {
+          "name": "1.1 [API-01] Pratinjau ekstraksi PDF (tidak menyimpan)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"NSFP terbaca\", function () { pm.expect(j.data.taxInvoiceNumber === '010.000-26.12345678').to.be.true; });",
+                  "pm.test(\"DPP 100000000.00 dan PPN 11000000.00\", function () { pm.expect(j.data.dpp === '100000000.00' && j.data.ppn === '11000000.00').to.be.true; });",
+                  "pm.test(\"Masa pajak 2026-11\", function () { pm.expect(j.data.taxPeriod === '2026-11').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/extractions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "extractions"
+              ]
+            },
+            "description": "form-data: `invoiceId` (teks) + `eFakturFile` (PDF, maks 5 MB). Hanya menampilkan hasil baca PDF.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-001",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-001.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 [API-02] Simpan faktur A (inv-demo-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('taxInvoiceId', j.data.taxInvoiceId);",
+                  "pm.test(\"Status NORMAL\", function () { pm.expect(j.data.status === 'NORMAL').to.be.true; });",
+                  "pm.test(\"ID berupa UUID v7\", function () { pm.expect(new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$').test(j.data.taxInvoiceId)).to.be.true; });",
+                  "pm.test(\"Dicatat oleh AKN-0002\", function () { pm.expect(j.data.createdByAkunId === 'AKN-0002').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "description": "form-data: `invoiceId`, `eFakturFile`; `replacesTaxInvoiceId` hanya untuk faktur pengganti. ID faktur tersimpan ke `taxInvoiceId`.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-001",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-001.pdf"
+                },
+                {
+                  "key": "replacesTaxInvoiceId",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true,
+                  "description": "isi ID faktur asal hanya untuk faktur pengganti"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.3 [API-02] Simpan faktur B (inv-demo-002, 2 item)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('taxInvoiceIdB', j.data.taxInvoiceId);",
+                  "pm.test(\"Dua item\", function () { pm.expect(j.data.items.length === 2).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-002",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-002.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.4 [API-02] Simpan faktur C asal (inv-demo-003)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('originalTaxInvoiceId', j.data.taxInvoiceId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-003",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-003.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.5 [API-02] Faktur pengganti C2 (menggantikan C)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('replacementTaxInvoiceId', j.data.taxInvoiceId);",
+                  "pm.test(\"Status REPLACEMENT\", function () { pm.expect(j.data.status === 'REPLACEMENT').to.be.true; });",
+                  "pm.test(\"Menunjuk faktur asal\", function () { pm.expect(j.data.replacesTaxInvoiceId === pm.collectionVariables.get('originalTaxInvoiceId')).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "description": "Sertakan `replacesTaxInvoiceId` = ID faktur asal (`{{originalTaxInvoiceId}}`) dan invoiceId yang SAMA dengan faktur asal. Faktur asal menjadi non-aktif.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-003",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-003-pengganti.pdf"
+                },
+                {
+                  "key": "replacesTaxInvoiceId",
+                  "value": "{{originalTaxInvoiceId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.6 [API-02] Simpan faktur D (inv-demo-004, masa 2026-12)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('cancelTaxInvoiceId', j.data.taxInvoiceId);",
+                  "pm.test(\"Masa pajak 2026-12\", function () { pm.expect(j.data.taxPeriod === '2026-12').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-004",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-004.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.7 [API-02] Simpan faktur E (inv-demo-005, masa 2026-12)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-005",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-005.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.8 [API-03] Daftar semua faktur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"6 faktur\", function () { pm.expect(j.data.pagination.totalItems === 6).to.be.true; });",
+                  "pm.test(\"Terurut tanggal terbaru\", function () { pm.expect(j.data.items[0].taxInvoiceDate === '2026-12-15').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices?page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                },
+                {
+                  "key": "taxInvoiceNumber",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "project",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "client",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "taxPeriod",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Parameter filter opsional (aktifkan dengan mencentang): taxInvoiceNumber, project (ID atau nama), client (ID atau nama), taxPeriod (YYYY-MM), status (NORMAL, REPLACEMENT, CANCELLED), page, pageSize (maks 100)."
+          },
+          "response": []
+        },
+        {
+          "name": "1.9 [API-03] Filter masa pajak + status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"3 faktur NORMAL pada 2026-11 (A, B, C)\", function () { pm.expect(j.data.pagination.totalItems === 3).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices?taxPeriod=2026-11&status=NORMAL",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11"
+                },
+                {
+                  "key": "status",
+                  "value": "NORMAL"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.10 [API-03] Filter nama proyek (substring)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"3 faktur proyek gudang (B, C, C2)\", function () { pm.expect(j.data.pagination.totalItems === 3).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices?project=gudang",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ],
+              "query": [
+                {
+                  "key": "project",
+                  "value": "gudang"
+                }
+              ]
+            },
+            "description": "Cocok ke ID atau nama proyek dari D-2 (prj-demo-002 = \"Integrasi Sistem Gudang\")."
+          },
+          "response": []
+        },
+        {
+          "name": "1.11 [API-03] Filter nama klien",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"3 faktur klien PT Lintas Rel Nusantara\", function () { pm.expect(j.data.pagination.totalItems === 3).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices?client=Lintas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ],
+              "query": [
+                {
+                  "key": "client",
+                  "value": "Lintas"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.12 [API-04] Detail faktur A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Memuat item dan taxInvoice\", function () { pm.expect(j.data.items.length === 1 && j.data.taxInvoice.invoiceId === \"inv-demo-001\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.13 [API-04] Detail faktur asal C (sudah diganti)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"replacedByTaxInvoiceId terisi\", function () { pm.expect(j.data.replacedByTaxInvoiceId === pm.collectionVariables.get('replacementTaxInvoiceId')).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{originalTaxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{originalTaxInvoiceId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.14 [API-05] Koreksi tanggal faktur A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Tanggal berubah\", function () { pm.expect(j.data.taxInvoice.taxInvoiceDate === '2026-11-10').to.be.true; });",
+                  "pm.test(\"auditId ada\", function () { pm.expect(typeof j.data.auditId === \"string\").to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceId}}"
+              ]
+            },
+            "description": "Body JSON: `changes` (taxInvoiceNumber, taxInvoiceDate, taxPeriod, dpp, ppn, ppnbm, items) dan `note`. Nominal HARUS string. Riwayat sebelum/sesudah tercatat.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"taxInvoiceDate\": \"2026-11-10\"\n  },\n  \"note\": \"Koreksi tanggal faktur\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.15 [API-06] Riwayat faktur A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"CREATE lalu UPDATE\", function () { pm.expect(j.data.history.length === 2 && j.data.history[0].action === 'CREATE' && j.data.history[1].action === 'UPDATE').to.be.true; });",
+                  "pm.test(\"Sebelum/sesudah tanggal\", function () { pm.expect(j.data.history[1].beforeSnapshot.taxInvoiceDate === '2026-11-01' && j.data.history[1].afterSnapshot.taxInvoiceDate === '2026-11-10').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceId}}",
+                "history"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.16 [API-05] Batalkan faktur D",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Status CANCELLED\", function () { pm.expect(j.data.taxInvoice.status === 'CANCELLED').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{cancelTaxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{cancelTaxInvoiceId}}"
+              ]
+            },
+            "description": "Pembatalan: `changes` hanya berisi `status` = `CANCELLED`. Faktur tidak dihapus dan tidak lagi dihitung pada rekap.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"status\": \"CANCELLED\"\n  },\n  \"note\": \"Salah klien\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Rekap (API-KE01-07)",
+      "description": "Rekap per masa pajak (YYYY-MM). Hanya faktur aktif yang dijumlahkan.",
+      "item": [
+        {
+          "name": "2.1 [API-07] Rekap 2026-11",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"3 faktur dihitung (A, B, C2)\", function () { pm.expect(j.data.recap.invoiceCount === 3).to.be.true; });",
+                  "pm.test(\"Total DPP 420000000.00\", function () { pm.expect(j.data.recap.totalDpp === '420000000.00').to.be.true; });",
+                  "pm.test(\"Total PPN 46200000.00\", function () { pm.expect(j.data.recap.totalPpn === '46200000.00').to.be.true; });",
+                  "pm.test(\"4 faktur tampil, asal C tidak dihitung\", function () { pm.expect(j.data.invoices.length === 4 && j.data.invoices.filter(function(i){return !i.isCounted;}).length === 1).to.be.true; });",
+                  "pm.test(\"Belum ada pembayaran\", function () { pm.expect(j.data.recap.paymentStatus === 'NOT_RECORDED').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 [API-07] Rekap 2026-12 (D dibatalkan)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Hanya E dihitung\", function () { pm.expect(j.data.recap.invoiceCount === 1 && j.data.recap.totalPpn === '6600000.00').to.be.true; });",
+                  "pm.test(\"D tampil tetapi tidak dihitung\", function () { pm.expect(j.data.invoices.length === 2).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-12"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 [API-07] Masa pajak tanpa data (2026-01)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Kosong\", function () { pm.expect(j.data.recap.invoiceCount === 0 && j.data.recap.totalPpn === '0.00' && j.data.invoices.length === 0).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-01"
+              ]
+            },
+            "description": "Periode kosong menghasilkan rekap nol (200), bukan error dan bukan data karangan."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Pembayaran (API-KE01-08 dan 11)",
+      "description": "Draft (INCOMPLETE) dibuat lebih dulu; melengkapi NTPN + bukti mengubahnya menjadi CONFIRMED.",
+      "item": [
+        {
+          "name": "3.1 [API-08] Catat pembayaran Draft (tanpa NTPN dan bukti)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.collectionVariables.set('taxPaymentId', j.data.taxPaymentId);",
+                  "pm.test(\"INCOMPLETE\", function () { pm.expect(j.data.status === 'INCOMPLETE').to.be.true; });",
+                  "pm.test(\"Selisih 0.00\", function () { pm.expect(j.data.paymentDifference === '0.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments"
+              ]
+            },
+            "description": "form-data: taxPeriod, taxYear (harus sama dengan tahun masa pajak), amountPaid (string desimal), billingId, eBillingFile (PDF). `ntpn` dan `paymentProofFile` opsional; bila keduanya ada langsung CONFIRMED. ID disimpan ke `taxPaymentId`.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11",
+                  "type": "text"
+                },
+                {
+                  "key": "taxYear",
+                  "value": "2026",
+                  "type": "text"
+                },
+                {
+                  "key": "amountPaid",
+                  "value": "46200000.00",
+                  "type": "text"
+                },
+                {
+                  "key": "billingId",
+                  "value": "BILL-202611-001",
+                  "type": "text"
+                },
+                {
+                  "key": "eBillingFile",
+                  "type": "file",
+                  "src": "samples/e-billing.pdf"
+                },
+                {
+                  "key": "ntpn",
+                  "value": "NTPN-ABC123456",
+                  "type": "text",
+                  "disabled": true,
+                  "description": "opsional; aktifkan bersama bukti untuk langsung CONFIRMED"
+                },
+                {
+                  "key": "paymentProofFile",
+                  "type": "file",
+                  "src": "samples/bukti-pembayaran.pdf",
+                  "disabled": true,
+                  "description": "opsional"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 [API-07] Rekap 2026-11 setelah Draft",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"paymentStatus INCOMPLETE\", function () { pm.expect(j.data.recap.paymentStatus === 'INCOMPLETE').to.be.true; });",
+                  "pm.test(\"Jumlah setor 46200000.00\", function () { pm.expect(j.data.recap.amountPaid === '46200000.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 [API-11] Lengkapi pembayaran menjadi CONFIRMED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"CONFIRMED\", function () { pm.expect(j.data.status === 'CONFIRMED' && j.data.paymentStatus === 'CONFIRMED').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments/{{taxPaymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments",
+                "{{taxPaymentId}}"
+              ]
+            },
+            "description": "form-data (multipart): `ntpn` dan `paymentProofFile` WAJIB keduanya.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "ntpn",
+                  "value": "NTPN-ABC123456",
+                  "type": "text"
+                },
+                {
+                  "key": "paymentProofFile",
+                  "type": "file",
+                  "src": "samples/bukti-pembayaran.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 [API-07] Rekap 2026-11 setelah dikonfirmasi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"CONFIRMED\", function () { pm.expect(j.data.recap.paymentStatus === 'CONFIRMED').to.be.true; });",
+                  "pm.test(\"NTPN tampil di daftar pembayaran\", function () { pm.expect(j.data.payments[0].ntpn === 'NTPN-ABC123456').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.5 [API-08] Pembayaran Desember kurang bayar, langsung CONFIRMED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"CONFIRMED\", function () { pm.expect(j.data.status === 'CONFIRMED').to.be.true; });",
+                  "pm.test(\"Selisih -600000.00\", function () { pm.expect(j.data.paymentDifference === '-600000.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments"
+              ]
+            },
+            "description": "Jumlah setor 6.000.000,00 < total PPN 6.600.000,00: tetap tersimpan, selisih negatif ditampilkan.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-12",
+                  "type": "text"
+                },
+                {
+                  "key": "taxYear",
+                  "value": "2026",
+                  "type": "text"
+                },
+                {
+                  "key": "amountPaid",
+                  "value": "6000000.00",
+                  "type": "text"
+                },
+                {
+                  "key": "billingId",
+                  "value": "BILL-202612-001",
+                  "type": "text"
+                },
+                {
+                  "key": "ntpn",
+                  "value": "NTPN-XYZ987654",
+                  "type": "text"
+                },
+                {
+                  "key": "eBillingFile",
+                  "type": "file",
+                  "src": "samples/e-billing.pdf"
+                },
+                {
+                  "key": "paymentProofFile",
+                  "type": "file",
+                  "src": "samples/bukti-pembayaran.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Ekspor (API-KE01-09)",
+      "description": "Berkas biner tanpa amplop. Di Postman gunakan \"Send and Download\" untuk menyimpan.",
+      "item": [
+        {
+          "name": "4.1 [API-09] Ekspor Excel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Berkas xlsx', function () {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('spreadsheetml.sheet');",
+                  "  pm.expect(pm.response.headers.get('Content-Disposition')).to.include('rekap-pajak-2026-11.xlsx');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11/export?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 [API-09] Ekspor PDF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Berkas pdf', function () {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');",
+                  "  pm.expect(pm.response.headers.get('Content-Disposition')).to.include('rekap-pajak-2026-11.pdf');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11/export?format=pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Ringkasan untuk modul lain / E-2 (API-KE01-10)",
+      "description": "Hanya agregat; tanpa NTPN, billing, atau lampiran.",
+      "item": [
+        {
+          "name": "5.1 [API-10] Ringkasan 2026-11",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"3 faktur aktif, DPP 420000000.00, PPN 46200000.00\", function () { pm.expect(j.data.invoiceCount === 3 && j.data.totalDpp === '420000000.00' && j.data.totalPpn === '46200000.00').to.be.true; });",
+                  "pm.test(\"Terkonfirmasi\", function () { pm.expect(j.data.paymentStatus === 'CONFIRMED').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11"
+                },
+                {
+                  "key": "projectId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 [API-10] Ringkasan per proyek (prj-demo-002)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"B + C2: DPP 320000000.00, PPN 35200000.00\", function () { pm.expect(j.data.invoiceCount === 2 && j.data.totalDpp === '320000000.00' && j.data.totalPpn === '35200000.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-demo-002",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11"
+                },
+                {
+                  "key": "projectId",
+                  "value": "prj-demo-002"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.3 [API-10] Ringkasan 2026-12",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Hanya E: PPN 6600000.00\", function () { pm.expect(j.data.invoiceCount === 1 && j.data.totalPpn === '6600000.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-12"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.4 [API-10] Ringkasan sebagai layanan E-2 (opsional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11"
+                }
+              ]
+            },
+            "description": "Butuh E1_SUMMARY_EXTRA_ROLES=LayananE2 pada .env. Tanpa itu respons 403 (sesuai desain: konsumen tidak berwenang).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenE2}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Variasi data lain (ubah nilai, lalu cek dampaknya)",
+      "description": "Jalankan setelah folder 1 sampai 5.",
+      "item": [
+        {
+          "name": "6.1 [API-05] Koreksi nominal faktur A (DPP/PPN lebih kecil)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Nominal baru\", function () { pm.expect(j.data.taxInvoice.dpp === '90000000.00' && j.data.taxInvoice.ppn === '9900000.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"dpp\": \"90000000.00\",\n    \"ppn\": \"9900000.00\"\n  },\n  \"note\": \"Koreksi nilai sesuai e-Faktur final\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.2 [API-07] Rekap 2026-11 setelah koreksi: lebih bayar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Total PPN 45100000.00, selisih +1100000.00\", function () { pm.expect(j.data.recap.totalPpn === '45100000.00' && j.data.recap.paymentDifference === '1100000.00').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11"
+              ]
+            },
+            "description": "Total PPN aktif menjadi 45.100.000,00 sehingga jumlah setor 46.200.000,00 melebihi PPN: selisih +1.100.000,00. Kompensasi tidak dihitung (Q-24 terbuka)."
+          },
+          "response": []
+        },
+        {
+          "name": "6.3 [API-05] Koreksi item faktur B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceIdB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceIdB}}"
+              ]
+            },
+            "description": "`items` mengganti seluruh daftar item. `discountAmount` dan `receivedAdvanceAmount` opsional (bawaan 0.00).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"items\": [\n      {\n        \"itemCode\": \"620200\",\n        \"itemName\": \"Lisensi Aplikasi Gudang\",\n        \"saleReplacementAdvanceTermAmount\": \"150000000.00\",\n        \"discountAmount\": \"0.00\",\n        \"receivedAdvanceAmount\": \"0.00\"\n      },\n      {\n        \"itemCode\": \"620300\",\n        \"itemName\": \"Jasa Implementasi dan Pelatihan\",\n        \"saleReplacementAdvanceTermAmount\": \"100000000.00\",\n        \"discountAmount\": \"1000000.00\",\n        \"receivedAdvanceAmount\": \"0.00\"\n      }\n    ]\n  },\n  \"note\": \"Tambah potongan harga pada item kedua\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.4 [API-05] Pindahkan masa pajak faktur A ke 2026-12",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Masa pajak 2026-12\", function () { pm.expect(j.data.taxInvoice.taxPeriod === '2026-12').to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceId}}"
+              ]
+            },
+            "description": "Mengubah `taxPeriod` menghitung ulang rekap periode lama (2026-11) dan baru (2026-12).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"taxPeriod\": \"2026-12\"\n  },\n  \"note\": \"Faktur dilaporkan pada masa pajak berikutnya\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6.5 [API-07] Rekap 2026-12 memuat faktur A yang dipindah",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
+                  "pm.test(\"Faktur A dan E dihitung\", function () { pm.expect(j.data.recap.invoiceCount === 2).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-12"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Kasus gagal (uji kode kesalahan)",
+      "description": "Tiap request di sini SENGAJA salah dan diharapkan gagal sesuai errorCode.",
+      "item": [
+        {
+          "name": "7.1 401 UNAUTHORIZED: tanpa token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', function () { pm.response.to.have.status(401); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"401\"', function () { pm.expect(j.code).to.eql('401'); });",
+                  "pm.test('errorCode = UNAUTHORIZED', function () { pm.expect(j.errorCode).to.eql('UNAUTHORIZED'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.2 403 FORBIDDEN: peran CTO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', function () { pm.response.to.have.status(403); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"403\"', function () { pm.expect(j.code).to.eql('403'); });",
+                  "pm.test('errorCode = FORBIDDEN', function () { pm.expect(j.errorCode).to.eql('FORBIDDEN'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenCto}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.3 400 INVALID_FILE: berkas bukan PDF",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_FILE', function () { pm.expect(j.errorCode).to.eql('INVALID_FILE'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/extractions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "extractions"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-001",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/bukan-pdf.txt"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.4 400 EXTRACTION_FAILED: PDF sah tetapi bukan e-Faktur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = EXTRACTION_FAILED', function () { pm.expect(j.errorCode).to.eql('EXTRACTION_FAILED'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/extractions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "extractions"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-004",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/e-billing.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.5 400 INVALID_INVOICE_ID: invoiceId kosong",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_INVOICE_ID', function () { pm.expect(j.errorCode).to.eql('INVALID_INVOICE_ID'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/extractions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "extractions"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-001.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.6 404 INVOICE_NOT_FOUND: invoice tidak ada di D-2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"404\"', function () { pm.expect(j.code).to.eql('404'); });",
+                  "pm.test('errorCode = INVOICE_NOT_FOUND', function () { pm.expect(j.errorCode).to.eql('INVOICE_NOT_FOUND'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/extractions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "extractions"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-tidak-ada",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-001.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.7 409 INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"409\"', function () { pm.expect(j.code).to.eql('409'); });",
+                  "pm.test('errorCode = INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE', function () { pm.expect(j.errorCode).to.eql('INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-001",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-001.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.8 409 DUPLICATE_NSFP: NSFP sudah terdaftar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"409\"', function () { pm.expect(j.code).to.eql('409'); });",
+                  "pm.test('errorCode = DUPLICATE_NSFP', function () { pm.expect(j.errorCode).to.eql('DUPLICATE_NSFP'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "description": "Invoice inv-demo-004 bebas (fakturnya dibatalkan), tetapi PDF yang dipakai bernomor sama dengan faktur A.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-004",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-001.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.9 400 REPLACEMENT_INVOICE_MISMATCH",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = REPLACEMENT_INVOICE_MISMATCH', function () { pm.expect(j.errorCode).to.eql('REPLACEMENT_INVOICE_MISMATCH'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "description": "Faktur pengganti harus memakai invoiceId yang sama dengan faktur asal.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-002",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-004.pdf"
+                },
+                {
+                  "key": "replacesTaxInvoiceId",
+                  "value": "{{taxInvoiceId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.10 409 INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE: mengganti faktur yang sudah diganti",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"409\"', function () { pm.expect(j.code).to.eql('409'); });",
+                  "pm.test('errorCode = INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE', function () { pm.expect(j.errorCode).to.eql('INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "outgoing"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "invoiceId",
+                  "value": "inv-demo-003",
+                  "type": "text"
+                },
+                {
+                  "key": "eFakturFile",
+                  "type": "file",
+                  "src": "samples/efaktur-inv-demo-004.pdf"
+                },
+                {
+                  "key": "replacesTaxInvoiceId",
+                  "value": "{{originalTaxInvoiceId}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.11 404 TAX_INVOICE_NOT_FOUND: detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"404\"', function () { pm.expect(j.code).to.eql('404'); });",
+                  "pm.test('errorCode = TAX_INVOICE_NOT_FOUND', function () { pm.expect(j.errorCode).to.eql('TAX_INVOICE_NOT_FOUND'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c99",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c99"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.12 400 INVALID_CHANGE: field tidak boleh diubah",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_CHANGE', function () { pm.expect(j.errorCode).to.eql('INVALID_CHANGE'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceIdB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceIdB}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"invoiceId\": \"inv-demo-005\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.13 400 INVALID_CHANGE: nominal bukan string",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_CHANGE', function () { pm.expect(j.errorCode).to.eql('INVALID_CHANGE'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceIdB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceIdB}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"dpp\": 90000000\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.14 409 TAX_INVOICE_ALREADY_CANCELLED: ubah faktur yang dibatalkan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"409\"', function () { pm.expect(j.code).to.eql('409'); });",
+                  "pm.test('errorCode = TAX_INVOICE_ALREADY_CANCELLED', function () { pm.expect(j.errorCode).to.eql('TAX_INVOICE_ALREADY_CANCELLED'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{cancelTaxInvoiceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{cancelTaxInvoiceId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"dpp\": \"1.00\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.15 409 DUPLICATE_NSFP: koreksi NSFP menjadi milik faktur lain",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"409\"', function () { pm.expect(j.code).to.eql('409'); });",
+                  "pm.test('errorCode = DUPLICATE_NSFP', function () { pm.expect(j.errorCode).to.eql('DUPLICATE_NSFP'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceIdB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices",
+                "{{taxInvoiceIdB}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"taxInvoiceNumber\": \"010.000-26.12345678\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.16 400 INVALID_FILTER: masa pajak salah",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_FILTER', function () { pm.expect(j.errorCode).to.eql('INVALID_FILTER'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices?taxPeriod=2026-13",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-13"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.17 400 INVALID_FILTER: status di luar enum",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_FILTER', function () { pm.expect(j.errorCode).to.eql('INVALID_FILTER'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-invoices?status=APPROVED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-invoices"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "APPROVED"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.18 400 INVALID_TAX_PERIOD: rekap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_TAX_PERIOD', function () { pm.expect(j.errorCode).to.eql('INVALID_TAX_PERIOD'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-13",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-13"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.19 400 INVALID_FORMAT: ekspor csv",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_FORMAT', function () { pm.expect(j.errorCode).to.eql('INVALID_FORMAT'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-recaps/2026-11/export?format=csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-recaps",
+                "2026-11",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.20 400 INVALID_PROJECT_ID: ringkasan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_PROJECT_ID', function () { pm.expect(j.errorCode).to.eql('INVALID_PROJECT_ID'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-tidak-ada",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11"
+                },
+                {
+                  "key": "projectId",
+                  "value": "prj-tidak-ada"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.21 404 TAX_RECAP_NOT_FOUND: bayar pada masa pajak tanpa rekap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"404\"', function () { pm.expect(j.code).to.eql('404'); });",
+                  "pm.test('errorCode = TAX_RECAP_NOT_FOUND', function () { pm.expect(j.errorCode).to.eql('TAX_RECAP_NOT_FOUND'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2027-01",
+                  "type": "text"
+                },
+                {
+                  "key": "taxYear",
+                  "value": "2027",
+                  "type": "text"
+                },
+                {
+                  "key": "amountPaid",
+                  "value": "1000000.00",
+                  "type": "text"
+                },
+                {
+                  "key": "billingId",
+                  "value": "BILL-202701-001",
+                  "type": "text"
+                },
+                {
+                  "key": "eBillingFile",
+                  "type": "file",
+                  "src": "samples/e-billing.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.22 400 INVALID_PAYMENT: jumlah setor negatif",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_PAYMENT', function () { pm.expect(j.errorCode).to.eql('INVALID_PAYMENT'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "taxPeriod",
+                  "value": "2026-11",
+                  "type": "text"
+                },
+                {
+                  "key": "taxYear",
+                  "value": "2026",
+                  "type": "text"
+                },
+                {
+                  "key": "amountPaid",
+                  "value": "-1.00",
+                  "type": "text"
+                },
+                {
+                  "key": "billingId",
+                  "value": "BILL-X",
+                  "type": "text"
+                },
+                {
+                  "key": "eBillingFile",
+                  "type": "file",
+                  "src": "samples/e-billing.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.23 400 INVALID_PAYMENT: melengkapi tanpa bukti",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"400\"', function () { pm.expect(j.code).to.eql('400'); });",
+                  "pm.test('errorCode = INVALID_PAYMENT', function () { pm.expect(j.errorCode).to.eql('INVALID_PAYMENT'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments/{{taxPaymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments",
+                "{{taxPaymentId}}"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "ntpn",
+                  "value": "NTPN-ABC123456",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7.24 404 TAX_PAYMENT_NOT_FOUND",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test('Amplop code = \"404\"', function () { pm.expect(j.code).to.eql('404'); });",
+                  "pm.test('errorCode = TAX_PAYMENT_NOT_FOUND', function () { pm.expect(j.errorCode).to.eql('TAX_PAYMENT_NOT_FOUND'); pm.expect(j.data).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tax-payments/0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c99",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tax-payments",
+                "0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c99"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "ntpn",
+                  "value": "NTPN-ABC123456",
+                  "type": "text"
+                },
+                {
+                  "key": "paymentProofFile",
+                  "type": "file",
+                  "src": "samples/bukti-pembayaran.pdf"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

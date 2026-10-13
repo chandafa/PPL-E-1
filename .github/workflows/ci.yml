@@ -9,21 +9,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: e1_pajak_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
     env:
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
@@ -33,6 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Siapkan PostgreSQL (bawaan runner)
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+          sudo -u postgres createdb e1_pajak_test
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -41,19 +32,13 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: composer-${{ hashFiles('composer.lock') }}
-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
-      - name: Prepare environment
+      - name: Siapkan environment
         run: |
           cp .env.example .env
           php artisan key:generate
 
-      - name: Run tests (termasuk uji kontrak OpenAPI)
+      - name: Jalankan pengujian (termasuk uji kontrak OpenAPI)
         run: php artisan test
