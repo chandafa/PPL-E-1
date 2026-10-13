@@ -1,0 +1,6 @@
+{
+  "code": "400",
+  "message": "Filter tidak valid: taxPeriod harus berformat YYYY-MM",
+  "data": null,
+  "errorCode": "INVALID_FILTER"
+}

@@ -1,0 +1,10 @@
+{
+  "code": "200",
+  "message": "Pembayaran tersimpan",
+  "data": {
+    "taxPaymentId": "01a25dad-c900-79c2-a6e1-b45d08af7362",
+    "status": "INCOMPLETE",
+    "taxPeriod": "2026-11",
+    "paymentDifference": "0.00"
+  }
+}

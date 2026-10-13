@@ -1,0 +1,6 @@
+{
+  "code": "404",
+  "message": "Faktur pajak tidak ditemukan",
+  "data": null,
+  "errorCode": "TAX_INVOICE_NOT_FOUND"
+}

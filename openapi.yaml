@@ -1,0 +1,2084 @@
+openapi: "3.1.0"
+info:
+  title: E-1 Pencatatan e-Faktur dan pajak proyek
+  version: "0.1.0"
+  contact:
+    name: "Kelompok 1 / Kelas E (E-1): Pencatatan e-Faktur dan pajak proyek"
+  description: "Kontrak awal (draf Pertemuan 3) API modul pencatatan e-Faktur dan pajak proyek, Kelompok 1 / Kelas E. Memuat 11 operasi API-KE01-01 sampai API-KE01-11; satu operasi (API-KE01-10) dibaca modul lain termasuk E-2, sisanya dipakai antarmuka web E-1. Rujukan: Daftar Kontrak API (04), Spesifikasi Fitur Minimum (01), Rancangan Antarmuka (02), Skema Data Awal (03). Path, field, enum, dan kode kesalahan berstatus usulan sampai ditinjau kelompok konsumen. Kesalahan umum di luar daftar per operasi memakai bentuk Error yang sama: 404 NOT_FOUND (rute tidak dikenal), 405 METHOD_NOT_ALLOWED, 413 PAYLOAD_TOO_LARGE, 500 INTERNAL_ERROR."
+servers:
+  - url: http://localhost:8080
+    description: Lingkungan uji lokal (usulan; alamat final menunggu repositori dan stack tim)
+security:
+  - bearerAuth: []
+tags:
+  - name: Faktur dan pembayaran
+    description: "Operasi antarmuka web E-1 (internal): faktur, riwayat, rekap, pembayaran, ekspor."
+  - name: Ringkasan pajak
+    description: Data agregat pajak per masa pajak untuk modul lain; tanpa dokumen, rincian faktur, atau lampiran.
+paths:
+  /api/v1/tax-invoices/extractions:
+    post:
+      operationId: extractTaxInvoice
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-01: Pratinjau hasil ekstraksi PDF e-Faktur"
+      description: "Fitur FTR-KE01-01; dipakai UI-KE01-02 (internal). Hasil ekstraksi PDF e-Faktur untuk invoice D-2 yang dipilih ditampilkan sebagai pratinjau sebelum faktur disimpan; tidak menyimpan data. Sumber: Backlog BL-01; Peta Aktor dan Proses E-1 (Langkah 2–3); jawaban mitra Q-02 dan Q-04."
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - invoiceId
+                - eFakturFile
+              properties:
+                invoiceId:
+                  type: string
+                  minLength: 1
+                  examples:
+                    - inv-demo-001
+                  description: invoiceId D-2 yang belum memiliki faktur aktif (Q-04), dikirim sebagai field teks; contoh inv-demo-001.
+                eFakturFile:
+                  type: string
+                  format: binary
+                  contentMediaType: application/pdf
+                  description: Berkas PDF e-Faktur yang dibuat di luar sistem (multipart/form-data); batas ukuran ditetapkan saat implementasi.
+            encoding:
+              eFakturFile:
+                contentType: application/pdf
+      responses:
+        "200":
+          description: Hasil ekstraksi (belum tersimpan)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractionResultResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Hasil ekstraksi (belum tersimpan)"
+                    data:
+                      invoiceId: inv-demo-001
+                      taxInvoiceNumber: "010.000-26.12345678"
+                      taxInvoiceDate: "2026-11-01"
+                      taxPeriod: "2026-11"
+                      dpp: "100000000.00"
+                      ppn: "11000000.00"
+                      ppnbm: "0.00"
+                      items:
+                        - itemCode: JASA-001
+                          itemName: Jasa pengembangan perangkat lunak termin 1
+                          saleReplacementAdvanceTermAmount: "100000000.00"
+                          discountAmount: "0.00"
+                          receivedAdvanceAmount: "0.00"
+        "400":
+          description: "Permintaan tidak valid: berkas bukan PDF; struktur PDF tidak sesuai standar sehingga ekstraksi gagal (tidak dibuat catatan faktur parsial); invoiceId kosong"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_FILE:
+                  summary: berkas bukan PDF
+                  value:
+                    code: "400"
+                    message: "Berkas harus berformat PDF"
+                    data: null
+                    errorCode: INVALID_FILE
+                EXTRACTION_FAILED:
+                  summary: struktur PDF tidak sesuai standar sehingga ekstraksi gagal (tidak dibuat catatan faktur parsial)
+                  value:
+                    code: "400"
+                    message: "PDF e-Faktur tidak dapat diproses"
+                    data: null
+                    errorCode: EXTRACTION_FAILED
+                INVALID_INVOICE_ID:
+                  summary: invoiceId tidak dikirim atau kosong
+                  value:
+                    code: "400"
+                    message: "invoiceId wajib diisi"
+                    data: null
+                    errorCode: INVALID_INVOICE_ID
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: invoiceId tidak dikenal D-2"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVOICE_NOT_FOUND:
+                  summary: invoiceId tidak dikenal D-2
+                  value:
+                    code: "404"
+                    message: "Invoice tidak ditemukan"
+                    data: null
+                    errorCode: INVOICE_NOT_FOUND
+        "409":
+          description: "Konflik status atau data: invoice sudah memiliki faktur aktif (1 invoice : 1 faktur, Q-04); NSFP pada PDF sudah terdaftar"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE:
+                  summary: "invoice sudah memiliki faktur aktif (1 invoice : 1 faktur, Q-04)"
+                  value:
+                    code: "409"
+                    message: "Invoice ini sudah memiliki faktur aktif"
+                    data: null
+                    errorCode: INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE
+                DUPLICATE_NSFP:
+                  summary: NSFP pada PDF sudah terdaftar
+                  value:
+                    code: "409"
+                    message: "NSFP sudah terdaftar"
+                    data: null
+                    errorCode: DUPLICATE_NSFP
+        "503":
+          description: Layanan D-2 tidak dapat dihubungi sehingga invoiceId tidak dapat divalidasi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                D2_UNAVAILABLE:
+                  summary: API D-2 tidak tersedia (hanya bila D2_DRIVER=http)
+                  value:
+                    code: "503"
+                    message: "Layanan D-2 tidak dapat dihubungi"
+                    data: null
+                    errorCode: D2_UNAVAILABLE
+  /api/v1/tax-invoices/outgoing:
+    post:
+      operationId: createOutgoingTaxInvoice
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-02: Simpan faktur keluaran atau faktur pengganti"
+      description: "Fitur FTR-KE01-01, FTR-KE01-03; dipakai UI-KE01-02, UI-KE01-03 (internal). Faktur Pajak Keluaran tersimpan dan tertaut ke invoice D-2 dari PDF e-Faktur, atau faktur pengganti yang wajib menunjuk faktur asalnya. Sumber: Backlog BL-01, BL-02; Peta Aktor dan Proses E-1 (Langkah 2–5); jawaban mitra Q-02, Q-04, Q-07."
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - invoiceId
+                - eFakturFile
+              properties:
+                invoiceId:
+                  type: string
+                  minLength: 1
+                  examples:
+                    - inv-demo-001
+                  description: invoiceId D-2 (contoh inv-demo-001), dikirim sebagai field teks; untuk faktur pengganti sama dengan invoiceId faktur asal.
+                eFakturFile:
+                  type: string
+                  format: binary
+                  contentMediaType: application/pdf
+                  description: PDF e-Faktur yang sama dengan pratinjau API-KE01-01 (multipart/form-data).
+                replacesTaxInvoiceId:
+                  type: string
+                  format: uuid
+                  examples:
+                    - "01a18abf-fb80-72f6-bb81-c9d0a347e5b2"
+                  description: "Hanya untuk faktur pengganti: ID faktur asal (contoh 01a18abf-fb80-72f6-bb81-c9d0a347e5b2), yang lalu menjadi non-aktif/terganti. Bila diisi, status faktur baru REPLACEMENT."
+            encoding:
+              eFakturFile:
+                contentType: application/pdf
+      responses:
+        "200":
+          description: Faktur tersimpan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxInvoiceCreatedResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Faktur tersimpan"
+                    data:
+                      taxInvoiceId: "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+                      type: OUTGOING
+                      invoiceId: inv-demo-001
+                      vendorName: null
+                      status: NORMAL
+                      replacesTaxInvoiceId: null
+                      taxInvoiceNumber: "010.000-26.12345678"
+                      taxInvoiceDate: "2026-11-01"
+                      taxPeriod: "2026-11"
+                      dpp: "100000000.00"
+                      ppn: "11000000.00"
+                      ppnbm: "0.00"
+                      items:
+                        - itemCode: JASA-001
+                          itemName: Jasa pengembangan perangkat lunak termin 1
+                          saleReplacementAdvanceTermAmount: "100000000.00"
+                          discountAmount: "0.00"
+                          receivedAdvanceAmount: "0.00"
+                      createdByAkunId: AKN-0002
+                      createdAt: "2026-11-01T03:00:00Z"
+        "400":
+          description: "Permintaan tidak valid: berkas bukan PDF; struktur PDF tidak sesuai standar sehingga ekstraksi gagal (tidak dibuat catatan faktur parsial); invoiceId faktur pengganti berbeda dari faktur asal; invoiceId kosong"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_FILE:
+                  summary: berkas bukan PDF
+                  value:
+                    code: "400"
+                    message: "Berkas harus berformat PDF"
+                    data: null
+                    errorCode: INVALID_FILE
+                EXTRACTION_FAILED:
+                  summary: struktur PDF tidak sesuai standar sehingga ekstraksi gagal (tidak dibuat catatan faktur parsial)
+                  value:
+                    code: "400"
+                    message: "PDF e-Faktur tidak dapat diproses"
+                    data: null
+                    errorCode: EXTRACTION_FAILED
+                REPLACEMENT_INVOICE_MISMATCH:
+                  summary: invoiceId faktur pengganti berbeda dari faktur asal
+                  value:
+                    code: "400"
+                    message: "invoiceId faktur pengganti harus sama dengan faktur asal"
+                    data: null
+                    errorCode: REPLACEMENT_INVOICE_MISMATCH
+                INVALID_INVOICE_ID:
+                  summary: invoiceId tidak dikirim atau kosong
+                  value:
+                    code: "400"
+                    message: "invoiceId wajib diisi"
+                    data: null
+                    errorCode: INVALID_INVOICE_ID
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: invoiceId tidak dikenal D-2; replacesTaxInvoiceId tidak dikenal"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVOICE_NOT_FOUND:
+                  summary: invoiceId tidak dikenal D-2
+                  value:
+                    code: "404"
+                    message: "Invoice tidak ditemukan"
+                    data: null
+                    errorCode: INVOICE_NOT_FOUND
+                TAX_INVOICE_NOT_FOUND:
+                  summary: replacesTaxInvoiceId tidak dikenal
+                  value:
+                    code: "404"
+                    message: "Faktur asal tidak ditemukan"
+                    data: null
+                    errorCode: TAX_INVOICE_NOT_FOUND
+        "409":
+          description: "Konflik status atau data: invoice sudah memiliki faktur aktif (bukan faktur pengganti); NSFP pada PDF sudah terdaftar; faktur asal yang akan diganti sudah Dibatalkan atau sudah diganti faktur lain"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE:
+                  summary: invoice sudah memiliki faktur aktif (bukan faktur pengganti)
+                  value:
+                    code: "409"
+                    message: "Invoice ini sudah memiliki faktur aktif"
+                    data: null
+                    errorCode: INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE
+                DUPLICATE_NSFP:
+                  summary: NSFP pada PDF sudah terdaftar
+                  value:
+                    code: "409"
+                    message: "NSFP sudah terdaftar"
+                    data: null
+                    errorCode: DUPLICATE_NSFP
+                TAX_INVOICE_ALREADY_CANCELLED:
+                  summary: faktur asal (replacesTaxInvoiceId) sudah Dibatalkan
+                  value:
+                    code: "409"
+                    message: "Faktur asal sudah berstatus Dibatalkan"
+                    data: null
+                    errorCode: TAX_INVOICE_ALREADY_CANCELLED
+        "503":
+          description: Layanan D-2 tidak dapat dihubungi sehingga invoiceId tidak dapat divalidasi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                D2_UNAVAILABLE:
+                  summary: API D-2 tidak tersedia (hanya bila D2_DRIVER=http)
+                  value:
+                    code: "503"
+                    message: "Layanan D-2 tidak dapat dihubungi"
+                    data: null
+                    errorCode: D2_UNAVAILABLE
+  /api/v1/tax-invoices:
+    get:
+      operationId: listTaxInvoices
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-03: Cari dan filter faktur"
+      description: "Fitur FTR-KE01-02; dipakai UI-KE01-01 (internal). Daftar faktur dicari dan difilter berdasarkan nomor faktur/NSFP, proyek, klien, masa pajak, dan status. Sumber: Backlog BL-04; Peta Aktor dan Proses E-1 (Langkah 6); jawaban mitra Q-16."
+      parameters:
+        - name: taxInvoiceNumber
+          in: query
+          required: false
+          description: Nomor faktur/NSFP; contoh 010.000-26.12345678.
+          schema:
+            type: string
+            examples:
+              - "010.000-26.12345678"
+        - name: project
+          in: query
+          required: false
+          description: ID atau nama proyek (referensi dari invoice D-2); contoh prj-demo-001.
+          schema:
+            type: string
+            examples:
+              - prj-demo-001
+        - name: client
+          in: query
+          required: false
+          description: ID atau nama klien (referensi dari invoice D-2).
+          schema:
+            type: string
+        - name: taxPeriod
+          in: query
+          required: false
+          description: Masa pajak; contoh 2026-11.
+          schema:
+            $ref: "#/components/schemas/TaxPeriod"
+        - name: status
+          in: query
+          required: false
+          description: NORMAL, REPLACEMENT, atau CANCELLED (label UI Normal, Pengganti, Dibatalkan).
+          schema:
+            $ref: "#/components/schemas/TaxInvoiceStatus"
+        - name: page
+          in: query
+          required: false
+          description: Halaman hasil, mulai 1 (default 1).
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Ukuran halaman; default 20, maksimum 100 (usulan, 04 menyerahkannya ke OpenAPI).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Daftar faktur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxInvoiceListResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Daftar faktur"
+                    data:
+                      items:
+                        - taxInvoiceId: "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+                          type: OUTGOING
+                          taxInvoiceNumber: "010.000-26.12345678"
+                          taxInvoiceDate: "2026-11-01"
+                          invoiceId: inv-demo-001
+                          vendorName: null
+                          projectId: prj-demo-001
+                          clientId: null
+                          taxPeriod: "2026-11"
+                          dpp: "100000000.00"
+                          ppn: "11000000.00"
+                          status: NORMAL
+                          replacedByTaxInvoiceId: null
+                      pagination:
+                        page: 1
+                        pageSize: 20
+                        totalItems: 1
+        "400":
+          description: "Permintaan tidak valid: taxPeriod bukan YYYY-MM atau status di luar enum"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_FILTER:
+                  summary: taxPeriod bukan YYYY-MM atau status di luar enum
+                  value:
+                    code: "400"
+                    message: "Filter tidak valid: taxPeriod harus berformat YYYY-MM"
+                    data: null
+                    errorCode: INVALID_FILTER
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/tax-invoices/{taxInvoiceId}:
+    get:
+      operationId: getTaxInvoice
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-04: Detail faktur beserta item dan tautan asal/pengganti"
+      description: "Fitur FTR-KE01-02; dipakai UI-KE01-03 (internal). Detail satu faktur beserta item, status, dan tautan faktur asal/pengganti ditampilkan, termasuk detail yang dibuka dari rekap. Sumber: Backlog BL-04; Peta Aktor dan Proses E-1 (Langkah 6); jawaban mitra Q-03, Q-07, Q-16."
+      parameters:
+        - name: taxInvoiceId
+          in: path
+          required: true
+          description: ID faktur; contoh 01a1950c-b380-73a9-91c4-7e20d5b86f14.
+          schema:
+            type: string
+            format: uuid
+            examples:
+              - "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+      responses:
+        "200":
+          description: Detail faktur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxInvoiceDetailResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Detail faktur"
+                    data:
+                      taxInvoice:
+                        taxInvoiceId: "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+                        type: OUTGOING
+                        invoiceId: inv-demo-001
+                        vendorName: null
+                        projectId: prj-demo-001
+                        clientId: null
+                        taxInvoiceNumber: "010.000-26.12345678"
+                        taxInvoiceDate: "2026-11-01"
+                        taxPeriod: "2026-11"
+                        dpp: "100000000.00"
+                        ppn: "11000000.00"
+                        ppnbm: "0.00"
+                        status: NORMAL
+                        pdfUri: /files/tax/efaktur-001.pdf
+                        createdByAkunId: AKN-0002
+                        createdAt: "2026-11-01T03:00:00Z"
+                        updatedAt: "2026-11-01T03:00:00Z"
+                      items:
+                        - itemCode: JASA-001
+                          itemName: Jasa pengembangan perangkat lunak termin 1
+                          saleReplacementAdvanceTermAmount: "100000000.00"
+                          discountAmount: "0.00"
+                          receivedAdvanceAmount: "0.00"
+                      replacesTaxInvoiceId: null
+                      replacedByTaxInvoiceId: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: taxInvoiceId tidak dikenal"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                TAX_INVOICE_NOT_FOUND:
+                  summary: taxInvoiceId tidak dikenal
+                  value:
+                    code: "404"
+                    message: "Faktur pajak tidak ditemukan"
+                    data: null
+                    errorCode: TAX_INVOICE_NOT_FOUND
+    patch:
+      operationId: updateTaxInvoice
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-05: Koreksi atau batalkan faktur dengan riwayat"
+      description: "Fitur FTR-KE01-03; dipakai UI-KE01-03 (internal). Data faktur hasil ekstraksi dikoreksi atau faktur dibatalkan (status CANCELLED) tanpa menghilangkan riwayat lama. Sumber: Backlog BL-02, BL-03; Peta Aktor dan Proses E-1 (Langkah 4–5); jawaban mitra Q-05, Q-06, Q-07."
+      parameters:
+        - name: taxInvoiceId
+          in: path
+          required: true
+          description: ID faktur; contoh 01a1950c-b380-73a9-91c4-7e20d5b86f14.
+          schema:
+            type: string
+            format: uuid
+            examples:
+              - "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - changes
+              properties:
+                changes:
+                  $ref: "#/components/schemas/TaxInvoiceChanges"
+                  description: "Field yang boleh dikoreksi: taxInvoiceNumber, taxInvoiceDate, taxPeriod, dpp, ppn, ppnbm, items; atau status CANCELLED untuk pembatalan. invoiceId dan nilai invoice D-2 tidak dapat diubah."
+                note:
+                  type: string
+                  examples:
+                    - Koreksi tanggal faktur
+                  description: Alasan koreksi atau pembatalan; disimpan sebagai note di ENT-KE01-05.
+            examples:
+              contoh:
+                value:
+                  changes:
+                    taxInvoiceDate: "2026-11-01"
+                  note: Koreksi tanggal faktur
+      responses:
+        "200":
+          description: Faktur diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxInvoiceUpdatedResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Faktur diperbarui"
+                    data:
+                      taxInvoice:
+                        taxInvoiceId: "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+                        type: OUTGOING
+                        invoiceId: inv-demo-001
+                        vendorName: null
+                        projectId: prj-demo-001
+                        clientId: null
+                        taxInvoiceNumber: "010.000-26.12345678"
+                        taxInvoiceDate: "2026-11-01"
+                        taxPeriod: "2026-11"
+                        dpp: "100000000.00"
+                        ppn: "11000000.00"
+                        ppnbm: "0.00"
+                        status: NORMAL
+                        pdfUri: /files/tax/efaktur-001.pdf
+                        createdByAkunId: AKN-0002
+                        createdAt: "2026-11-01T03:00:00Z"
+                        updatedAt: "2026-11-01T03:05:00Z"
+                      auditId: "01a19511-4760-70e7-bb5c-92a4f1d63b80"
+        "400":
+          description: "Permintaan tidak valid: field di luar yang diizinkan atau nilai tidak valid"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_CHANGE:
+                  summary: field di luar yang diizinkan atau nilai tidak valid
+                  value:
+                    code: "400"
+                    message: "Field tidak boleh diubah atau nilai tidak valid"
+                    data: null
+                    errorCode: INVALID_CHANGE
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: taxInvoiceId tidak dikenal"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                TAX_INVOICE_NOT_FOUND:
+                  summary: taxInvoiceId tidak dikenal
+                  value:
+                    code: "404"
+                    message: "Faktur pajak tidak ditemukan"
+                    data: null
+                    errorCode: TAX_INVOICE_NOT_FOUND
+        "409":
+          description: "Konflik status atau data: faktur sudah Dibatalkan sehingga tidak dapat diubah lagi; taxInvoiceNumber hasil koreksi sudah terdaftar pada faktur lain"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                TAX_INVOICE_ALREADY_CANCELLED:
+                  summary: faktur sudah Dibatalkan sehingga tidak dapat diubah lagi
+                  value:
+                    code: "409"
+                    message: "Faktur sudah berstatus Dibatalkan"
+                    data: null
+                    errorCode: TAX_INVOICE_ALREADY_CANCELLED
+                DUPLICATE_NSFP:
+                  summary: taxInvoiceNumber hasil koreksi sudah terdaftar pada faktur lain
+                  value:
+                    code: "409"
+                    message: "NSFP sudah terdaftar"
+                    data: null
+                    errorCode: DUPLICATE_NSFP
+  /api/v1/tax-invoices/{taxInvoiceId}/history:
+    get:
+      operationId: getTaxInvoiceHistory
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-06: Riwayat perubahan faktur"
+      description: "Fitur FTR-KE01-03; dipakai UI-KE01-03 (internal). Riwayat perubahan faktur ditampilkan secara kronologis (waktu, pengguna, aksi, nilai sebelum dan sesudah). Sumber: Backlog BL-02, BL-03; Peta Aktor dan Proses E-1 (Langkah 4–5); jawaban mitra Q-05, Q-06, Q-07."
+      parameters:
+        - name: taxInvoiceId
+          in: path
+          required: true
+          description: ID faktur; contoh 01a1950c-b380-73a9-91c4-7e20d5b86f14.
+          schema:
+            type: string
+            format: uuid
+            examples:
+              - "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+      responses:
+        "200":
+          description: Riwayat faktur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxInvoiceHistoryResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Riwayat faktur"
+                    data:
+                      history:
+                        - auditId: "01a1950c-b380-74c1-88d2-7a05e9b3f671"
+                          action: CREATE
+                          actorAkunId: AKN-0002
+                          changedAt: "2026-11-01T03:00:00Z"
+                          beforeSnapshot: null
+                          afterSnapshot:
+                            taxInvoiceNumber: "010.000-26.12345678"
+                            taxInvoiceDate: "2026-11-10"
+                            taxPeriod: "2026-11"
+                            dpp: "100000000.00"
+                            ppn: "11000000.00"
+                            ppnbm: "0.00"
+                            status: NORMAL
+                          note: null
+                        - auditId: "01a19511-4760-70e7-bb5c-92a4f1d63b80"
+                          action: UPDATE
+                          actorAkunId: AKN-0002
+                          changedAt: "2026-11-01T03:05:00Z"
+                          beforeSnapshot:
+                            taxInvoiceDate: "2026-11-10"
+                          afterSnapshot:
+                            taxInvoiceDate: "2026-11-01"
+                          note: Koreksi tanggal faktur
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: taxInvoiceId tidak dikenal"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                TAX_INVOICE_NOT_FOUND:
+                  summary: taxInvoiceId tidak dikenal
+                  value:
+                    code: "404"
+                    message: "Faktur pajak tidak ditemukan"
+                    data: null
+                    errorCode: TAX_INVOICE_NOT_FOUND
+  /api/v1/tax-recaps/{taxPeriod}:
+    get:
+      operationId: getTaxRecap
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-07: Rekap pajak per masa pajak"
+      description: "Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur aktif, daftar faktur periode, dan pembayaran. Sumber: Backlog BL-05; Peta Aktor dan Proses E-1 (Langkah 7); jawaban mitra Q-03, Q-12, Q-13."
+      parameters:
+        - name: taxPeriod
+          in: path
+          required: true
+          description: Masa pajak satu bulan (Q-12); contoh 2026-11.
+          schema:
+            $ref: "#/components/schemas/TaxPeriod"
+      responses:
+        "200":
+          description: Rekap masa pajak
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxRecapResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Rekap masa pajak"
+                    data:
+                      recap:
+                        taxPeriod: "2026-11"
+                        invoiceCount: 1
+                        totalDpp: "100000000.00"
+                        totalPpn: "11000000.00"
+                        totalPpnbm: "0.00"
+                        amountPaid: "11000000.00"
+                        paymentDifference: "0.00"
+                        paymentStatus: CONFIRMED
+                        computedAt: "2026-12-10T02:00:05Z"
+                      invoices:
+                        - taxInvoiceId: "01a1950c-b380-73a9-91c4-7e20d5b86f14"
+                          taxInvoiceNumber: "010.000-26.12345678"
+                          invoiceId: inv-demo-001
+                          projectId: prj-demo-001
+                          clientId: null
+                          status: NORMAL
+                          dpp: "100000000.00"
+                          ppn: "11000000.00"
+                          ppnbm: "0.00"
+                          isCounted: true
+                      payments:
+                        - taxPaymentId: "01a25dad-c900-79c2-a6e1-b45d08af7362"
+                          amountPaid: "11000000.00"
+                          billingId: BILL-202611-001
+                          ntpn: NTPN-ABC123
+                          status: CONFIRMED
+                          createdAt: "2026-12-10T02:00:00Z"
+        "400":
+          description: "Permintaan tidak valid: taxPeriod bukan YYYY-MM"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_TAX_PERIOD:
+                  summary: taxPeriod bukan YYYY-MM
+                  value:
+                    code: "400"
+                    message: "Masa pajak harus berformat YYYY-MM (contoh 2026-11)"
+                    data: null
+                    errorCode: INVALID_TAX_PERIOD
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/tax-payments:
+    post:
+      operationId: createTaxPayment
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-08: Catat pembayaran dan pelaporan pajak"
+      description: "Fitur FTR-KE01-05; dipakai UI-KE01-05 (internal). Pembayaran dan pelaporan pajak untuk masa pajak yang dibuka dari rekap tercatat: jumlah setor, masa dan tahun pajak, kode billing, NTPN, e-Billing, dan bukti pembayaran. Sumber: Backlog BL-06; Peta Aktor dan Proses E-1 (Langkah 8); jawaban mitra Q-02, Q-09, Q-10."
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - taxPeriod
+                - taxYear
+                - amountPaid
+                - billingId
+                - eBillingFile
+              properties:
+                taxPeriod:
+                  $ref: "#/components/schemas/TaxPeriod"
+                  description: Masa pajak dari rekap yang dibuka; contoh 2026-11.
+                taxYear:
+                  type: integer
+                  examples:
+                    - 2026
+                  description: Tahun pajak (Q-02), terisi dari masa pajak; contoh 2026.
+                amountPaid:
+                  $ref: "#/components/schemas/Money"
+                  description: Jumlah setor; tidak boleh negatif; contoh 11000000.00.
+                billingId:
+                  type: string
+                  minLength: 1
+                  examples:
+                    - BILL-202611-001
+                  description: ID/kode billing (Q-02, Q-09); contoh BILL-202611-001.
+                ntpn:
+                  type: string
+                  minLength: 1
+                  examples:
+                    - NTPN-ABC123
+                  description: Tidak wajib pada pencatatan awal (dicatat sebagai Draft/INCOMPLETE); dilengkapi lewat API-KE01-11. Wajib bersama bukti pembayaran agar CONFIRMED (Q-10); contoh NTPN-ABC123.
+                eBillingFile:
+                  type: string
+                  format: binary
+                  contentMediaType: application/pdf
+                  description: Berkas PDF e-Billing (multipart/form-data).
+                paymentProofFile:
+                  type: string
+                  format: binary
+                  contentMediaType: application/pdf
+                  description: Berkas PDF bukti pembayaran (multipart/form-data); tidak wajib pada pencatatan awal (Draft/INCOMPLETE), dilengkapi lewat API-KE01-11. Wajib bersama NTPN agar CONFIRMED (Q-10).
+            encoding:
+              eBillingFile:
+                contentType: application/pdf
+              paymentProofFile:
+                contentType: application/pdf
+      responses:
+        "200":
+          description: Pembayaran tersimpan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxPaymentCreatedResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Pembayaran tersimpan"
+                    data:
+                      taxPaymentId: "01a25dad-c900-79c2-a6e1-b45d08af7362"
+                      status: INCOMPLETE
+                      taxPeriod: "2026-11"
+                      paymentDifference: "0.00"
+        "400":
+          description: "Permintaan tidak valid: field wajib kosong, angka negatif, atau lampiran bukan PDF"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_PAYMENT:
+                  summary: field wajib kosong, angka negatif, atau lampiran bukan PDF
+                  value:
+                    code: "400"
+                    message: "Data pembayaran tidak valid"
+                    data: null
+                    errorCode: INVALID_PAYMENT
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: masa pajak belum memiliki rekap"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                TAX_RECAP_NOT_FOUND:
+                  summary: masa pajak belum memiliki rekap
+                  value:
+                    code: "404"
+                    message: "Masa pajak belum memiliki rekap"
+                    data: null
+                    errorCode: TAX_RECAP_NOT_FOUND
+  /api/v1/tax-recaps/{taxPeriod}/export:
+    get:
+      operationId: exportTaxRecap
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-09: Ekspor rekap ke Excel atau PDF"
+      description: "Fitur FTR-KE01-06; dipakai UI-KE01-06 (internal). File rekap masa pajak dihasilkan dalam format Excel atau PDF; susunan kolom, isi, dan total identik dengan rekap di layar. Sumber: Backlog BL-07; Peta Aktor dan Proses E-1 (Langkah 9); jawaban mitra Q-15, Q-17."
+      parameters:
+        - name: taxPeriod
+          in: path
+          required: true
+          description: Masa pajak yang sedang dilihat; contoh 2026-11.
+          schema:
+            $ref: "#/components/schemas/TaxPeriod"
+        - name: format
+          in: query
+          required: true
+          description: Hanya xlsx atau pdf (Q-15); CSV dan format lain ditolak 400.
+          schema:
+            type: string
+            enum:
+              - xlsx
+              - pdf
+      responses:
+        "200":
+          description: File rekap
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: Berkas diunduh sebagai lampiran; nama berkas rekap-pajak-<taxPeriod>.<format> (usulan).
+              schema:
+                type: string
+                examples:
+                  - attachment; filename="rekap-pajak-2026-11.xlsx"
+        "400":
+          description: "Permintaan tidak valid: format selain xlsx atau pdf, atau taxPeriod tidak valid"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_FORMAT:
+                  summary: format selain xlsx atau pdf, atau taxPeriod tidak valid
+                  value:
+                    code: "400"
+                    message: "Format ekspor hanya xlsx atau pdf"
+                    data: null
+                    errorCode: INVALID_FORMAT
+                INVALID_TAX_PERIOD:
+                  summary: taxPeriod bukan YYYY-MM
+                  value:
+                    code: "400"
+                    message: "Masa pajak harus berformat YYYY-MM (contoh 2026-11)"
+                    data: null
+                    errorCode: INVALID_TAX_PERIOD
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/tax/summary:
+    get:
+      operationId: getTaxSummary
+      tags:
+        - Ringkasan pajak
+      summary: "API-KE01-10: Ringkasan pajak per masa pajak untuk modul lain"
+      description: "Fitur FTR-KE01-07; dipakai modul ERP lain, termasuk E-2. Ringkasan pajak (jumlah faktur aktif, total DPP, PPN, PPnBM, dan status pembayaran) per masa pajak untuk modul ERP lain, termasuk E-2 (arus kas dan dasbor keuangan). Sumber: Backlog BL-08; Peta Aktor dan Proses E-1 (Langkah 10); hasil minimum E-1 pada Pembagian Pekerjaan (API ringkasan pajak); jawaban mitra Q-22."
+      parameters:
+        - name: taxPeriod
+          in: query
+          required: true
+          description: Masa pajak satu bulan (Q-12); contoh 2026-11.
+          schema:
+            $ref: "#/components/schemas/TaxPeriod"
+        - name: projectId
+          in: query
+          required: false
+          description: ID kanonis proyek milik D-1; contoh prj-demo-001. Bila dihilangkan, seluruh proyek pada masa pajak dihitung.
+          schema:
+            type: string
+            minLength: 1
+            examples:
+              - prj-demo-001
+      responses:
+        "200":
+          description: Ringkasan pajak
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxSummaryResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Ringkasan pajak"
+                    data:
+                      taxPeriod: "2026-11"
+                      invoiceCount: 1
+                      totalDpp: "100000000.00"
+                      totalPpn: "11000000.00"
+                      totalPpnbm: "0.00"
+                      paymentStatus: CONFIRMED
+        "400":
+          description: "Permintaan tidak valid: taxPeriod bukan YYYY-MM; projectId tidak valid"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_TAX_PERIOD:
+                  summary: taxPeriod bukan YYYY-MM
+                  value:
+                    code: "400"
+                    message: "Masa pajak harus berformat YYYY-MM (contoh 2026-11)"
+                    data: null
+                    errorCode: INVALID_TAX_PERIOD
+                INVALID_PROJECT_ID:
+                  summary: projectId tidak valid
+                  value:
+                    code: "400"
+                    message: "projectId tidak valid"
+                    data: null
+                    errorCode: INVALID_PROJECT_ID
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Pengguna sah, akses tidak cukup (konsumen atau pengguna tidak berwenang membaca ringkasan pajak)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                FORBIDDEN:
+                  summary: konsumen atau pengguna tidak berwenang membaca ringkasan pajak
+                  value:
+                    code: "403"
+                    message: "Pengguna sah, akses tidak cukup"
+                    data: null
+                    errorCode: FORBIDDEN
+  /api/v1/tax-payments/{taxPaymentId}:
+    patch:
+      operationId: completeTaxPayment
+      tags:
+        - Faktur dan pembayaran
+      summary: "API-KE01-11: Lengkapi pembayaran menjadi Terkonfirmasi"
+      description: "Fitur FTR-KE01-05; dipakai UI-KE01-05 (internal). Catatan pembayaran berstatus Draft/INCOMPLETE dilengkapi menjadi Terkonfirmasi (CONFIRMED); pelengkapan hanya dapat dilakukan bila NTPN dan bukti pembayaran ada. Sumber: Backlog BL-06; Peta Aktor dan Proses E-1 (Langkah 8); jawaban mitra Q-02 (update data dari rekap), Q-10."
+      parameters:
+        - name: taxPaymentId
+          in: path
+          required: true
+          description: ID catatan pembayaran berstatus INCOMPLETE; contoh 01a25dad-c900-79c2-a6e1-b45d08af7362.
+          schema:
+            type: string
+            format: uuid
+            examples:
+              - "01a25dad-c900-79c2-a6e1-b45d08af7362"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - ntpn
+                - paymentProofFile
+              properties:
+                ntpn:
+                  type: string
+                  minLength: 1
+                  examples:
+                    - NTPN-ABC123
+                  description: NTPN; wajib untuk melengkapi pembayaran menjadi CONFIRMED (Q-10); contoh NTPN-ABC123.
+                paymentProofFile:
+                  type: string
+                  format: binary
+                  contentMediaType: application/pdf
+                  description: Berkas PDF bukti pembayaran (multipart/form-data); wajib bersama NTPN untuk CONFIRMED (Q-10). Berkas lama tidak dihapus saat diganti.
+            encoding:
+              paymentProofFile:
+                contentType: application/pdf
+      responses:
+        "200":
+          description: Pembayaran Terkonfirmasi
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxPaymentCompletedResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Pembayaran Terkonfirmasi"
+                    data:
+                      taxPaymentId: "01a25dad-c900-79c2-a6e1-b45d08af7362"
+                      status: CONFIRMED
+                      paymentStatus: CONFIRMED
+        "400":
+          description: "Permintaan tidak valid: ntpn atau bukti pembayaran tidak ada, atau lampiran bukan PDF"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_PAYMENT:
+                  summary: ntpn atau bukti pembayaran tidak ada, atau lampiran bukan PDF
+                  value:
+                    code: "400"
+                    message: "NTPN dan bukti pembayaran wajib diisi untuk Terkonfirmasi"
+                    data: null
+                    errorCode: INVALID_PAYMENT
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: "ID tidak ditemukan: taxPaymentId tidak dikenal"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                TAX_PAYMENT_NOT_FOUND:
+                  summary: taxPaymentId tidak dikenal
+                  value:
+                    code: "404"
+                    message: "Catatan pembayaran tidak ditemukan"
+                    data: null
+                    errorCode: TAX_PAYMENT_NOT_FOUND
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Token diterbitkan F-1 saat login dan dikirim sebagai Authorization: Bearer <token>. Layanan memeriksa tanda tangan, iss, aud, dan exp, lalu peran (kodePeran) dan izin. Pemilik kunci, masa token, dan perilaku logout ditetapkan F-1."
+  responses:
+    Unauthorized:
+      description: Token tidak ada atau tidak sah
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            UNAUTHORIZED:
+              summary: token tidak ada atau tidak sah
+              value:
+                code: "401"
+                message: "Token tidak ada atau tidak sah"
+                data: null
+                errorCode: UNAUTHORIZED
+    Forbidden:
+      description: Pengguna sah, akses tidak cukup (peran bukan Admin, CEO, atau COO)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            FORBIDDEN:
+              summary: peran bukan Admin, CEO, atau COO
+              value:
+                code: "403"
+                message: "Pengguna sah, akses tidak cukup"
+                data: null
+                errorCode: FORBIDDEN
+  schemas:
+    Money:
+      type: string
+      pattern: ^[0-9]{1,16}\.[0-9]{2}$
+      description: Nominal Rupiah decimal(18,2) ditulis sebagai string agar presisi tidak hilang (usulan E-1; menunggu persetujuan konsumen).
+      examples:
+        - "100000000.00"
+    SignedMoney:
+      type: string
+      pattern: ^-?[0-9]{1,16}\.[0-9]{2}$
+      description: Nominal decimal(18,2) bertanda sebagai string; negatif bila nilai pertama lebih kecil (mis. jumlah setor kurang dari total PPN).
+      examples:
+        - "-500000.00"
+    MoneyNullable:
+      type:
+        - string
+        - "null"
+      pattern: ^[0-9]{1,16}\.[0-9]{2}$
+      description: "Nominal decimal(18,2) sebagai string; null bila tidak ada data (03: 0.00; 04: null; menunggu keputusan tim E-1)."
+      examples:
+        - "0.00"
+    TaxPeriod:
+      type: string
+      pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+      description: Masa pajak satu bulan kalender, format YYYY-MM (Q-12).
+      examples:
+        - "2026-11"
+    TaxInvoiceStatus:
+      type: string
+      enum:
+        - NORMAL
+        - REPLACEMENT
+        - CANCELLED
+      description: "Status faktur (Q-07). Label UI: Normal, Pengganti, Dibatalkan."
+    RecapPaymentStatus:
+      type: string
+      enum:
+        - NOT_RECORDED
+        - INCOMPLETE
+        - CONFIRMED
+      description: "Status pembayaran per masa pajak: NOT_RECORDED belum ada pembayaran; INCOMPLETE NTPN atau bukti belum lengkap; CONFIRMED NTPN dan bukti lengkap (Q-10)."
+    PaymentRecordStatus:
+      type: string
+      enum:
+        - INCOMPLETE
+        - CONFIRMED
+      description: "Status satu catatan pembayaran (Q-10). Label UI: Draft/Belum Konfirmasi, Terkonfirmasi."
+    HistoryAction:
+      type: string
+      enum:
+        - CREATE
+        - UPDATE
+        - DELETE
+        - STATUS_CHANGE
+      description: Aksi pada riwayat perubahan faktur (ENT-KE01-05); penggunaan DELETE dan STATUS_CHANGE menunggu Q-21.
+    ItemFaktur:
+      type: object
+      description: Rincian barang/jasa hasil ekstraksi PDF e-Faktur (ENT-KE01-02).
+      required:
+        - itemCode
+        - itemName
+        - saleReplacementAdvanceTermAmount
+        - discountAmount
+        - receivedAdvanceAmount
+      properties:
+        itemCode:
+          type: string
+          description: Kode barang/jasa dari PDF (Q-02).
+          examples:
+            - JASA-001
+        itemName:
+          type: string
+          description: Nama barang/jasa kena pajak dari PDF (Q-02).
+          examples:
+            - Jasa pengembangan perangkat lunak termin 1
+        saleReplacementAdvanceTermAmount:
+          $ref: "#/components/schemas/Money"
+          description: Harga jual/penggantian/uang muka/termin (Rp) dari PDF (Q-02).
+        discountAmount:
+          $ref: "#/components/schemas/Money"
+          description: Potongan harga dari PDF; 0.00 bila tidak ada.
+        receivedAdvanceAmount:
+          $ref: "#/components/schemas/Money"
+          description: Uang muka yang telah diterima dari PDF; 0.00 bila tidak ada.
+    ItemFakturInput:
+      type: object
+      description: Rincian barang/jasa yang dikirim saat koreksi.
+      required:
+        - itemCode
+        - itemName
+        - saleReplacementAdvanceTermAmount
+      properties:
+        itemCode:
+          type: string
+          description: Kode barang/jasa (Q-02).
+          examples:
+            - JASA-001
+        itemName:
+          type: string
+          description: Nama barang/jasa kena pajak (Q-02).
+        saleReplacementAdvanceTermAmount:
+          $ref: "#/components/schemas/Money"
+          description: Harga jual/penggantian/uang muka/termin (Rp).
+        discountAmount:
+          $ref: "#/components/schemas/Money"
+          default: "0.00"
+          description: Potongan harga; tidak wajib, 0.00 bila tidak ada (Skema Data Awal).
+        receivedAdvanceAmount:
+          $ref: "#/components/schemas/Money"
+          default: "0.00"
+          description: Uang muka yang telah diterima; tidak wajib, 0.00 bila tidak ada (Skema Data Awal).
+    ExtractionResult:
+      type: object
+      description: Hasil ekstraksi PDF e-Faktur; belum tersimpan.
+      required:
+        - invoiceId
+        - taxInvoiceNumber
+        - taxInvoiceDate
+        - taxPeriod
+        - dpp
+        - ppn
+        - ppnbm
+        - items
+      properties:
+        invoiceId:
+          type: string
+          description: invoiceId D-2 yang dipilih.
+          examples:
+            - inv-demo-001
+        taxInvoiceNumber:
+          type: string
+          description: Kode dan nomor seri faktur pajak (NSFP) hasil ekstraksi.
+          examples:
+            - "010.000-26.12345678"
+        taxInvoiceDate:
+          type: string
+          format: date
+          description: Tanggal e-Faktur (YYYY-MM-DD).
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        dpp:
+          $ref: "#/components/schemas/Money"
+        ppn:
+          $ref: "#/components/schemas/Money"
+        ppnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemFaktur"
+    TaxInvoiceCreated:
+      type: object
+      description: Faktur yang tersimpan (ENT-KE01-01 dan ENT-KE01-02).
+      required:
+        - taxInvoiceId
+        - type
+        - invoiceId
+        - status
+        - replacesTaxInvoiceId
+        - taxInvoiceNumber
+        - taxInvoiceDate
+        - taxPeriod
+        - dpp
+        - ppn
+        - ppnbm
+        - items
+        - createdByAkunId
+        - createdAt
+        - vendorName
+      properties:
+        taxInvoiceId:
+          type: string
+          format: uuid
+          description: ID faktur (UUID v7) diterbitkan E-1.
+        type:
+          $ref: "#/components/schemas/TaxInvoiceType"
+        invoiceId:
+          type: string
+          description: invoiceId D-2 yang tertaut.
+        vendorName:
+          type:
+            - string
+            - "null"
+          description: Nama vendor; wajib hanya untuk INCOMING (Q-02), selalu null untuk faktur keluaran.
+        status:
+          $ref: "#/components/schemas/TaxInvoiceStatus"
+        replacesTaxInvoiceId:
+          type:
+            - string
+            - "null"
+          format: uuid
+          description: Faktur asal yang digantikan; null bila bukan faktur pengganti.
+        taxInvoiceNumber:
+          type: string
+          description: NSFP.
+        taxInvoiceDate:
+          type: string
+          format: date
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        dpp:
+          $ref: "#/components/schemas/Money"
+        ppn:
+          $ref: "#/components/schemas/Money"
+        ppnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemFaktur"
+        createdByAkunId:
+          type: string
+          description: akunId pencatat, diambil dari token F-1.
+          examples:
+            - AKN-0002
+        createdAt:
+          type: string
+          format: date-time
+          description: Waktu faktur dicatat (RFC 3339 UTC).
+    TaxInvoiceSummary:
+      type: object
+      description: Ringkasan satu faktur pada daftar.
+      required:
+        - taxInvoiceId
+        - type
+        - taxInvoiceNumber
+        - taxInvoiceDate
+        - invoiceId
+        - projectId
+        - clientId
+        - taxPeriod
+        - dpp
+        - ppn
+        - status
+        - replacedByTaxInvoiceId
+        - vendorName
+      properties:
+        taxInvoiceId:
+          type: string
+          format: uuid
+          description: ID faktur.
+        type:
+          $ref: "#/components/schemas/TaxInvoiceType"
+        taxInvoiceNumber:
+          type: string
+          description: NSFP.
+        taxInvoiceDate:
+          type: string
+          format: date
+        invoiceId:
+          type: string
+          description: invoiceId D-2.
+        vendorName:
+          type:
+            - string
+            - "null"
+          description: Nama vendor; wajib hanya untuk INCOMING (Q-02), selalu null untuk faktur keluaran.
+        projectId:
+          type:
+            - string
+            - "null"
+          description: ID proyek (milik D-1, lewat invoice D-2).
+        clientId:
+          type:
+            - string
+            - "null"
+          description: ID klien (milik F-6); belum ada di kontrak D-2 (Q-D2-01).
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        dpp:
+          $ref: "#/components/schemas/Money"
+        ppn:
+          $ref: "#/components/schemas/Money"
+        status:
+          $ref: "#/components/schemas/TaxInvoiceStatus"
+        replacedByTaxInvoiceId:
+          type:
+            - string
+            - "null"
+          format: uuid
+          description: Faktur pengganti; terisi bila faktur ini sudah diganti (label Terganti).
+    Pagination:
+      type: object
+      description: Metadata halaman (rancangan API).
+      required:
+        - page
+        - pageSize
+        - totalItems
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        totalItems:
+          type: integer
+          minimum: 0
+    TaxInvoiceList:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaxInvoiceSummary"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    TaxInvoice:
+      type: object
+      description: Faktur pajak (ENT-KE01-01).
+      required:
+        - taxInvoiceId
+        - type
+        - invoiceId
+        - projectId
+        - clientId
+        - taxInvoiceNumber
+        - taxInvoiceDate
+        - taxPeriod
+        - dpp
+        - ppn
+        - ppnbm
+        - status
+        - pdfUri
+        - createdByAkunId
+        - createdAt
+        - updatedAt
+        - vendorName
+      properties:
+        taxInvoiceId:
+          type: string
+          format: uuid
+          description: ID faktur (UUID v7).
+        type:
+          $ref: "#/components/schemas/TaxInvoiceType"
+        invoiceId:
+          type: string
+          description: invoiceId D-2.
+        vendorName:
+          type:
+            - string
+            - "null"
+          description: Nama vendor; wajib hanya untuk INCOMING (Q-02), selalu null untuk faktur keluaran.
+        projectId:
+          type:
+            - string
+            - "null"
+          description: ID proyek (milik D-1).
+        clientId:
+          type:
+            - string
+            - "null"
+          description: ID klien (milik F-6); opsional.
+        taxInvoiceNumber:
+          type: string
+          description: NSFP.
+        taxInvoiceDate:
+          type: string
+          format: date
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        dpp:
+          $ref: "#/components/schemas/Money"
+        ppn:
+          $ref: "#/components/schemas/Money"
+        ppnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        status:
+          $ref: "#/components/schemas/TaxInvoiceStatus"
+        pdfUri:
+          type: string
+          description: Lokasi PDF e-Faktur; hanya untuk pengguna berwenang.
+        createdByAkunId:
+          type: string
+          description: akunId pencatat (F-1).
+          examples:
+            - AKN-0002
+        createdAt:
+          type: string
+          format: date-time
+          description: Waktu dicatat.
+        updatedAt:
+          type: string
+          format: date-time
+          description: Waktu perubahan terakhir.
+    TaxInvoiceDetail:
+      type: object
+      required:
+        - taxInvoice
+        - items
+        - replacesTaxInvoiceId
+        - replacedByTaxInvoiceId
+      properties:
+        taxInvoice:
+          $ref: "#/components/schemas/TaxInvoice"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemFaktur"
+        replacesTaxInvoiceId:
+          type:
+            - string
+            - "null"
+          format: uuid
+          description: Faktur asal yang digantikan; null bila tidak ada.
+        replacedByTaxInvoiceId:
+          type:
+            - string
+            - "null"
+          format: uuid
+          description: Faktur pengganti (diturunkan dari faktur yang merujuk faktur ini); null bila belum diganti.
+    TaxInvoiceChanges:
+      type: object
+      minProperties: 1
+      description: "Perubahan yang diizinkan: koreksi field hasil ekstraksi atau status CANCELLED untuk pembatalan. invoiceId dan nilai invoice D-2 tidak dapat diubah."
+      properties:
+        taxInvoiceNumber:
+          type: string
+          description: NSFP.
+        taxInvoiceDate:
+          type: string
+          format: date
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        dpp:
+          $ref: "#/components/schemas/Money"
+        ppn:
+          $ref: "#/components/schemas/Money"
+        ppnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ItemFakturInput"
+        status:
+          type: string
+          enum:
+            - CANCELLED
+          description: Hanya CANCELLED yang dapat diminta (pembatalan).
+    TaxInvoiceUpdated:
+      type: object
+      required:
+        - taxInvoice
+        - auditId
+      properties:
+        taxInvoice:
+          $ref: "#/components/schemas/TaxInvoice"
+        auditId:
+          type: string
+          format: uuid
+          description: Jejak aksi UPDATE atau STATUS_CHANGE di ENT-KE01-05.
+    HistoryEntry:
+      type: object
+      required:
+        - auditId
+        - action
+        - actorAkunId
+        - changedAt
+        - beforeSnapshot
+        - afterSnapshot
+        - note
+      properties:
+        auditId:
+          type: string
+          format: uuid
+          description: ID satu peristiwa riwayat.
+        action:
+          $ref: "#/components/schemas/HistoryAction"
+        actorAkunId:
+          type: string
+          description: akunId pelaku (F-1).
+          examples:
+            - AKN-0002
+        changedAt:
+          type: string
+          format: date-time
+          description: Waktu aksi.
+        beforeSnapshot:
+          type:
+            - object
+            - "null"
+          description: Nilai sebelum perubahan; null pada CREATE.
+        afterSnapshot:
+          type:
+            - object
+            - "null"
+          description: Nilai sesudah perubahan; null pada penghapusan logis (DELETE).
+        note:
+          type:
+            - string
+            - "null"
+          description: Catatan koreksi bila ada.
+    TaxInvoiceHistory:
+      type: object
+      required:
+        - history
+      properties:
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/HistoryEntry"
+          description: Urut kronologis.
+    RecapSummary:
+      type: object
+      description: RekapPajakBulanan (ENT-KE01-03).
+      required:
+        - taxPeriod
+        - invoiceCount
+        - totalDpp
+        - totalPpn
+        - totalPpnbm
+        - amountPaid
+        - paymentDifference
+        - paymentStatus
+        - computedAt
+      properties:
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        invoiceCount:
+          type: integer
+          minimum: 0
+          description: Jumlah faktur aktif yang dihitung.
+        totalDpp:
+          $ref: "#/components/schemas/Money"
+        totalPpn:
+          $ref: "#/components/schemas/Money"
+        totalPpnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        amountPaid:
+          $ref: "#/components/schemas/Money"
+          description: Jumlah setor pada masa pajak; 0.00 bila belum ada pembayaran.
+        paymentDifference:
+          $ref: "#/components/schemas/SignedMoney"
+          description: amountPaid dikurangi totalPpn; negatif bila jumlah setor kurang dari total PPN.
+        paymentStatus:
+          $ref: "#/components/schemas/RecapPaymentStatus"
+        computedAt:
+          type: string
+          format: date-time
+          description: Waktu rekap terakhir dihitung.
+    RecapInvoice:
+      type: object
+      required:
+        - taxInvoiceId
+        - taxInvoiceNumber
+        - invoiceId
+        - projectId
+        - clientId
+        - status
+        - dpp
+        - ppn
+        - ppnbm
+        - isCounted
+      properties:
+        taxInvoiceId:
+          type: string
+          format: uuid
+          description: ID faktur.
+        taxInvoiceNumber:
+          type: string
+          description: NSFP.
+        invoiceId:
+          type: string
+          description: invoiceId D-2.
+        projectId:
+          type:
+            - string
+            - "null"
+          description: ID proyek.
+        clientId:
+          type:
+            - string
+            - "null"
+          description: ID klien.
+        status:
+          $ref: "#/components/schemas/TaxInvoiceStatus"
+        dpp:
+          $ref: "#/components/schemas/Money"
+        ppn:
+          $ref: "#/components/schemas/Money"
+        ppnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        isCounted:
+          type: boolean
+          description: false untuk faktur Dibatalkan atau faktur asal yang sudah diganti; tetap terlihat tetapi tidak dijumlahkan (Q-13).
+    RecapPayment:
+      type: object
+      required:
+        - taxPaymentId
+        - amountPaid
+        - billingId
+        - ntpn
+        - status
+        - createdAt
+      properties:
+        taxPaymentId:
+          type: string
+          format: uuid
+          description: ID catatan pembayaran.
+        amountPaid:
+          $ref: "#/components/schemas/Money"
+        billingId:
+          type: string
+          description: ID/kode billing.
+        ntpn:
+          type:
+            - string
+            - "null"
+          description: NTPN; null bila belum diisi.
+        status:
+          $ref: "#/components/schemas/PaymentRecordStatus"
+        createdAt:
+          type: string
+          format: date-time
+          description: Waktu dicatat.
+    TaxRecap:
+      type: object
+      required:
+        - recap
+        - invoices
+        - payments
+      properties:
+        recap:
+          $ref: "#/components/schemas/RecapSummary"
+        invoices:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecapInvoice"
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecapPayment"
+    TaxPaymentCreated:
+      type: object
+      required:
+        - taxPaymentId
+        - status
+        - taxPeriod
+        - paymentDifference
+      properties:
+        taxPaymentId:
+          type: string
+          format: uuid
+          description: ID catatan pembayaran (UUID v7).
+        status:
+          $ref: "#/components/schemas/PaymentRecordStatus"
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        paymentDifference:
+          $ref: "#/components/schemas/SignedMoney"
+          description: amountPaid dikurangi totalPpn rekap masa pajak (negatif bila kurang); data tetap tersimpan bila berbeda.
+    TaxPaymentCompleted:
+      type: object
+      required:
+        - taxPaymentId
+        - status
+        - paymentStatus
+      properties:
+        taxPaymentId:
+          type: string
+          format: uuid
+          description: ID catatan pembayaran.
+        status:
+          type: string
+          enum:
+            - CONFIRMED
+          description: Pembayaran Terkonfirmasi (NTPN dan bukti lengkap, Q-10).
+        paymentStatus:
+          $ref: "#/components/schemas/RecapPaymentStatus"
+    TaxSummary:
+      type: object
+      description: Ringkasan pajak satu masa pajak (ENT-KE01-03 dan ENT-KE01-04); hanya faktur aktif yang dihitung (Q-13).
+      required:
+        - taxPeriod
+        - invoiceCount
+        - totalDpp
+        - totalPpn
+        - totalPpnbm
+        - paymentStatus
+      properties:
+        taxPeriod:
+          $ref: "#/components/schemas/TaxPeriod"
+        invoiceCount:
+          type: integer
+          minimum: 0
+          description: Jumlah faktur aktif yang dihitung (bukan jumlah invoice D-2).
+        totalDpp:
+          $ref: "#/components/schemas/Money"
+        totalPpn:
+          $ref: "#/components/schemas/Money"
+        totalPpnbm:
+          $ref: "#/components/schemas/MoneyNullable"
+        paymentStatus:
+          $ref: "#/components/schemas/RecapPaymentStatus"
+    ExtractionResultResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-01; data mengikuti skema ExtractionResult.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/ExtractionResult"
+    TaxInvoiceCreatedResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-02; data mengikuti skema TaxInvoiceCreated.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxInvoiceCreated"
+    TaxInvoiceListResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-03; data mengikuti skema TaxInvoiceList.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxInvoiceList"
+    TaxInvoiceDetailResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-04; data mengikuti skema TaxInvoiceDetail.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxInvoiceDetail"
+    TaxInvoiceUpdatedResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-05; data mengikuti skema TaxInvoiceUpdated.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxInvoiceUpdated"
+    TaxInvoiceHistoryResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-06; data mengikuti skema TaxInvoiceHistory.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxInvoiceHistory"
+    TaxRecapResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-07; data mengikuti skema TaxRecap.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxRecap"
+    TaxPaymentCreatedResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-08; data mengikuti skema TaxPaymentCreated.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxPaymentCreated"
+    TaxSummaryResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-10; data mengikuti skema TaxSummary.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxSummary"
+    TaxPaymentCompletedResponse:
+      type: object
+      description: Respons berhasil untuk API-KE01-11; data mengikuti skema TaxPaymentCompleted.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          $ref: "#/components/schemas/TaxPaymentCompleted"
+    Error:
+      type: object
+      description: Respons gagal dengan status HTTP, pesan, data null, dan kode alasan khusus.
+      required:
+        - code
+        - message
+        - data
+        - errorCode
+      properties:
+        code:
+          type: string
+          pattern: ^[45][0-9]{2}$
+          examples:
+            - "400"
+            - "404"
+            - "409"
+          description: Status HTTP dalam bentuk string; harus sama dengan status respons.
+        message:
+          type: string
+          description: Pesan kesalahan yang dapat dibaca.
+        data:
+          type: "null"
+          description: Tidak ada data saat gagal.
+        errorCode:
+          type: string
+          description: Kode alasan khusus agar klien dapat membedakan kesalahan dengan status HTTP yang sama.
+          enum:
+            - INVALID_FILE
+            - EXTRACTION_FAILED
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - INVOICE_NOT_FOUND
+            - INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE
+            - DUPLICATE_NSFP
+            - REPLACEMENT_INVOICE_MISMATCH
+            - TAX_INVOICE_NOT_FOUND
+            - INVALID_FILTER
+            - INVALID_CHANGE
+            - TAX_INVOICE_ALREADY_CANCELLED
+            - INVALID_TAX_PERIOD
+            - INVALID_PAYMENT
+            - TAX_RECAP_NOT_FOUND
+            - INVALID_FORMAT
+            - INVALID_PROJECT_ID
+            - TAX_PAYMENT_NOT_FOUND
+            - INVALID_INVOICE_ID
+            - D2_UNAVAILABLE
+            - NOT_FOUND
+            - METHOD_NOT_ALLOWED
+            - PAYLOAD_TOO_LARGE
+            - TOO_MANY_REQUESTS
+            - VALIDATION_ERROR
+            - HTTP_ERROR
+            - INTERNAL_ERROR
+    TaxInvoiceType:
+      type: string
+      enum:
+        - OUTGOING
+        - INCOMING
+      description: Jenis faktur. API E-1 hanya mencatat OUTGOING (faktur keluaran); INCOMING dicadangkan sesuai Skema Data Awal (ENT-KE01-01) sampai faktur masukan diputuskan (Q-08, Q-20).

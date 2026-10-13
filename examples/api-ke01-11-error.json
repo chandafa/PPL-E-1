@@ -1,0 +1,6 @@
+{
+  "code": "400",
+  "message": "NTPN dan bukti pembayaran wajib diisi untuk Terkonfirmasi",
+  "data": null,
+  "errorCode": "INVALID_PAYMENT"
+}

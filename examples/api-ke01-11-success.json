@@ -1,0 +1,9 @@
+{
+  "code": "200",
+  "message": "Pembayaran Terkonfirmasi",
+  "data": {
+    "taxPaymentId": "01a25dad-c900-79c2-a6e1-b45d08af7362",
+    "status": "CONFIRMED",
+    "paymentStatus": "CONFIRMED"
+  }
+}

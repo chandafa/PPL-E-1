@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <ini name="memory_limit" value="512M"/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+        <!-- PostgreSQL: DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD dapat ditimpa lewat environment (CI). -->
+        <env name="DB_CONNECTION" value="pgsql"/>
+        <env name="DB_DATABASE" value="e1_pajak_test"/>
+        <env name="DB_URL" value=""/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Token F-1 untuk uji (bukan rahasia asli) -->
+        <env name="F1_JWT_ALGO" value="HS256"/>
+        <env name="F1_JWT_SECRET" value="rahasia-uji-e1-minimal-32-karakter-0123456789"/>
+        <env name="F1_JWT_ISSUER" value="f1-identity"/>
+        <env name="F1_JWT_AUDIENCE" value="erp-anaheim"/>
+        <env name="F1_JWT_LEEWAY" value="0"/>
+        <env name="F1_CLAIM_AKUN_ID" value="akunId"/>
+        <env name="F1_CLAIM_ROLE" value="kodePeran"/>
+        <env name="E1_ALLOWED_ROLES" value="Admin,CEO,COO"/>
+        <env name="E1_SUMMARY_EXTRA_ROLES" value="LayananE2"/>
+        <env name="E1_DEV_LOGIN" value="true"/>
+        <env name="D2_DRIVER" value="mock"/>
+        <env name="E1_UPLOAD_MAX_KB" value="5120"/>
+        <env name="E1_STORAGE_DISK" value="local"/>
+    </php>
+</phpunit>

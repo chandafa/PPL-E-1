@@ -1,0 +1,26 @@
+{
+  "code": "200",
+  "message": "Faktur diperbarui",
+  "data": {
+    "taxInvoice": {
+      "taxInvoiceId": "01a1950c-b380-73a9-91c4-7e20d5b86f14",
+      "type": "OUTGOING",
+      "invoiceId": "inv-demo-001",
+      "vendorName": null,
+      "projectId": "prj-demo-001",
+      "clientId": null,
+      "taxInvoiceNumber": "010.000-26.12345678",
+      "taxInvoiceDate": "2026-11-01",
+      "taxPeriod": "2026-11",
+      "dpp": "100000000.00",
+      "ppn": "11000000.00",
+      "ppnbm": "0.00",
+      "status": "NORMAL",
+      "pdfUri": "/files/tax/efaktur-001.pdf",
+      "createdByAkunId": "AKN-0002",
+      "createdAt": "2026-11-01T03:00:00Z",
+      "updatedAt": "2026-11-01T03:05:00Z"
+    },
+    "auditId": "01a19511-4760-70e7-bb5c-92a4f1d63b80"
+  }
+}

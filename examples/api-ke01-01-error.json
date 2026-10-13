@@ -1,0 +1,6 @@
+{
+  "code": "400",
+  "message": "PDF e-Faktur tidak dapat diproses",
+  "data": null,
+  "errorCode": "EXTRACTION_FAILED"
+}

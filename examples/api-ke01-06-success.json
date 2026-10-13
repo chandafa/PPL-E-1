@@ -1,0 +1,38 @@
+{
+  "code": "200",
+  "message": "Riwayat faktur",
+  "data": {
+    "history": [
+      {
+        "auditId": "01a1950c-b380-74c1-88d2-7a05e9b3f671",
+        "action": "CREATE",
+        "actorAkunId": "AKN-0002",
+        "changedAt": "2026-11-01T03:00:00Z",
+        "beforeSnapshot": null,
+        "afterSnapshot": {
+          "taxInvoiceNumber": "010.000-26.12345678",
+          "taxInvoiceDate": "2026-11-10",
+          "taxPeriod": "2026-11",
+          "dpp": "100000000.00",
+          "ppn": "11000000.00",
+          "ppnbm": "0.00",
+          "status": "NORMAL"
+        },
+        "note": null
+      },
+      {
+        "auditId": "01a19511-4760-70e7-bb5c-92a4f1d63b80",
+        "action": "UPDATE",
+        "actorAkunId": "AKN-0002",
+        "changedAt": "2026-11-01T03:05:00Z",
+        "beforeSnapshot": {
+          "taxInvoiceDate": "2026-11-10"
+        },
+        "afterSnapshot": {
+          "taxInvoiceDate": "2026-11-01"
+        },
+        "note": "Koreksi tanggal faktur"
+      }
+    ]
+  }
+}

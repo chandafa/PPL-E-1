@@ -1,0 +1,6 @@
+{
+  "code": "409",
+  "message": "Invoice ini sudah memiliki faktur aktif",
+  "data": null,
+  "errorCode": "INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE"
+}

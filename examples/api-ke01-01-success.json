@@ -1,0 +1,22 @@
+{
+  "code": "200",
+  "message": "Hasil ekstraksi (belum tersimpan)",
+  "data": {
+    "invoiceId": "inv-demo-001",
+    "taxInvoiceNumber": "010.000-26.12345678",
+    "taxInvoiceDate": "2026-11-01",
+    "taxPeriod": "2026-11",
+    "dpp": "100000000.00",
+    "ppn": "11000000.00",
+    "ppnbm": "0.00",
+    "items": [
+      {
+        "itemCode": "JASA-001",
+        "itemName": "Jasa pengembangan perangkat lunak termin 1",
+        "saleReplacementAdvanceTermAmount": "100000000.00",
+        "discountAmount": "0.00",
+        "receivedAdvanceAmount": "0.00"
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "code": "200",
+  "message": "Daftar faktur",
+  "data": {
+    "items": [
+      {
+        "taxInvoiceId": "01a1950c-b380-73a9-91c4-7e20d5b86f14",
+        "type": "OUTGOING",
+        "taxInvoiceNumber": "010.000-26.12345678",
+        "taxInvoiceDate": "2026-11-01",
+        "invoiceId": "inv-demo-001",
+        "vendorName": null,
+        "projectId": "prj-demo-001",
+        "clientId": null,
+        "taxPeriod": "2026-11",
+        "dpp": "100000000.00",
+        "ppn": "11000000.00",
+        "status": "NORMAL",
+        "replacedByTaxInvoiceId": null
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "pageSize": 20,
+      "totalItems": 1
+    }
+  }
+}

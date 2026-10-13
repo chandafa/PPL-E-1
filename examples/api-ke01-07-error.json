@@ -1,0 +1,6 @@
+{
+  "code": "400",
+  "message": "Masa pajak harus berformat YYYY-MM (contoh 2026-11)",
+  "data": null,
+  "errorCode": "INVALID_TAX_PERIOD"
+}

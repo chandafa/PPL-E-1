@@ -1,0 +1,6 @@
+{
+  "code": "409",
+  "message": "Faktur sudah berstatus Dibatalkan",
+  "data": null,
+  "errorCode": "TAX_INVOICE_ALREADY_CANCELLED"
+}

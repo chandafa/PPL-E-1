@@ -1,0 +1,12 @@
+{
+  "code": "200",
+  "message": "Ringkasan pajak",
+  "data": {
+    "taxPeriod": "2026-11",
+    "invoiceCount": 1,
+    "totalDpp": "100000000.00",
+    "totalPpn": "11000000.00",
+    "totalPpnbm": "0.00",
+    "paymentStatus": "CONFIRMED"
+  }
+}

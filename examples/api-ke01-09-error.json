@@ -1,0 +1,6 @@
+{
+  "code": "400",
+  "message": "Format ekspor hanya xlsx atau pdf",
+  "data": null,
+  "errorCode": "INVALID_FORMAT"
+}

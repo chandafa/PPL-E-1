@@ -1,0 +1,6 @@
+{
+  "code": "404",
+  "message": "Masa pajak belum memiliki rekap",
+  "data": null,
+  "errorCode": "TAX_RECAP_NOT_FOUND"
+}
