@@ -253,792 +253,223 @@ waktu RFC 3339 UTC (`...Z`), dan ID memakai UUID v7.
 <p align="right"><sub><a href="#daftar-isi">⬆ Kembali ke daftar isi</a></sub></p>
 
 <a id="tutorial"></a>
-## 🧪 Tutorial menguji setiap API
+## 🧪 Tutorial menguji setiap API di Postman
 
-Ikuti berurutan pada **database kosong** (`php artisan migrate:fresh`) agar angkanya sama dengan contoh.
-ID pada contoh respons akan berbeda di komputer Anda; gunakan ID dari respons Anda.
+Panduan ini menguji **11 API E-1** dari awal sampai akhir. Gunakan database **demo yang boleh dikosongkan** agar request tulis menghasilkan `200`, bukan `409` karena invoice atau NSFP sudah tercatat. ID UUID pada respons selalu berbeda; simpan ID dari respons sendiri, jangan menyalin ID contoh.
 
 <a id="t-persiapan"></a>
-### 🧱 Persiapan pengujian
+### 1. Persiapan Postman dan database
 
-Gunakan **Git Bash** (atau terminal Linux/macOS) dari folder proyek. Di Windows PowerShell tulis `curl.exe`, bukan `curl`.
+1. Pastikan PostgreSQL aktif dan nilai `DB_*` di `.env` benar. Jalankan `php artisan migrate:status` untuk memeriksa koneksi.
+2. Pada **database demo yang boleh dihapus**, jalankan `php artisan migrate:fresh` dari folder proyek. Perintah ini menghapus tabel dan data E-1 lalu membuatnya kembali. **Jangan tambahkan `--seed`** untuk alur lengkap di bawah: seeder demo sudah mengisi seluruh invoice mock `inv-demo-001` sampai `inv-demo-005`, sehingga API-KE01-01/02 akan menolak pencatatan ulang.
+3. Jalankan `composer serve`, lalu pastikan `http://127.0.0.1:8080/up` menjawab HTTP `200`.
+4. Import [`docs/postman/E1-API.postman_collection.json`](docs/postman/E1-API.postman_collection.json) dan, bila perlu, [`E1-Local.postman_environment.json`](docs/postman/E1-Local.postman_environment.json). Pilih environment **E-1 Lokal**.
+5. Di Postman, buka **Settings → General → Working directory** dan pilih folder `docs/postman`. Pada field bertipe **File**, pilih PDF dari `docs/postman/samples/` jika Postman belum menemukannya.
 
-```bash
-BASE=http://127.0.0.1:8080
-SAMPLES=docs/postman/samples
+Atur variabel environment berikut. Nilai ID akan diperoleh dari respons pada langkah selanjutnya.
 
-# fungsi kecil: ambil nilai teks "kunci":"nilai" pertama dari JSON yang masuk lewat pipa
-idof() { grep -o "\"$1\":\"[^\"]*\"" | head -1 | cut -d'"' -f4; }
-```
+| Variabel | Nilai awal | Kegunaan |
+|---|---|---|
+| `baseUrl` | `http://127.0.0.1:8080` | Alamat server lokal |
+| `token` | kosong | Token Bearer dari login |
+| `taxInvoiceId` | kosong | ID faktur A (`inv-demo-001`) |
+| `originalTaxInvoiceId` | kosong | ID faktur C sebelum diganti |
+| `replacementTaxInvoiceId` | kosong | ID faktur pengganti C2 |
+| `cancelTaxInvoiceId` | kosong | ID faktur D yang akan dibatalkan |
+| `taxPaymentId` | kosong | ID pembayaran Draft November |
+
+Untuk **semua request selain login**, gunakan tab **Authorization → Bearer Token → `{{token}}`** dan header `Accept: application/json`. Untuk body **form-data**, pilih tab **Body → form-data**, ubah field PDF menjadi tipe **File**, lalu pilih berkasnya. Biarkan Postman mengisi `Content-Type` beserta boundary secara otomatis. Untuk body JSON, pilih **Body → raw → JSON**.
+
+Urutan ringkas: **login → ekstraksi A → simpan A, B, C, D, E → pengganti C2 → daftar/detail/koreksi/riwayat → batalkan D → rekap → pembayaran Draft → lengkapi pembayaran → ekspor → ringkasan**. Jangan menjalankan request tulis yang sama dua kali tanpa mengosongkan database demo karena NSFP dan faktur aktif harus unik.
 
 <a id="t-login"></a>
-### 🔑 Login
+### 2. Login lokal dan simpan token
 
-- **Tujuan:** mendapatkan token Bearer untuk semua request berikutnya.
-- **Request:** `POST /api/dev/f1/login`
-- **Body:** `application/json`
+| Metode | URL | Authorization | Body |
+|---|---|---|---|
+| `POST` | `{{baseUrl}}/api/dev/f1/login` | **No Auth** | raw JSON di bawah |
 
-**Field**
-
-| Field | Contoh | Wajib |
-|---|---|---|
-| `akunId` | `AKN-0002` | ya |
-| `kodePeran` | `Admin`, `CEO`, `COO` | ya |
-| `ttl` | `3600` (detik, 60 sampai 86400) | tidak |
-
-**Perintah**
-
-```bash
-TOKEN=$(curl -s -X POST $BASE/api/dev/f1/login \
-  -H "Content-Type: application/json" \
-  -d '{"akunId":"AKN-0002","kodePeran":"Admin"}' | idof accessToken)
-
-AUTH="Authorization: Bearer $TOKEN"
-echo "$TOKEN"          # harus berupa teks panjang berawalan eyJ...
+```json
+{"akunId":"AKN-0002","kodePeran":"Admin","ttl":3600}
 ```
 
-**Kasus gagal**
+Respons sukses: HTTP `200`, `code: "200"`, dan `data.accessToken` terisi. Pada tab **Scripts → Post-response** request login, tambahkan:
 
-| Kondisi | Status | errorCode |
-|---|:---:|---|
-| tanpa `kodePeran` | 400 | `INVALID_LOGIN` |
-| token peran `CTO` dipakai pada API E-1 | 403 | `FORBIDDEN` |
-| tanpa header `Authorization` | 401 | `UNAUTHORIZED` |
-
-```bash
-TOKEN_CTO=$(curl -s -X POST $BASE/api/dev/f1/login -H "Content-Type: application/json" \
-  -d '{"akunId":"AKN-0009","kodePeran":"CTO"}' | idof accessToken)
-
-curl -s $BASE/api/v1/tax-invoices -H "Authorization: Bearer $TOKEN_CTO"     # 403 FORBIDDEN
-curl -s $BASE/api/v1/tax-invoices                                           # 401 UNAUTHORIZED
+```javascript
+pm.environment.set('token', pm.response.json().data.accessToken);
 ```
+
+Login ini adalah tiruan F-1 khusus lokal (`E1_DEV_LOGIN=true`). Jika `404`, periksa nilai itu di `.env` dan jalankan `php artisan config:clear`. Token berlaku selama `ttl` detik; login lagi bila API menjawab `401`.
 
 <a id="t-api01"></a>
-### 🔍 API-KE01-01 · Pratinjau ekstraksi PDF e-Faktur
+### 3. API-KE01-01 — Pratinjau ekstraksi PDF
 
-- **Tujuan:** memeriksa hasil baca PDF sebelum disimpan. **Tidak menyimpan apa pun.**
-- **Request:** `POST /api/v1/tax-invoices/extractions`
-- **Body:** `multipart/form-data`
-
-**Field**
-
-| Field | Contoh | Wajib |
+| Metode | URL | Body form-data |
 |---|---|---|
-| `invoiceId` | `inv-demo-001` | ya |
-| `eFakturFile` | berkas PDF (maksimum 5 MB) | ya |
+| `POST` | `{{baseUrl}}/api/v1/tax-invoices/extractions` | `invoiceId` (Text) = `inv-demo-001`; `eFakturFile` (File) = `samples/efaktur-inv-demo-001.pdf` |
 
-**Perintah**
-
-```bash
-curl -s -X POST $BASE/api/v1/tax-invoices/extractions -H "$AUTH" \
-  -F invoiceId=inv-demo-001 \
-  -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-001.pdf"
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Hasil ekstraksi (belum tersimpan)",
-  "data": {
-    "invoiceId": "inv-demo-001",
-    "taxInvoiceNumber": "010.000-26.12345678",
-    "taxInvoiceDate": "2026-11-01",
-    "taxPeriod": "2026-11",
-    "dpp": "100000000.00",
-    "ppn": "11000000.00",
-    "ppnbm": "0.00",
-    "items": [
-      {
-        "itemCode": "620100",
-        "itemName": "Jasa Pengembangan Portal ERP Termin 1",
-        "saleReplacementAdvanceTermAmount": "100000000.00",
-        "discountAmount": "0.00",
-        "receivedAdvanceAmount": "0.00"
-      }
-    ]
-  }
-}
-```
-
-</details>
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| `eFakturFile=@$SAMPLES/bukan-pdf.txt` | 400 | `INVALID_FILE` |
-| `invoiceId=inv-demo-004` dan `eFakturFile=@$SAMPLES/e-billing.pdf` (PDF sah, bukan faktur) | 400 | `EXTRACTION_FAILED` |
-| tanpa `invoiceId` | 400 | `INVALID_INVOICE_ID` |
-| `invoiceId=inv-tidak-ada` | 404 | `INVOICE_NOT_FOUND` |
-| `invoiceId=inv-demo-001` setelah API-KE01-02 dijalankan | 409 | `INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE` |
-| `invoiceId=inv-demo-004` dan PDF `efaktur-inv-demo-001.pdf` setelah API-KE01-02 | 409 | `DUPLICATE_NSFP` |
+Respons: HTTP `200`; `data.taxInvoiceNumber = "010.000-26.12345678"`, `data.taxInvoiceDate = "2026-11-01"`, `data.taxPeriod = "2026-11"`, `data.dpp = "100000000.00"`, dan `data.ppn = "11000000.00"`. Pratinjau tidak menyimpan faktur. Jalankan langkah ini **sebelum** API-KE01-02 untuk `inv-demo-001`.
 
 <a id="t-api02"></a>
-### 💾 API-KE01-02 · Simpan faktur atau faktur pengganti
+### 4. API-KE01-02 — Simpan faktur dan faktur pengganti
 
-- **Tujuan:** menyimpan faktur dari PDF dan menautkannya ke invoice D-2.
-- **Request:** `POST /api/v1/tax-invoices/outgoing`
-- **Body:** `multipart/form-data`
+Semua request pada tabel memakai `POST {{baseUrl}}/api/v1/tax-invoices/outgoing` dengan body **form-data**. Field `invoiceId` dan `replacesTaxInvoiceId` bertipe **Text**; `eFakturFile` bertipe **File**. Jalankan **dari atas ke bawah**.
 
-**Field**
+| Langkah | `invoiceId` | `eFakturFile` | `replacesTaxInvoiceId` | Simpan `data.taxInvoiceId` ke |
+|---|---|---|---|---|
+| A | `inv-demo-001` | `samples/efaktur-inv-demo-001.pdf` | kosong | `taxInvoiceId` |
+| B | `inv-demo-002` | `samples/efaktur-inv-demo-002.pdf` | kosong | opsional |
+| C (asal) | `inv-demo-003` | `samples/efaktur-inv-demo-003.pdf` | kosong | `originalTaxInvoiceId` |
+| D | `inv-demo-004` | `samples/efaktur-inv-demo-004.pdf` | kosong | `cancelTaxInvoiceId` |
+| E | `inv-demo-005` | `samples/efaktur-inv-demo-005.pdf` | kosong | opsional |
+| C2 (pengganti) | `inv-demo-003` | `samples/efaktur-inv-demo-003-pengganti.pdf` | `{{originalTaxInvoiceId}}` | `replacementTaxInvoiceId` |
 
-| Field | Contoh | Wajib |
-|---|---|---|
-| `invoiceId` | `inv-demo-001` | ya |
-| `eFakturFile` | berkas PDF | ya |
-| `replacesTaxInvoiceId` | ID faktur asal (hanya untuk faktur pengganti) | tidak |
+Setelah respons `200`, salin `data.taxInvoiceId` ke variabel yang disebutkan. Untuk otomatisasi, tambahkan skrip berikut pada tab **Scripts → Post-response** request A; ganti nama variabel pada request C, D, dan C2:
 
-**Perintah**
-
-**A. Simpan faktur biasa.** `tee /dev/stderr` menampilkan respons sambil menyimpan ID-nya.
-
-```bash
-FAKTUR_A=$(curl -s -X POST $BASE/api/v1/tax-invoices/outgoing -H "$AUTH" \
-  -F invoiceId=inv-demo-001 \
-  -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-001.pdf" | tee /dev/stderr | idof taxInvoiceId)
-echo; echo "FAKTUR_A=$FAKTUR_A"
+```javascript
+pm.environment.set('taxInvoiceId', pm.response.json().data.taxInvoiceId);
 ```
 
-**B. Lengkapi data uji** (satu perintah per invoice).
-
-```bash
-# B: dua item, masa pajak 2026-11
-FAKTUR_B=$(curl -s -X POST $BASE/api/v1/tax-invoices/outgoing -H "$AUTH" \
-  -F invoiceId=inv-demo-002 -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-002.pdf" | idof taxInvoiceId)
-
-# C: akan diganti
-FAKTUR_C=$(curl -s -X POST $BASE/api/v1/tax-invoices/outgoing -H "$AUTH" \
-  -F invoiceId=inv-demo-003 -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-003.pdf" | idof taxInvoiceId)
-
-# D dan E: masa pajak 2026-12
-FAKTUR_D=$(curl -s -X POST $BASE/api/v1/tax-invoices/outgoing -H "$AUTH" \
-  -F invoiceId=inv-demo-004 -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-004.pdf" | idof taxInvoiceId)
-curl -s -X POST $BASE/api/v1/tax-invoices/outgoing -H "$AUTH" \
-  -F invoiceId=inv-demo-005 -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-005.pdf" > /dev/null
-```
-
-**C. Buat faktur pengganti** untuk faktur C. `invoiceId` HARUS sama dengan faktur asal.
-
-```bash
-FAKTUR_C2=$(curl -s -X POST $BASE/api/v1/tax-invoices/outgoing -H "$AUTH" \
-  -F invoiceId=inv-demo-003 \
-  -F "eFakturFile=@$SAMPLES/efaktur-inv-demo-003-pengganti.pdf" \
-  -F "replacesTaxInvoiceId=$FAKTUR_C" | tee /dev/stderr | idof taxInvoiceId)
-```
-
-Pada langkah **C**, `status` menjadi `REPLACEMENT`, `replacesTaxInvoiceId` terisi, dan faktur C menjadi terganti
-(tidak dihitung pada rekap).
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK (langkah A)</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Faktur tersimpan",
-  "data": {
-    "taxInvoiceId": "01a135e1-4265-704e-859b-50ef2d70a4b1",
-    "type": "OUTGOING",
-    "invoiceId": "inv-demo-001",
-    "vendorName": null,
-    "status": "NORMAL",
-    "replacesTaxInvoiceId": null,
-    "taxInvoiceNumber": "010.000-26.12345678",
-    "taxInvoiceDate": "2026-11-01",
-    "taxPeriod": "2026-11",
-    "dpp": "100000000.00",
-    "ppn": "11000000.00",
-    "ppnbm": "0.00",
-    "items": [
-      { "itemCode": "620100", "itemName": "Jasa Pengembangan Portal ERP Termin 1", "...": "..." }
-    ],
-    "createdByAkunId": "AKN-0002",
-    "createdAt": "2026-10-13T15:28:37Z"
-  }
-}
-```
-
-</details>
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| catat ulang `invoiceId=inv-demo-001` | 409 | `INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE` |
-| `invoiceId=inv-demo-004` dan PDF `efaktur-inv-demo-001.pdf` | 409 | `DUPLICATE_NSFP` |
-| pengganti dengan `invoiceId=inv-demo-002` tetapi `replacesTaxInvoiceId=$FAKTUR_A` | 400 | `REPLACEMENT_INVOICE_MISMATCH` |
-| `replacesTaxInvoiceId=0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c99` | 404 | `TAX_INVOICE_NOT_FOUND` |
-| mengganti `$FAKTUR_C` yang sudah diganti | 409 | `INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE` |
-| `invoiceId=inv-tidak-ada` | 404 | `INVOICE_NOT_FOUND` |
+Hasil: A, B, D, E berstatus `NORMAL`; C2 berstatus `REPLACEMENT` dan menunjuk C. Total ada **6 baris faktur**; C tidak dihitung lagi pada rekap. Jika mendapat `409`, database demo sudah berisi faktur atau NSFP yang sama.
 
 <a id="t-api03"></a>
-### 🔎 API-KE01-03 · Cari dan filter faktur
+### 5. API-KE01-03 — Daftar dan filter faktur
 
-- **Tujuan:** menampilkan daftar faktur dengan filter dan paging.
-- **Request:** `GET /api/v1/tax-invoices`
-- **Body:** tanpa body; semua parameter query opsional
+| Metode | URL | Body | Hasil |
+|---|---|---|---|
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices` | tidak ada | `data.pagination.totalItems = 6` |
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices?taxPeriod=2026-11&status=NORMAL` | tidak ada | A, B, dan C (asal yang sudah diganti), `totalItems = 3` |
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices?project=gudang&client=Lintas&page=1&pageSize=2` | tidak ada | Filter proyek, klien, dan paging |
 
-**Parameter**
-
-| Parameter | Contoh | Keterangan |
-|---|---|---|
-| `taxInvoiceNumber` | `12345678` | sebagian nomor faktur atau NSFP |
-| `project` | `prj-demo-002` atau `gudang` | ID atau nama proyek |
-| `client` | `Lintas` | ID atau nama klien |
-| `taxPeriod` | `2026-11` | masa pajak |
-| `status` | `NORMAL`, `REPLACEMENT`, `CANCELLED` | status faktur |
-| `page`, `pageSize` | `1`, `20` | paging (`pageSize` maksimum 100) |
-
-**Perintah**
-
-```bash
-curl -s "$BASE/api/v1/tax-invoices" -H "$AUTH"                                    # semua (6 faktur)
-curl -s "$BASE/api/v1/tax-invoices?taxPeriod=2026-11&status=NORMAL" -H "$AUTH"    # 3 faktur
-curl -s "$BASE/api/v1/tax-invoices?project=gudang" -H "$AUTH"                     # cari nama proyek
-curl -s "$BASE/api/v1/tax-invoices?client=Lintas&pageSize=2&page=1" -H "$AUTH"    # klien + paging
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Daftar faktur",
-  "data": {
-    "items": [
-      {
-        "taxInvoiceId": "01a135e1-4668-7100-9380-31dd522f977b",
-        "type": "OUTGOING",
-        "taxInvoiceNumber": "010.000-26.12345680",
-        "taxInvoiceDate": "2026-11-12",
-        "invoiceId": "inv-demo-003",
-        "projectId": "prj-demo-002",
-        "clientId": "0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c01",
-        "vendorName": null,
-        "taxPeriod": "2026-11",
-        "dpp": "75000000.00",
-        "ppn": "8250000.00",
-        "status": "NORMAL",
-        "replacedByTaxInvoiceId": "01a135e1-490b-728a-8fa7-85ca00b80ad5"
-      }
-    ],
-    "pagination": { "page": 1, "pageSize": 20, "totalItems": 3 }
-  }
-}
-```
-
-</details>
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| `?taxPeriod=2026-13` | 400 | `INVALID_FILTER` |
-| `?status=APPROVED` | 400 | `INVALID_FILTER` |
-| `?page=0` atau `?pageSize=101` | 400 | `INVALID_FILTER` |
-| filter tanpa hasil | 200 | (`items` kosong) |
+Semua query opsional: `taxInvoiceNumber` (mis. `12345678`), `project` (ID/nama), `client` (ID/nama), `taxPeriod` (`YYYY-MM`), `status` (`NORMAL`, `REPLACEMENT`, `CANCELLED`), `page` (mulai `1`), dan `pageSize` (maksimal `100`).
 
 <a id="t-api04"></a>
-### 📄 API-KE01-04 · Detail faktur
+### 6. API-KE01-04 — Detail faktur
 
-- **Tujuan:** melihat satu faktur beserta item dan tautan asal/pengganti.
-- **Request:** `GET /api/v1/tax-invoices/{taxInvoiceId}`
-- **Body:** tanpa body
+| Metode | URL | Body | Hasil |
+|---|---|---|---|
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}` | tidak ada | Detail A dan daftar `items` |
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices/{{originalTaxInvoiceId}}` | tidak ada | `replacedByTaxInvoiceId` menunjuk C2 |
 
-**Perintah**
-
-```bash
-curl -s $BASE/api/v1/tax-invoices/$FAKTUR_A -H "$AUTH"
-curl -s $BASE/api/v1/tax-invoices/$FAKTUR_C -H "$AUTH"      # replacedByTaxInvoiceId terisi
-```
-
-Respons memuat `taxInvoice`, `items`, `replacesTaxInvoiceId`, dan `replacedByTaxInvoiceId`.
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| ID `0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c99` (tidak ada) | 404 | `TAX_INVOICE_NOT_FOUND` |
-| ID bukan UUID, mis. `abc` | 404 | `TAX_INVOICE_NOT_FOUND` |
+Kedua URL harus menjawab HTTP `200`. ID diambil dari respons API-KE01-02, bukan nomor faktur.
 
 <a id="t-api05"></a>
-### ✏️ API-KE01-05 · Koreksi atau batalkan faktur
+### 7. API-KE01-05 — Koreksi dan pembatalan faktur
 
-- **Tujuan:** mengoreksi data faktur atau membatalkannya, dengan riwayat sebelum dan sesudah.
-- **Request:** `PATCH /api/v1/tax-invoices/{taxInvoiceId}`
-- **Body:** `application/json`
+| Metode | URL | Body | Hasil |
+|---|---|---|---|
+| `PATCH` | `{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}` | raw JSON koreksi di bawah | A berubah tanggal, `auditId` terisi |
+| `PATCH` | `{{baseUrl}}/api/v1/tax-invoices/{{cancelTaxInvoiceId}}` | raw JSON pembatalan di bawah | D berstatus `CANCELLED` |
 
-**Field**
-
-| Field | Contoh | Keterangan |
-|---|---|---|
-| `changes` | `{ "taxInvoiceDate": "2026-11-10" }` | objek perubahan (wajib) |
-| `note` | `"Koreksi tanggal faktur"` | alasan, maksimum 500 karakter |
-
-Isi `changes` yang boleh: `taxInvoiceNumber`, `taxInvoiceDate`, `taxPeriod`, `dpp`, `ppn`, `ppnbm` (nominal **string**),
-`items`, atau `status` bernilai `CANCELLED`.
-
-**Perintah**
-
-**A. Koreksi tanggal faktur A.**
-
-```bash
-curl -s -X PATCH $BASE/api/v1/tax-invoices/$FAKTUR_A -H "$AUTH" -H "Content-Type: application/json" \
-  -d '{"changes":{"taxInvoiceDate":"2026-11-10"},"note":"Koreksi tanggal faktur"}'
-```
-
-**B. Batalkan faktur D.** Hanya `status`; tidak boleh digabung dengan koreksi lain.
-
-```bash
-curl -s -X PATCH $BASE/api/v1/tax-invoices/$FAKTUR_D -H "$AUTH" -H "Content-Type: application/json" \
-  -d '{"changes":{"status":"CANCELLED"},"note":"Salah klien"}'
-```
-
-> [!TIP]
-> Ingin mencoba koreksi nominal, pindah masa pajak, atau ganti item? Lihat [Variasi data lain](#t-variasi) dan jalankan
-> **setelah** tutorial selesai, karena mengubah angka rekap.
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK (koreksi tanggal)</summary>
+Koreksi A:
 
 ```json
-{
-  "code": "200",
-  "message": "Faktur diperbarui",
-  "data": {
-    "taxInvoice": {
-      "taxInvoiceId": "01a135e1-4265-704e-859b-50ef2d70a4b1",
-      "type": "OUTGOING",
-      "invoiceId": "inv-demo-001",
-      "projectId": "prj-demo-001",
-      "clientId": null,
-      "vendorName": null,
-      "taxInvoiceNumber": "010.000-26.12345678",
-      "taxInvoiceDate": "2026-11-10",
-      "taxPeriod": "2026-11",
-      "dpp": "100000000.00",
-      "ppn": "11000000.00",
-      "ppnbm": "0.00",
-      "status": "NORMAL",
-      "pdfUri": "/files/tax/e-faktur/01a135e1-4265-704e-859b-50ef2d70a4b1.pdf",
-      "createdByAkunId": "AKN-0002",
-      "createdAt": "2026-10-13T15:28:37Z",
-      "updatedAt": "2026-10-13T15:28:41Z"
-    },
-    "auditId": "01a135e1-52b5-70f8-97d6-e3d82503fcd5"
-  }
-}
+{"changes":{"taxInvoiceDate":"2026-11-10"},"note":"Koreksi tanggal faktur"}
 ```
 
-</details>
+Pembatalan D:
 
-**Kasus gagal**
+```json
+{"changes":{"status":"CANCELLED"},"note":"Salah klien; faktur dibatalkan"}
+```
 
-| `changes` atau kondisi | Status | errorCode |
-|---|:---:|---|
-| `{"invoiceId":"inv-demo-005"}` (field tidak boleh diubah) | 400 | `INVALID_CHANGE` |
-| `{"dpp":90000000}` (angka, bukan string) | 400 | `INVALID_CHANGE` |
-| `{"status":"CANCELLED","dpp":"1.00"}` (digabung) | 400 | `INVALID_CHANGE` |
-| `{"dpp":"100000000.00"}` (sama dengan nilai sekarang) | 400 | `INVALID_CHANGE` |
-| ubah atau batalkan faktur yang sudah `CANCELLED` | 409 | `TAX_INVOICE_ALREADY_CANCELLED` |
-| `{"taxInvoiceNumber":"010.000-26.12345678"}` pada faktur lain | 409 | `DUPLICATE_NSFP` |
-| ID faktur tidak dikenal | 404 | `TAX_INVOICE_NOT_FOUND` |
-
-> [!NOTE]
-> Membatalkan **faktur pengganti** melepas tautannya sehingga faktur asal berlaku kembali. Riwayat kedua faktur dicatat.
+Keduanya menjawab HTTP `200`. Field dalam `changes` dapat berupa `taxInvoiceNumber`, `taxInvoiceDate`, `taxPeriod`, `dpp`, `ppn`, `ppnbm`, `items`, atau `status: "CANCELLED"`. Nominal harus **string** desimal dua digit, misalnya `"90000000.00"`. Jangan gabungkan pembatalan dengan koreksi field lain.
 
 <a id="t-api06"></a>
-### 🕘 API-KE01-06 · Riwayat perubahan
+### 8. API-KE01-06 — Riwayat perubahan
 
-- **Tujuan:** melihat jejak perubahan faktur secara kronologis.
-- **Request:** `GET /api/v1/tax-invoices/{taxInvoiceId}/history`
-- **Body:** tanpa body
+| Metode | URL | Body | Hasil |
+|---|---|---|---|
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}/history` | tidak ada | HTTP `200`; A memiliki aksi `CREATE` dan `UPDATE` |
+| `GET` | `{{baseUrl}}/api/v1/tax-invoices/{{cancelTaxInvoiceId}}/history` | tidak ada | HTTP `200`; D memiliki aksi `CREATE` dan `STATUS_CHANGE` |
 
-**Perintah**
-
-```bash
-curl -s $BASE/api/v1/tax-invoices/$FAKTUR_A/history -H "$AUTH"
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Riwayat faktur",
-  "data": {
-    "history": [
-      {
-        "auditId": "01a135e1-428d-7364-8896-b4a66ff8736d",
-        "action": "CREATE",
-        "actorAkunId": "AKN-0002",
-        "changedAt": "2026-10-13T15:28:37Z",
-        "beforeSnapshot": null,
-        "afterSnapshot": { "taxInvoiceNumber": "010.000-26.12345678", "taxInvoiceDate": "2026-11-01", "...": "..." },
-        "note": null
-      },
-      {
-        "auditId": "01a135e1-52b5-70f8-97d6-e3d82503fcd5",
-        "action": "UPDATE",
-        "actorAkunId": "AKN-0002",
-        "changedAt": "2026-10-13T15:28:41Z",
-        "beforeSnapshot": { "taxInvoiceDate": "2026-11-01" },
-        "afterSnapshot": { "taxInvoiceDate": "2026-11-10" },
-        "note": "Koreksi tanggal faktur"
-      }
-    ]
-  }
-}
-```
-
-</details>
-
-Aksi riwayat: `CREATE`, `UPDATE`, dan `STATUS_CHANGE` (batal atau penggantian). Riwayat bersifat **append-only**.
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| ID faktur tidak dikenal | 404 | `TAX_INVOICE_NOT_FOUND` |
+Periksa `data.history[*].actorAkunId`, `beforeSnapshot`, `afterSnapshot`, dan `note` untuk melihat perubahan yang tercatat.
 
 <a id="t-api07"></a>
-### 📅 API-KE01-07 · Rekap per masa pajak
+### 9. API-KE01-07 — Rekap masa pajak
 
-- **Tujuan:** melihat total faktur aktif, daftar faktur, dan pembayaran satu masa pajak.
-- **Request:** `GET /api/v1/tax-recaps/{taxPeriod}` (format `YYYY-MM`)
-- **Body:** tanpa body
+| Metode | URL | Hasil setelah langkah 7 |
+|---|---|---|
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-11` | `invoiceCount = 3`, `totalDpp = "420000000.00"`, `totalPpn = "46200000.00"` |
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-12` | `invoiceCount = 1`, `totalPpn = "6600000.00"`; D tetap tampil dengan `isCounted = false` |
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-01` | HTTP `200`, rekap kosong dengan nilai nol |
 
-**Perintah**
-
-```bash
-curl -s $BASE/api/v1/tax-recaps/2026-11 -H "$AUTH"
-curl -s $BASE/api/v1/tax-recaps/2026-12 -H "$AUTH"      # faktur D dibatalkan: tampil tetapi tidak dihitung
-curl -s $BASE/api/v1/tax-recaps/2026-01 -H "$AUTH"      # kosong: rekap nol (200), bukan error
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK (2026-11, dipangkas)</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Rekap masa pajak",
-  "data": {
-    "recap": {
-      "taxPeriod": "2026-11",
-      "invoiceCount": 3,
-      "totalDpp": "420000000.00",
-      "totalPpn": "46200000.00",
-      "totalPpnbm": "0.00",
-      "amountPaid": "0.00",
-      "paymentDifference": "-46200000.00",
-      "paymentStatus": "NOT_RECORDED",
-      "computedAt": "2026-10-13T15:28:43Z"
-    },
-    "invoices": [
-      { "taxInvoiceNumber": "010.000-26.12345679", "status": "NORMAL", "dpp": "250000000.00", "ppn": "27500000.00", "isCounted": true }
-    ],
-    "payments": []
-  }
-}
-```
-
-</details>
-
-**Cara membaca**
-
-- 3 faktur dihitung (A, B, C2); faktur asal C tampil dengan `isCounted: false`.
-- `paymentStatus`: `NOT_RECORDED` (belum ada pembayaran), `INCOMPLETE` (ada Draft), `CONFIRMED` (semua terkonfirmasi).
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| `/tax-recaps/2026-13` | 400 | `INVALID_TAX_PERIOD` |
-| `/tax-recaps/2026-01` (tanpa faktur) | 200 | (rekap nol) |
+Body tidak ada. Sebelum mencatat pembayaran, `data.recap.paymentStatus` bernilai `NOT_RECORDED`.
 
 <a id="t-api08"></a>
-### 💳 API-KE01-08 · Catat pembayaran pajak
+### 10. API-KE01-08 — Catat pembayaran pajak
 
-- **Tujuan:** mencatat jumlah setor, billing, NTPN, e-Billing, dan bukti pembayaran satu masa pajak.
-- **Request:** `POST /api/v1/tax-payments`
-- **Body:** `multipart/form-data`
+Metode dan URL: `POST {{baseUrl}}/api/v1/tax-payments`. Gunakan body **form-data**:
 
-**Field**
+| Field | Tipe | Pembayaran Draft November | Pembayaran langsung terkonfirmasi Desember |
+|---|---|---|---|
+| `taxPeriod` | Text | `2026-11` | `2026-12` |
+| `taxYear` | Text | `2026` | `2026` |
+| `amountPaid` | Text | `46200000.00` | `6000000.00` |
+| `billingId` | Text | `BILL-202611-001` | `BILL-202612-001` |
+| `eBillingFile` | File | `samples/e-billing.pdf` | `samples/e-billing.pdf` |
+| `ntpn` | Text | kosong | `NTPN-XYZ987654` |
+| `paymentProofFile` | File | kosong | `samples/bukti-pembayaran.pdf` |
 
-| Field | Contoh | Wajib |
-|---|---|---|
-| `taxPeriod` | `2026-11` | ya |
-| `taxYear` | `2026` (sama dengan tahun masa pajak) | ya |
-| `amountPaid` | `46200000.00` | ya |
-| `billingId` | `BILL-202611-001` | ya |
-| `eBillingFile` | PDF e-Billing | ya |
-| `ntpn` | `NTPN-ABC123456` | tidak |
-| `paymentProofFile` | PDF bukti pembayaran | tidak |
+Jalankan **Draft November terlebih dahulu**, lalu simpan `data.taxPaymentId` ke `taxPaymentId` dengan skrip Post-response:
 
-Tanpa `ntpn` **dan** bukti, catatan tersimpan sebagai **Draft** (`INCOMPLETE`). Bila keduanya ada, langsung `CONFIRMED`.
-
-**Perintah**
-
-**A. Draft** (tanpa NTPN dan bukti).
-
-```bash
-PAYMENT=$(curl -s -X POST $BASE/api/v1/tax-payments -H "$AUTH" \
-  -F taxPeriod=2026-11 -F taxYear=2026 -F amountPaid=46200000.00 -F billingId=BILL-202611-001 \
-  -F "eBillingFile=@$SAMPLES/e-billing.pdf" | tee /dev/stderr | idof taxPaymentId)
-echo; echo "PAYMENT=$PAYMENT"
+```javascript
+pm.environment.set('taxPaymentId', pm.response.json().data.taxPaymentId);
 ```
 
-**B. Langsung Terkonfirmasi** dengan kurang bayar (Desember: setor 6.000.000 dari PPN 6.600.000).
-
-```bash
-curl -s -X POST $BASE/api/v1/tax-payments -H "$AUTH" \
-  -F taxPeriod=2026-12 -F taxYear=2026 -F amountPaid=6000000.00 -F billingId=BILL-202612-001 \
-  -F ntpn=NTPN-XYZ987654 \
-  -F "eBillingFile=@$SAMPLES/e-billing.pdf" -F "paymentProofFile=@$SAMPLES/bukti-pembayaran.pdf"
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK (Draft)</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Pembayaran tersimpan",
-  "data": {
-    "taxPaymentId": "01a135e1-59f1-7303-a3fb-48bc787dd906",
-    "status": "INCOMPLETE",
-    "taxPeriod": "2026-11",
-    "paymentDifference": "0.00"
-  }
-}
-```
-
-</details>
-
-`paymentDifference` adalah jumlah setor dikurangi total PPN (boleh negatif). Pembayaran **tetap tersimpan** walau berbeda.
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| `taxPeriod=2027-01` dan `taxYear=2027` (belum ada faktur) | 404 | `TAX_RECAP_NOT_FOUND` |
-| `amountPaid=-1.00` | 400 | `INVALID_PAYMENT` |
-| `taxYear=2025` untuk `taxPeriod=2026-11` | 400 | `INVALID_PAYMENT` |
-| tanpa `eBillingFile`, atau berkas bukan PDF | 400 | `INVALID_PAYMENT` |
+Draft menjawab HTTP `200`, `data.status = "INCOMPLETE"`, dan `data.paymentDifference = "0.00"`. Pembayaran Desember juga menjawab `200`, langsung `CONFIRMED`, dan selisih `"-600000.00"` karena PPN Desember `6600000.00`.
 
 <a id="t-api11"></a>
-### ✅ API-KE01-11 · Lengkapi pembayaran menjadi Terkonfirmasi
+### 11. API-KE01-11 — Lengkapi pembayaran Draft
 
-- **Tujuan:** melengkapi pembayaran Draft dengan NTPN dan bukti sehingga menjadi `CONFIRMED`.
-- **Request:** `PATCH /api/v1/tax-payments/{taxPaymentId}`
-- **Body:** `multipart/form-data`
+| Metode | URL | Body form-data | Hasil |
+|---|---|---|---|
+| `PATCH` | `{{baseUrl}}/api/v1/tax-payments/{{taxPaymentId}}` | `ntpn` (Text) = `NTPN-ABC123456`; `paymentProofFile` (File) = `samples/bukti-pembayaran.pdf` | HTTP `200`, `data.status = "CONFIRMED"` |
 
-**Field**
-
-| Field | Contoh | Wajib |
-|---|---|---|
-| `ntpn` | `NTPN-ABC123456` | ya |
-| `paymentProofFile` | PDF bukti pembayaran | ya |
-
-**Perintah**
-
-```bash
-curl -s -X PATCH $BASE/api/v1/tax-payments/$PAYMENT -H "$AUTH" \
-  -F ntpn=NTPN-ABC123456 \
-  -F "paymentProofFile=@$SAMPLES/bukti-pembayaran.pdf"
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Pembayaran Terkonfirmasi",
-  "data": {
-    "taxPaymentId": "01a135e1-59f1-7303-a3fb-48bc787dd906",
-    "status": "CONFIRMED",
-    "paymentStatus": "CONFIRMED"
-  }
-}
-```
-
-</details>
-
-Setelah ini `GET /api/v1/tax-recaps/2026-11` menunjukkan `paymentStatus: "CONFIRMED"`.
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| tanpa `paymentProofFile` | 400 | `INVALID_PAYMENT` |
-| tanpa `ntpn` | 400 | `INVALID_PAYMENT` |
-| ID pembayaran tidak dikenal | 404 | `TAX_PAYMENT_NOT_FOUND` |
+Gunakan **PATCH** dengan form-data, bukan POST. Setelah berhasil, ulangi `GET {{baseUrl}}/api/v1/tax-recaps/2026-11`: `data.recap.paymentStatus = "CONFIRMED"` dan `amountPaid = "46200000.00"`.
 
 <a id="t-api09"></a>
-### 📤 API-KE01-09 · Ekspor rekap (Excel atau PDF)
+### 12. API-KE01-09 — Ekspor rekap
 
-- **Tujuan:** mengunduh rekap satu masa pajak sebagai berkas.
-- **Request:** `GET /api/v1/tax-recaps/{taxPeriod}/export?format=xlsx|pdf`
-- **Body:** tanpa body; respons berupa **berkas**, bukan JSON
+| Metode | URL | Respons |
+|---|---|---|
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-11/export?format=xlsx` | HTTP `200`, berkas Excel `.xlsx` |
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-11/export?format=pdf` | HTTP `200`, berkas PDF `.pdf` |
 
-**Perintah**
-
-```bash
-curl -s "$BASE/api/v1/tax-recaps/2026-11/export?format=xlsx" -H "$AUTH" -o rekap-pajak-2026-11.xlsx
-curl -s "$BASE/api/v1/tax-recaps/2026-11/export?format=pdf"  -H "$AUTH" -o rekap-pajak-2026-11.pdf
-```
-
-Berkas Excel berisi tiga lembar (**Ringkasan**, **Faktur**, **Pembayaran**) dan isinya sama dengan rekap API-KE01-07.
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| `format=csv` atau format lain | 400 | `INVALID_FORMAT` |
-| `/tax-recaps/2026-13/export` | 400 | `INVALID_TAX_PERIOD` |
+Body tidak ada. Di Postman, gunakan **Send and Download** untuk menyimpan berkas. Respons sukses berupa **berkas biner**, sehingga tidak memakai amplop JSON `{code,message,data}`.
 
 <a id="t-api10"></a>
-### 📊 API-KE01-10 · Ringkasan pajak untuk modul lain (E-2)
+### 13. API-KE01-10 — Ringkasan pajak
 
-- **Tujuan:** menyediakan agregat pajak per masa pajak (dan per proyek) bagi modul lain.
-- **Request:** `GET /api/v1/tax/summary?taxPeriod=&projectId=`
-- **Body:** tanpa body; `projectId` opsional
+| Metode | URL | Hasil setelah pembayaran lengkap |
+|---|---|---|
+| `GET` | `{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11` | HTTP `200`, `invoiceCount = 3`, `totalPpn = "46200000.00"`, `paymentStatus = "CONFIRMED"` |
+| `GET` | `{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-demo-002` | HTTP `200`, ringkasan hanya proyek gudang |
 
-**Perintah**
-
-```bash
-curl -s "$BASE/api/v1/tax/summary?taxPeriod=2026-11" -H "$AUTH"
-curl -s "$BASE/api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-demo-002" -H "$AUTH"
-```
-
-**Contoh respons**
-
-<details>
-<summary>✅ 200 OK</summary>
-
-```json
-{
-  "code": "200",
-  "message": "Ringkasan pajak",
-  "data": {
-    "taxPeriod": "2026-11",
-    "invoiceCount": 3,
-    "totalDpp": "420000000.00",
-    "totalPpn": "46200000.00",
-    "totalPpnbm": "0.00",
-    "paymentStatus": "CONFIRMED"
-  }
-}
-```
-
-</details>
-
-Hanya agregat: **tanpa** NTPN, kode billing, atau lampiran. Masa pajak tanpa data menghasilkan nilai nol, bukan angka karangan.
-
-**Uji sebagai konsumen layanan (E-2)**
-
-Isi `E1_SUMMARY_EXTRA_ROLES=LayananE2` pada `.env`, restart server, lalu:
-
-```bash
-TOKEN_E2=$(curl -s -X POST $BASE/api/dev/f1/login -H "Content-Type: application/json" \
-  -d '{"akunId":"SVC-E2","kodePeran":"LayananE2"}' | idof accessToken)
-
-curl -s "$BASE/api/v1/tax/summary?taxPeriod=2026-11" -H "Authorization: Bearer $TOKEN_E2"   # 200
-curl -s "$BASE/api/v1/tax-invoices" -H "Authorization: Bearer $TOKEN_E2"                    # 403 (hanya ringkasan)
-```
-
-**Kasus gagal**
-
-| Ubah menjadi | Status | errorCode |
-|---|:---:|---|
-| `taxPeriod=2026-13` atau tanpa `taxPeriod` | 400 | `INVALID_TAX_PERIOD` |
-| `projectId=prj-tidak-ada` | 400 | `INVALID_PROJECT_ID` |
-| token peran tidak berwenang | 403 | `FORBIDDEN` |
+Body tidak ada. `taxPeriod` wajib berformat `YYYY-MM`; `projectId` opsional dan harus dikenal D-2/E-1. Token peran layanan E-2 dapat dipakai bila `E1_SUMMARY_EXTRA_ROLES` dikonfigurasi.
 
 <a id="t-variasi"></a>
-### 🔁 Variasi data lain
+### 14. Uji variasi dan hasil gagal yang diharapkan
 
-Jalankan **paling akhir**: perintah di bawah mengubah angka rekap sehingga contoh angka di atas tidak lagi berlaku
-bila dijalankan lebih awal.
+Setelah semua alur sukses, coba contoh berikut. Respons gagal tetap memakai `{code,message,data,errorCode}`; status `4xx` pada kasus ini **bukan** error server.
 
-```bash
-# 1) koreksi nominal faktur A: DPP dan PPN lebih kecil
-curl -s -X PATCH $BASE/api/v1/tax-invoices/$FAKTUR_A -H "$AUTH" -H "Content-Type: application/json" \
-  -d '{"changes":{"dpp":"90000000.00","ppn":"9900000.00"},"note":"Koreksi nilai sesuai e-Faktur final"}'
-
-# 2) rekap 2026-11: total PPN menjadi 45.100.000,00; jumlah setor 46.200.000,00 melebihi PPN (selisih +1.100.000,00)
-curl -s $BASE/api/v1/tax-recaps/2026-11 -H "$AUTH"
-
-# 3) ganti seluruh daftar item faktur B (dengan potongan harga pada item kedua)
-curl -s -X PATCH $BASE/api/v1/tax-invoices/$FAKTUR_B -H "$AUTH" -H "Content-Type: application/json" -d '{
-  "changes": {
-    "items": [
-      {
-        "itemCode": "620200",
-        "itemName": "Lisensi Aplikasi Gudang",
-        "saleReplacementAdvanceTermAmount": "150000000.00",
-        "discountAmount": "0.00",
-        "receivedAdvanceAmount": "0.00"
-      },
-      {
-        "itemCode": "620300",
-        "itemName": "Jasa Implementasi dan Pelatihan",
-        "saleReplacementAdvanceTermAmount": "100000000.00",
-        "discountAmount": "1000000.00",
-        "receivedAdvanceAmount": "0.00"
-      }
-    ]
-  },
-  "note": "Tambah potongan harga"
-}'
-
-# 4) pindah faktur A ke masa pajak 2026-12 (rekap lama dan baru dihitung ulang)
-curl -s -X PATCH $BASE/api/v1/tax-invoices/$FAKTUR_A -H "$AUTH" -H "Content-Type: application/json" \
-  -d '{"changes":{"taxPeriod":"2026-12"},"note":"Dilaporkan bulan berikutnya"}'
-curl -s $BASE/api/v1/tax-recaps/2026-12 -H "$AUTH"      # kini memuat faktur A dan E (invoiceCount 2)
-```
-
-> [!NOTE]
-> Kompensasi lebih atau kurang bayar **tidak dihitung** (Q-24 masih terbuka): sistem hanya menyimpan dan menampilkan selisihnya.
+| Request | Perubahan | Status / `errorCode` |
+|---|---|---|
+| API-KE01-01 | `eFakturFile` = `samples/bukan-pdf.txt` | `400 INVALID_FILE` |
+| API-KE01-02 | Simpan lagi `inv-demo-001` tanpa `replacesTaxInvoiceId` | `409 INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE` |
+| API-KE01-03 | `?taxPeriod=2026-13` | `400 INVALID_FILTER` |
+| API-KE01-04 | ID faktur `abc` | `404 TAX_INVOICE_NOT_FOUND` |
+| API-KE01-05 | `changes.dpp` berupa angka `90000000`, bukan string | `400 INVALID_CHANGE` |
+| API-KE01-07 | `/tax-recaps/2026-13` | `400 INVALID_TAX_PERIOD` |
+| API-KE01-09 | `?format=csv` | `400 INVALID_FORMAT` |
+| Semua API E-1 | Tanpa Bearer token | `401 UNAUTHORIZED` |
 
 <a id="t-postman"></a>
-### 📮 Menguji lewat Postman
+### 15. Menggunakan koleksi Postman yang tersedia
 
-Koleksi siap pakai berisi **62 request** (login, 11 API, variasi data, dan 24 kasus gagal) dengan pemeriksaan otomatis.
+Koleksi [`E1-API.postman_collection.json`](docs/postman/E1-API.postman_collection.json) berisi login, seluruh 11 operasi API, variasi data, dan kasus gagal. Jalankan folder **0. Login**, lalu folder **1** sampai **7** secara berurutan pada **database demo kosong**. Koleksi ini membuat data sendiri dan menyimpan ID dari respons ke variabel Postman. Jika ingin mengulang alur dari awal, kosongkan **hanya database demo** dengan `php artisan migrate:fresh`.
 
-1. **Import** [`docs/postman/E1-API.postman_collection.json`](docs/postman/E1-API.postman_collection.json)
-   (opsional: `E1-Local.postman_environment.json`).
-2. Atur **Settings > General > Working directory** ke folder `docs/postman` agar berkas PDF pada form-data terbaca.
-   Bila tidak, pilih ulang berkasnya.
-3. Jalankan folder **0. Login**, lalu folder **1** sampai **7** berurutan, atau klik **Run collection**.
-4. Untuk mengulang dari awal: `php artisan migrate:fresh`.
-
-Panduan lengkap dengan body dan nilai tiap request ada di [`docs/POSTMAN.md`](docs/POSTMAN.md).
-
-<p align="right"><sub><a href="#daftar-isi">⬆ Kembali ke daftar isi</a></sub></p>
+Jika Anda memakai `php artisan migrate --seed`, data A–E dan pembayaran Draft November sudah tersedia untuk membaca daftar, detail, riwayat, rekap, ekspor, ringkasan, serta melengkapi pembayaran. Alur ekstraksi dan simpan faktur baru dalam panduan ini memerlukan database demo kosong karena kelima invoice mock sudah terpakai oleh seeder. Rincian koleksi ada di [`docs/POSTMAN.md`](docs/POSTMAN.md).
 
 <a id="kode-kesalahan"></a>
 ## ❌ Kode kesalahan
