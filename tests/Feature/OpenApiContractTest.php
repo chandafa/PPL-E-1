@@ -60,6 +60,16 @@ class OpenApiContractTest extends TestCase
         $this->assertEqualsCanonicalizing(array_values(self::OPERATIONS), $this->contract->operationIds());
     }
 
+    public function test_nominal_json_decimal_presisi_tanpa_pemisah_ribuan(): void
+    {
+        $this->assertSame([], $this->contract->validateAgainstSchema('MoneyInput', '11000000.00'));
+        $this->assertSame([], $this->contract->validateAgainstSchema('Money', '11000000.00'));
+        $this->assertSame([], $this->contract->validateAgainstSchema('SignedMoney', '-600000.00'));
+        $this->assertSame([], $this->contract->validateAgainstSchema('Money', '9999999999999999.99'));
+        $this->assertNotSame([], $this->contract->validateAgainstSchema('Money', '11.000.000,00'));
+        $this->assertNotSame([], $this->contract->validateAgainstSchema('MoneyInput', '11.000.000,00'));
+    }
+
     public function test_seluruh_contoh_json_valid_terhadap_skema(): void
     {
         $checked = 0;

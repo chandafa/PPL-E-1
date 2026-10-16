@@ -1,6 +1,6 @@
 # Panduan mencoba API E-1 di Postman
 
-Semua nilai di bawah sudah diuji otomatis (Newman): 62 request, 196 pemeriksaan, 0 gagal.
+Koleksi berisi 62 request dan 196 pemeriksaan Postman untuk alur sukses serta kasus gagal.
 
 ## 1. Persiapan (sekali)
 
@@ -44,17 +44,17 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 
 **1.1 Pratinjau ekstraksi (API-KE01-01)** `POST /api/v1/tax-invoices/extractions`
 - form-data: `invoiceId` = `inv-demo-001`, `eFakturFile` (File) = `efaktur-inv-demo-001.pdf`
-- Hasil 200: `taxInvoiceNumber` `010.000-26.12345678`, `taxInvoiceDate` `2026-11-01`, `taxPeriod` `2026-11`, `dpp` `100000000.00`, `ppn` `11000000.00`. Tidak menyimpan apa pun.
+- Hasil 200: `taxInvoiceNumber` `010.000-26.12345678`, `taxInvoiceDate` `2026-11-01`, `taxPeriod` `2026-11`, `dpp` `100.000.000,00`, `ppn` `11.000.000,00`. Tidak menyimpan apa pun.
 
 **1.2 Simpan faktur A (API-KE01-02)** `POST /api/v1/tax-invoices/outgoing`
 - form-data: `invoiceId` = `inv-demo-001`, `eFakturFile` = `efaktur-inv-demo-001.pdf`
 - Hasil 200: `status` `NORMAL`. `data.taxInvoiceId` disimpan ke variabel `taxInvoiceId`.
 
 **1.3 Simpan faktur B** `POST /api/v1/tax-invoices/outgoing`
-- `invoiceId` = `inv-demo-002`, `eFakturFile` = `efaktur-inv-demo-002.pdf` (2 item; DPP `250000000.00`, PPN `27500000.00`)
+- `invoiceId` = `inv-demo-002`, `eFakturFile` = `efaktur-inv-demo-002.pdf` (2 item; DPP `250.000.000,00`, PPN `27.500.000,00`)
 
 **1.4 Simpan faktur C (asal)** `POST /api/v1/tax-invoices/outgoing`
-- `invoiceId` = `inv-demo-003`, `eFakturFile` = `efaktur-inv-demo-003.pdf` (DPP `75000000.00`, PPN `8250000.00`)
+- `invoiceId` = `inv-demo-003`, `eFakturFile` = `efaktur-inv-demo-003.pdf` (DPP `75.000.000,00`, PPN `8.250.000,00`)
 
 **1.5 Faktur pengganti C2** `POST /api/v1/tax-invoices/outgoing`
 - `invoiceId` = `inv-demo-003` (HARUS sama dengan faktur asal), `eFakturFile` = `efaktur-inv-demo-003-pengganti.pdf`,
@@ -62,8 +62,8 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 - Hasil 200: `status` `REPLACEMENT`. Faktur C menjadi non-aktif (tidak dihitung pada rekap).
 
 **1.6 dan 1.7 Faktur Desember**
-- D: `invoiceId` = `inv-demo-004`, `eFakturFile` = `efaktur-inv-demo-004.pdf` (DPP `120000000.00`, PPN `13200000.00`, masa pajak `2026-12`)
-- E: `invoiceId` = `inv-demo-005`, `eFakturFile` = `efaktur-inv-demo-005.pdf` (DPP `60000000.00`, PPN `6600000.00`, masa pajak `2026-12`)
+- D: `invoiceId` = `inv-demo-004`, `eFakturFile` = `efaktur-inv-demo-004.pdf` (DPP `120.000.000,00`, PPN `13.200.000,00`, masa pajak `2026-12`)
+- E: `invoiceId` = `inv-demo-005`, `eFakturFile` = `efaktur-inv-demo-005.pdf` (DPP `60.000.000,00`, PPN `6.600.000,00`, masa pajak `2026-12`)
 
 **1.8 Daftar (API-KE01-03)** `GET /api/v1/tax-invoices?page=1&pageSize=20`
 - Hasil: `pagination.totalItems` = 6, terurut tanggal faktur terbaru.
@@ -95,10 +95,10 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 ### Rekap
 
 **2.1 Rekap November (API-KE01-07)** `GET /api/v1/tax-recaps/2026-11`
-- `invoiceCount` 3 (A, B, C2), `totalDpp` `420000000.00`, `totalPpn` `46200000.00`, `paymentStatus` `NOT_RECORDED`.
+- `invoiceCount` 3 (A, B, C2), `totalDpp` `420.000.000,00`, `totalPpn` `46.200.000,00`, `paymentStatus` `NOT_RECORDED`.
 - `invoices` memuat 4 faktur; C tampil dengan `isCounted: false`.
 
-**2.2** `GET /api/v1/tax-recaps/2026-12` → `invoiceCount` 1, `totalPpn` `6600000.00` (D dibatalkan, tampil tetapi tidak dihitung).
+**2.2** `GET /api/v1/tax-recaps/2026-12` → `invoiceCount` 1, `totalPpn` `6.600.000,00` (D dibatalkan, tampil tetapi tidak dihitung).
 
 **2.3** `GET /api/v1/tax-recaps/2026-01` → rekap nol (200), bukan error.
 
@@ -108,7 +108,7 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 - form-data: `taxPeriod` = `2026-11`, `taxYear` = `2026`, `amountPaid` = `46200000.00`, `billingId` = `BILL-202611-001`,
   `eBillingFile` (File) = `e-billing.pdf`
 - Opsional: `ntpn` = `NTPN-ABC123456` dan `paymentProofFile` (File) = `bukti-pembayaran.pdf`. Bila **keduanya** diisi, langsung `CONFIRMED`.
-- Hasil 200: `status` `INCOMPLETE`, `paymentDifference` `0.00`. `taxPaymentId` disimpan otomatis.
+- Hasil 200: `status` `INCOMPLETE`, `paymentDifference` `0,00`. `taxPaymentId` disimpan otomatis.
 
 **3.3 Lengkapi pembayaran (API-KE01-11)** `PATCH /api/v1/tax-payments/{{taxPaymentId}}`
 - form-data: `ntpn` = `NTPN-ABC123456`, `paymentProofFile` (File) = `bukti-pembayaran.pdf` (keduanya wajib)
@@ -117,7 +117,7 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 **3.5 Kurang bayar** `POST /api/v1/tax-payments`
 - `taxPeriod` = `2026-12`, `taxYear` = `2026`, `amountPaid` = `6000000.00`, `billingId` = `BILL-202612-001`, `ntpn` = `NTPN-XYZ987654`,
   `eBillingFile` = `e-billing.pdf`, `paymentProofFile` = `bukti-pembayaran.pdf`
-- Hasil 200: `CONFIRMED`, `paymentDifference` `-600000.00` (disimpan, tidak ditolak).
+- Hasil 200: `CONFIRMED`, `paymentDifference` `-600.000,00` (disimpan, tidak ditolak).
 
 ### Ekspor
 
@@ -126,9 +126,9 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 
 ### Ringkasan untuk modul lain (E-2)
 
-**5.1** `GET /api/v1/tax/summary?taxPeriod=2026-11` → `invoiceCount` 3, `totalDpp` `420000000.00`, `totalPpn` `46200000.00`, `paymentStatus` `CONFIRMED`.
+**5.1** `GET /api/v1/tax/summary?taxPeriod=2026-11` → `invoiceCount` 3, `totalDpp` `420.000.000,00`, `totalPpn` `46.200.000,00`, `paymentStatus` `CONFIRMED`.
 
-**5.2** `GET /api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-demo-002` → `invoiceCount` 2, `totalDpp` `320000000.00`, `totalPpn` `35200000.00`.
+**5.2** `GET /api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-demo-002` → `invoiceCount` 2, `totalDpp` `320.000.000,00`, `totalPpn` `35.200.000,00`.
 
 ### Variasi data lain
 
@@ -136,7 +136,7 @@ field bertipe **File** dipilih dari `docs/postman/samples/`.
 ```json
 { "changes": { "dpp": "90000000.00", "ppn": "9900000.00" }, "note": "Koreksi nilai sesuai e-Faktur final" }
 ```
-- Lalu **6.2** `GET /api/v1/tax-recaps/2026-11`: `totalPpn` `45100000.00`, `paymentDifference` `1100000.00` (lebih bayar; kompensasi tidak dihitung).
+- Lalu **6.2** `GET /api/v1/tax-recaps/2026-11`: `totalPpn` `45.100.000,00`, `paymentDifference` `1.100.000,00` (lebih bayar; kompensasi tidak dihitung).
 
 **6.3 Koreksi item faktur B** `PATCH /api/v1/tax-invoices/{{taxInvoiceIdB}}`
 ```json
@@ -183,7 +183,7 @@ Setiap request sengaja salah. Pola respons: `{"code":"4xx","message":"...","data
 
 ## 5. Aturan nilai yang perlu diingat
 
-- Nominal selalu **string** desimal: `"11000000.00"` (boleh `"11000000"` pada input; keluaran selalu 2 desimal).
+- Nominal pada input berupa **string** desimal, misalnya `"11000000.00"` (juga menerima `"11000000"`); respons menggunakan format Indonesia `"11.000.000,00"`.
 - `taxPeriod` berformat `YYYY-MM`; `taxYear` harus sama dengan tahun pada `taxPeriod`.
 - PDF maksimum **5 MB**. Server bawaan PHP menolak lebih awal bila `upload_max_filesize` kecil; gunakan `composer serve`.
 - Satu invoice hanya boleh punya **satu faktur aktif**; NSFP tidak boleh ganda (termasuk faktur yang sudah dibatalkan).

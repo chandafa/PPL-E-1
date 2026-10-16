@@ -236,7 +236,7 @@
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
                   "pm.test(\"NSFP terbaca\", function () { pm.expect(j.data.taxInvoiceNumber === '010.000-26.12345678').to.be.true; });",
-                  "pm.test(\"DPP 100000000.00 dan PPN 11000000.00\", function () { pm.expect(j.data.dpp === '100000000.00' && j.data.ppn === '11000000.00').to.be.true; });",
+                  "pm.test(\"DPP 100.000.000,00 dan PPN 11.000.000,00\", function () { pm.expect(j.data.dpp === '100.000.000,00' && j.data.ppn === '11.000.000,00').to.be.true; });",
                   "pm.test(\"Masa pajak 2026-11\", function () { pm.expect(j.data.taxPeriod === '2026-11').to.be.true; });"
                 ]
               }
@@ -1003,8 +1003,8 @@
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
                   "pm.test(\"3 faktur dihitung (A, B, C2)\", function () { pm.expect(j.data.recap.invoiceCount === 3).to.be.true; });",
-                  "pm.test(\"Total DPP 420000000.00\", function () { pm.expect(j.data.recap.totalDpp === '420000000.00').to.be.true; });",
-                  "pm.test(\"Total PPN 46200000.00\", function () { pm.expect(j.data.recap.totalPpn === '46200000.00').to.be.true; });",
+                  "pm.test(\"Total DPP 420.000.000,00\", function () { pm.expect(j.data.recap.totalDpp === '420.000.000,00').to.be.true; });",
+                  "pm.test(\"Total PPN 46.200.000,00\", function () { pm.expect(j.data.recap.totalPpn === '46.200.000,00').to.be.true; });",
                   "pm.test(\"4 faktur tampil, asal C tidak dihitung\", function () { pm.expect(j.data.invoices.length === 4 && j.data.invoices.filter(function(i){return !i.isCounted;}).length === 1).to.be.true; });",
                   "pm.test(\"Belum ada pembayaran\", function () { pm.expect(j.data.recap.paymentStatus === 'NOT_RECORDED').to.be.true; });"
                 ]
@@ -1040,7 +1040,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"Hanya E dihitung\", function () { pm.expect(j.data.recap.invoiceCount === 1 && j.data.recap.totalPpn === '6600000.00').to.be.true; });",
+                  "pm.test(\"Hanya E dihitung\", function () { pm.expect(j.data.recap.invoiceCount === 1 && j.data.recap.totalPpn === '6.600.000,00').to.be.true; });",
                   "pm.test(\"D tampil tetapi tidak dihitung\", function () { pm.expect(j.data.invoices.length === 2).to.be.true; });"
                 ]
               }
@@ -1075,7 +1075,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"Kosong\", function () { pm.expect(j.data.recap.invoiceCount === 0 && j.data.recap.totalPpn === '0.00' && j.data.invoices.length === 0).to.be.true; });"
+                  "pm.test(\"Kosong\", function () { pm.expect(j.data.recap.invoiceCount === 0 && j.data.recap.totalPpn === '0,00' && j.data.invoices.length === 0).to.be.true; });"
                 ]
               }
             }
@@ -1118,7 +1118,7 @@
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
                   "pm.collectionVariables.set('taxPaymentId', j.data.taxPaymentId);",
                   "pm.test(\"INCOMPLETE\", function () { pm.expect(j.data.status === 'INCOMPLETE').to.be.true; });",
-                  "pm.test(\"Selisih 0.00\", function () { pm.expect(j.data.paymentDifference === '0.00').to.be.true; });"
+                  "pm.test(\"Selisih 0,00\", function () { pm.expect(j.data.paymentDifference === '0,00').to.be.true; });"
                 ]
               }
             }
@@ -1197,7 +1197,7 @@
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
                   "pm.test(\"paymentStatus INCOMPLETE\", function () { pm.expect(j.data.recap.paymentStatus === 'INCOMPLETE').to.be.true; });",
-                  "pm.test(\"Jumlah setor 46200000.00\", function () { pm.expect(j.data.recap.amountPaid === '46200000.00').to.be.true; });"
+                  "pm.test(\"Jumlah setor 46.200.000,00\", function () { pm.expect(j.data.recap.amountPaid === '46.200.000,00').to.be.true; });"
                 ]
               }
             }
@@ -1317,7 +1317,7 @@
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
                   "pm.test(\"CONFIRMED\", function () { pm.expect(j.data.status === 'CONFIRMED').to.be.true; });",
-                  "pm.test(\"Selisih -600000.00\", function () { pm.expect(j.data.paymentDifference === '-600000.00').to.be.true; });"
+                  "pm.test(\"Selisih -600.000,00\", function () { pm.expect(j.data.paymentDifference === '-600.000,00').to.be.true; });"
                 ]
               }
             }
@@ -1487,7 +1487,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"3 faktur aktif, DPP 420000000.00, PPN 46200000.00\", function () { pm.expect(j.data.invoiceCount === 3 && j.data.totalDpp === '420000000.00' && j.data.totalPpn === '46200000.00').to.be.true; });",
+                  "pm.test(\"3 faktur aktif, DPP 420.000.000,00, PPN 46.200.000,00\", function () { pm.expect(j.data.invoiceCount === 3 && j.data.totalDpp === '420.000.000,00' && j.data.totalPpn === '46.200.000,00').to.be.true; });",
                   "pm.test(\"Terkonfirmasi\", function () { pm.expect(j.data.paymentStatus === 'CONFIRMED').to.be.true; });"
                 ]
               }
@@ -1533,7 +1533,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"B + C2: DPP 320000000.00, PPN 35200000.00\", function () { pm.expect(j.data.invoiceCount === 2 && j.data.totalDpp === '320000000.00' && j.data.totalPpn === '35200000.00').to.be.true; });"
+                  "pm.test(\"B + C2: DPP 320.000.000,00, PPN 35.200.000,00\", function () { pm.expect(j.data.invoiceCount === 2 && j.data.totalDpp === '320.000.000,00' && j.data.totalPpn === '35.200.000,00').to.be.true; });"
                 ]
               }
             }
@@ -1577,7 +1577,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"Hanya E: PPN 6600000.00\", function () { pm.expect(j.data.invoiceCount === 1 && j.data.totalPpn === '6600000.00').to.be.true; });"
+                  "pm.test(\"Hanya E: PPN 6.600.000,00\", function () { pm.expect(j.data.invoiceCount === 1 && j.data.totalPpn === '6.600.000,00').to.be.true; });"
                 ]
               }
             }
@@ -1673,7 +1673,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"Nominal baru\", function () { pm.expect(j.data.taxInvoice.dpp === '90000000.00' && j.data.taxInvoice.ppn === '9900000.00').to.be.true; });"
+                  "pm.test(\"Nominal baru\", function () { pm.expect(j.data.taxInvoice.dpp === '90.000.000,00' && j.data.taxInvoice.ppn === '9.900.000,00').to.be.true; });"
                 ]
               }
             }
@@ -1721,7 +1721,7 @@
                   "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
                   "var j = pm.response.json();",
                   "pm.test('Amplop code = \"200\"', function () { pm.expect(j.code).to.eql('200'); });",
-                  "pm.test(\"Total PPN 45100000.00, selisih +1100000.00\", function () { pm.expect(j.data.recap.totalPpn === '45100000.00' && j.data.recap.paymentDifference === '1100000.00').to.be.true; });"
+                  "pm.test(\"Total PPN 45.100.000,00, selisih +1.100.000,00\", function () { pm.expect(j.data.recap.totalPpn === '45.100.000,00' && j.data.recap.paymentDifference === '1.100.000,00').to.be.true; });"
                 ]
               }
             }

@@ -1,0 +1,12 @@
+{
+  "name": "e1-pajak-api-docs",
+  "private": true,
+  "description": "Aset Swagger UI lokal untuk dokumentasi Laravel E-1",
+  "scripts": {
+    "docs:assets": "node scripts/publish-swagger.mjs",
+    "postinstall": "npm run docs:assets"
+  },
+  "dependencies": {
+    "swagger-ui-dist": "5.33.3"
+  }
+}

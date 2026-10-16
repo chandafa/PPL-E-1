@@ -1,6 +1,6 @@
 @php
     /** @var \App\Services\Export\RecapReport $report */
-    $rp = fn (string $v): string => 'Rp '.number_format((float) $v, 2, ',', '.');
+    $rp = fn (string $v): string => 'Rp '.\App\Support\Money::display($v);
 @endphp
 <!doctype html>
 <html lang="id">

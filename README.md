@@ -247,7 +247,7 @@ dan contoh respons di [`examples/`](examples).
 { "code": "409", "message": "NSFP sudah terdaftar", "data": null, "errorCode": "DUPLICATE_NSFP" }
 ```
 
-**Format nilai:** nominal selalu **string** (`"11000000.00"`), tanggal `YYYY-MM-DD`, masa pajak `YYYY-MM`,
+**Format nilai:** nominal pada input berupa **string** desimal (`"11000000.00"`), sedangkan respons menampilkan format Indonesia (`"11.000.000,00"`). Tanggal `YYYY-MM-DD`, masa pajak `YYYY-MM`,
 waktu RFC 3339 UTC (`...Z`), dan ID memakai UUID v7.
 
 <p align="right"><sub><a href="#daftar-isi">⬆ Kembali ke daftar isi</a></sub></p>
@@ -308,7 +308,7 @@ Login ini adalah tiruan F-1 khusus lokal (`E1_DEV_LOGIN=true`). Jika `404`, peri
 |---|---|---|
 | `POST` | `{{baseUrl}}/api/v1/tax-invoices/extractions` | `invoiceId` (Text) = `inv-demo-001`; `eFakturFile` (File) = `samples/efaktur-inv-demo-001.pdf` |
 
-Respons: HTTP `200`; `data.taxInvoiceNumber = "010.000-26.12345678"`, `data.taxInvoiceDate = "2026-11-01"`, `data.taxPeriod = "2026-11"`, `data.dpp = "100000000.00"`, dan `data.ppn = "11000000.00"`. Pratinjau tidak menyimpan faktur. Jalankan langkah ini **sebelum** API-KE01-02 untuk `inv-demo-001`.
+Respons: HTTP `200`; `data.taxInvoiceNumber = "010.000-26.12345678"`, `data.taxInvoiceDate = "2026-11-01"`, `data.taxPeriod = "2026-11"`, `data.dpp = "100.000.000,00"`, dan `data.ppn = "11.000.000,00"`. Pratinjau tidak menyimpan faktur. Jalankan langkah ini **sebelum** API-KE01-02 untuk `inv-demo-001`.
 
 <a id="t-api02"></a>
 ### 4. API-KE01-02 — Simpan faktur dan faktur pengganti
@@ -390,8 +390,8 @@ Periksa `data.history[*].actorAkunId`, `beforeSnapshot`, `afterSnapshot`, dan `n
 
 | Metode | URL | Hasil setelah langkah 7 |
 |---|---|---|
-| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-11` | `invoiceCount = 3`, `totalDpp = "420000000.00"`, `totalPpn = "46200000.00"` |
-| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-12` | `invoiceCount = 1`, `totalPpn = "6600000.00"`; D tetap tampil dengan `isCounted = false` |
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-11` | `invoiceCount = 3`, `totalDpp = "420.000.000,00"`, `totalPpn = "46.200.000,00"` |
+| `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-12` | `invoiceCount = 1`, `totalPpn = "6.600.000,00"`; D tetap tampil dengan `isCounted = false` |
 | `GET` | `{{baseUrl}}/api/v1/tax-recaps/2026-01` | HTTP `200`, rekap kosong dengan nilai nol |
 
 Body tidak ada. Sebelum mencatat pembayaran, `data.recap.paymentStatus` bernilai `NOT_RECORDED`.
@@ -417,7 +417,7 @@ Jalankan **Draft November terlebih dahulu**, lalu simpan `data.taxPaymentId` ke 
 pm.environment.set('taxPaymentId', pm.response.json().data.taxPaymentId);
 ```
 
-Draft menjawab HTTP `200`, `data.status = "INCOMPLETE"`, dan `data.paymentDifference = "0.00"`. Pembayaran Desember juga menjawab `200`, langsung `CONFIRMED`, dan selisih `"-600000.00"` karena PPN Desember `6600000.00`.
+Draft menjawab HTTP `200`, `data.status = "INCOMPLETE"`, dan `data.paymentDifference = "0,00"`. Pembayaran Desember juga menjawab `200`, langsung `CONFIRMED`, dan selisih `"-600.000,00"` karena PPN Desember `6.600.000,00`.
 
 <a id="t-api11"></a>
 ### 11. API-KE01-11 — Lengkapi pembayaran Draft
@@ -426,7 +426,7 @@ Draft menjawab HTTP `200`, `data.status = "INCOMPLETE"`, dan `data.paymentDiffer
 |---|---|---|---|
 | `PATCH` | `{{baseUrl}}/api/v1/tax-payments/{{taxPaymentId}}` | `ntpn` (Text) = `NTPN-ABC123456`; `paymentProofFile` (File) = `samples/bukti-pembayaran.pdf` | HTTP `200`, `data.status = "CONFIRMED"` |
 
-Gunakan **PATCH** dengan form-data, bukan POST. Setelah berhasil, ulangi `GET {{baseUrl}}/api/v1/tax-recaps/2026-11`: `data.recap.paymentStatus = "CONFIRMED"` dan `amountPaid = "46200000.00"`.
+Gunakan **PATCH** dengan form-data, bukan POST. Setelah berhasil, ulangi `GET {{baseUrl}}/api/v1/tax-recaps/2026-11`: `data.recap.paymentStatus = "CONFIRMED"` dan `amountPaid = "46.200.000,00"`.
 
 <a id="t-api09"></a>
 ### 12. API-KE01-09 — Ekspor rekap
@@ -443,7 +443,7 @@ Body tidak ada. Di Postman, gunakan **Send and Download** untuk menyimpan berkas
 
 | Metode | URL | Hasil setelah pembayaran lengkap |
 |---|---|---|
-| `GET` | `{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11` | HTTP `200`, `invoiceCount = 3`, `totalPpn = "46200000.00"`, `paymentStatus = "CONFIRMED"` |
+| `GET` | `{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11` | HTTP `200`, `invoiceCount = 3`, `totalPpn = "46.200.000,00"`, `paymentStatus = "CONFIRMED"` |
 | `GET` | `{{baseUrl}}/api/v1/tax/summary?taxPeriod=2026-11&projectId=prj-demo-002` | HTTP `200`, ringkasan hanya proyek gudang |
 
 Body tidak ada. `taxPeriod` wajib berformat `YYYY-MM`; `projectId` opsional dan harus dikenal D-2/E-1. Token peran layanan E-2 dapat dipakai bila `E1_SUMMARY_EXTRA_ROLES` dikonfigurasi.
@@ -515,7 +515,7 @@ Kesalahan umum lain: `404 NOT_FOUND` (rute tidak ada), `405 METHOD_NOT_ALLOWED`,
 | Rekap tidak menghitung Dibatalkan dan faktur asal yang diganti | Q-13 | `isCounted` pada daftar rekap |
 | Terkonfirmasi = NTPN dan bukti | Q-10 | selain itu `INCOMPLETE` (Draft) |
 | Selisih jumlah setor dan PPN tetap disimpan | FTR-KE01-05 | `paymentDifference` (bisa negatif); tidak menolak |
-| Periode kosong = rekap nol | FTR-KE01-04 | 200 dengan `0.00`, tanpa membuat data |
+| Periode kosong = rekap nol | FTR-KE01-04 | 200 dengan `0,00`, tanpa membuat data |
 | PDF maksimum 5 MB | keputusan tim | divalidasi dari isi berkas (`%PDF-`) |
 
 <p align="right"><sub><a href="#daftar-isi">⬆ Kembali ke daftar isi</a></sub></p>

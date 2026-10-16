@@ -5,6 +5,7 @@ namespace App\Services\Tax;
 use App\Exceptions\ApiException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 /**
  * Validasi dan penyimpanan berkas PDF (e-Faktur, e-Billing, bukti pembayaran).
@@ -43,7 +44,9 @@ class FileStore
     public function put(string $directory, string $id, string $binary): string
     {
         $path = "tax/{$directory}/{$id}.pdf";
-        Storage::disk((string) config('e1.upload.disk', 'local'))->put($path, $binary);
+        if (! Storage::disk((string) config('e1.upload.disk', 'local'))->put($path, $binary)) {
+            throw new RuntimeException('Penyimpanan PDF gagal');
+        }
 
         return '/files/'.$path;
     }

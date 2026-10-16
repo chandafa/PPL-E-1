@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
  *   sukses : {"code":"200","message":"...","data":{...}}
  *   gagal  : {"code":"4xx","message":"...","data":null,"errorCode":"ENUM"}
  * "code" selalu sama dengan status HTTP, ditulis sebagai string.
+ * Nominal tetap string decimal dengan titik desimal sesuai OpenAPI.
  */
 final class ApiResponse
 {
@@ -30,4 +31,5 @@ final class ApiResponse
             'errorCode' => $errorCode,
         ], $status, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
+
 }

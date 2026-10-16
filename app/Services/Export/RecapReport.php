@@ -41,7 +41,7 @@ final class RecapReport
                 'invoiceId' => (string) $f->invoice_id,
                 'projectId' => (string) $f->project_id,
                 'clientId' => (string) $f->client_id,
-                'status' => self::invoiceStatusLabel($f, $row['isCounted']),
+                'status' => self::invoiceStatusLabel($f),
                 'dpp' => $f->dpp,
                 'ppn' => $f->ppn,
                 'ppnbm' => $f->ppnbm ?? '0.00',
@@ -65,7 +65,7 @@ final class RecapReport
     {
         return [
             ['Masa pajak', $this->taxPeriod],
-            ['Jumlah faktur aktif', (string) $this->recap->invoiceCount],
+            ['Jumlah faktur dihitung', (string) $this->recap->invoiceCount],
             ['Total DPP', $this->recap->totalDpp],
             ['Total PPN', $this->recap->totalPpn],
             ['Total PPnBM', $this->recap->totalPpnbm],
@@ -76,7 +76,7 @@ final class RecapReport
         ];
     }
 
-    public static function invoiceStatusLabel(FakturPajak $f, bool $isCounted): string
+    public static function invoiceStatusLabel(FakturPajak $f): string
     {
         $label = match ($f->status) {
             FakturPajak::STATUS_REPLACEMENT => 'Pengganti',
@@ -84,7 +84,7 @@ final class RecapReport
             default => 'Normal',
         };
 
-        return ! $isCounted && ! $f->isCancelled() ? $label.' (terganti)' : $label;
+        return $f->replacedBy !== null && ! $f->isCancelled() ? $label.' (terganti)' : $label;
     }
 
     public static function paymentStatusLabel(string $status): string

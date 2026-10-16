@@ -1,13 +1,13 @@
 openapi: "3.1.0"
 info:
   title: E-1 Pencatatan e-Faktur dan pajak proyek
-  version: "0.1.0"
+  version: "0.2.0"
   contact:
     name: "Kelompok 1 / Kelas E (E-1): Pencatatan e-Faktur dan pajak proyek"
-  description: "Kontrak awal (draf Pertemuan 3) API modul pencatatan e-Faktur dan pajak proyek, Kelompok 1 / Kelas E. Memuat 11 operasi API-KE01-01 sampai API-KE01-11; satu operasi (API-KE01-10) dibaca modul lain termasuk E-2, sisanya dipakai antarmuka web E-1. Rujukan: Daftar Kontrak API (04), Spesifikasi Fitur Minimum (01), Rancangan Antarmuka (02), Skema Data Awal (03). Path, field, enum, dan kode kesalahan berstatus usulan sampai ditinjau kelompok konsumen. Kesalahan umum di luar daftar per operasi memakai bentuk Error yang sama: 404 NOT_FOUND (rute tidak dikenal), 405 METHOD_NOT_ALLOWED, 413 PAYLOAD_TOO_LARGE, 500 INTERNAL_ERROR."
+  description: "Kontrak E-1 hasil audit Pertemuan 4, disinkronkan dengan sumber Pertemuan 3 (2026-10-16). Q-13 tertutup: CANCELLED, REPLACEMENT, dan faktur asal terganti tidak dihitung. Nominal JSON string decimal tanpa pemisah ribuan. type/vendorName merupakan field tambahan skema data yang didokumentasikan; belum membuka API faktur masukan. Kesepakatan lintas kelompok tetap menunggu review. Kontrak API modul pencatatan e-Faktur dan pajak proyek, Kelompok 1 / Kelas E. Memuat 11 operasi API-KE01-01 sampai API-KE01-11; satu operasi (API-KE01-10) dibaca modul lain termasuk E-2, sisanya dipakai antarmuka web E-1. Rujukan: Daftar Kontrak API (04), Spesifikasi Fitur Minimum (01), Rancangan Antarmuka (02), Skema Data Awal (03). Path, field, enum, dan kode kesalahan berstatus usulan sampai ditinjau kelompok konsumen. Kesalahan umum di luar daftar per operasi memakai bentuk Error yang sama: 404 NOT_FOUND (rute tidak dikenal), 405 METHOD_NOT_ALLOWED, 413 PAYLOAD_TOO_LARGE, 500 INTERNAL_ERROR."
 servers:
-  - url: http://localhost:8080
-    description: Lingkungan uji lokal (usulan; alamat final menunggu repositori dan stack tim)
+  - url: /
+    description: Lingkungan uji lokal Laravel (composer serve)
 security:
   - bearerAuth: []
 tags:
@@ -43,7 +43,7 @@ paths:
                   type: string
                   format: binary
                   contentMediaType: application/pdf
-                  description: Berkas PDF e-Faktur yang dibuat di luar sistem (multipart/form-data); batas ukuran ditetapkan saat implementasi.
+                  description: Berkas PDF e-Faktur yang dibuat di luar sistem (multipart/form-data); maksimum 5 MiB per berkas.
             encoding:
               eFakturFile:
                 contentType: application/pdf
@@ -710,7 +710,7 @@ paths:
       tags:
         - Faktur dan pembayaran
       summary: "API-KE01-07: Rekap pajak per masa pajak"
-      description: "Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur aktif, daftar faktur periode, dan pembayaran. Sumber: Backlog BL-05; Peta Aktor dan Proses E-1 (Langkah 7); jawaban mitra Q-03, Q-12, Q-13."
+      description: "Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur NORMAL keluaran yang belum terganti, daftar seluruh faktur periode, dan pembayaran. Sumber: Backlog BL-05; Peta Aktor dan Proses E-1 (Langkah 7); jawaban mitra Q-03, Q-12, Q-13."
       parameters:
         - name: taxPeriod
           in: path
@@ -806,7 +806,7 @@ paths:
                     - 2026
                   description: Tahun pajak (Q-02), terisi dari masa pajak; contoh 2026.
                 amountPaid:
-                  $ref: "#/components/schemas/Money"
+                  $ref: "#/components/schemas/MoneyInput"
                   description: Jumlah setor; tidak boleh negatif; contoh 11000000.00.
                 billingId:
                   type: string
@@ -1041,7 +1041,7 @@ paths:
         - name: taxPaymentId
           in: path
           required: true
-          description: ID catatan pembayaran berstatus INCOMPLETE; contoh 01a25dad-c900-79c2-a6e1-b45d08af7362.
+          description: ID catatan pembayaran; Draft dilengkapi atau bukti/NTPN catatan terkonfirmasi diperbarui. Berkas bukti lama tetap disimpan.
           schema:
             type: string
             format: uuid
@@ -1159,13 +1159,25 @@ components:
     Money:
       type: string
       pattern: ^[0-9]{1,16}\.[0-9]{2}$
-      description: Nominal Rupiah decimal(18,2) ditulis sebagai string agar presisi tidak hilang (usulan E-1; menunggu persetujuan konsumen).
+      description: Nominal respons string decimal(18,2), titik desimal, tepat dua angka desimal, tanpa pemisah ribuan; tidak memakai float.
       examples:
         - "100000000.00"
+    MoneyInput:
+      type: string
+      pattern: ^[0-9]{1,16}(\.[0-9]{1,2})?$
+      description: Nominal pada request berupa string decimal(18,2) tanpa pemisah ribuan, misalnya 11000000.00; dinormalkan ke dua angka desimal saat disimpan.
+      examples:
+        - "11000000.00"
+    MoneyInputNullable:
+      type:
+        - string
+        - "null"
+      pattern: ^[0-9]{1,16}(\.[0-9]{1,2})?$
+      description: Nominal pada request berupa string decimal(18,2) tanpa pemisah ribuan; null bila tidak ada.
     SignedMoney:
       type: string
       pattern: ^-?[0-9]{1,16}\.[0-9]{2}$
-      description: Nominal decimal(18,2) bertanda sebagai string; negatif bila nilai pertama lebih kecil (mis. jumlah setor kurang dari total PPN).
+      description: Selisih respons string decimal bertanda, titik desimal, tepat dua angka desimal; negatif bila jumlah setor kurang dari total PPN.
       examples:
         - "-500000.00"
     MoneyNullable:
@@ -1173,7 +1185,7 @@ components:
         - string
         - "null"
       pattern: ^[0-9]{1,16}\.[0-9]{2}$
-      description: "Nominal decimal(18,2) sebagai string; null bila tidak ada data (03: 0.00; 04: null; menunggu keputusan tim E-1)."
+      description: "Nominal respons string decimal dengan titik dan dua angka desimal; null bila nilai tidak tersedia. Agregat kosong bernilai 0.00."
       examples:
         - "0.00"
     TaxPeriod:
@@ -1195,7 +1207,7 @@ components:
         - NOT_RECORDED
         - INCOMPLETE
         - CONFIRMED
-      description: "Status pembayaran per masa pajak: NOT_RECORDED belum ada pembayaran; INCOMPLETE NTPN atau bukti belum lengkap; CONFIRMED NTPN dan bukti lengkap (Q-10)."
+      description: "Status pembayaran per masa pajak: NOT_RECORDED belum ada pembayaran; INCOMPLETE bila sedikitnya satu catatan belum memiliki NTPN dan bukti; CONFIRMED bila seluruh catatan lengkap (Q-10). Tetap per masa pajak meskipun ringkasan difilter projectId."
     PaymentRecordStatus:
       type: string
       enum:
@@ -1256,14 +1268,14 @@ components:
           type: string
           description: Nama barang/jasa kena pajak (Q-02).
         saleReplacementAdvanceTermAmount:
-          $ref: "#/components/schemas/Money"
+          $ref: "#/components/schemas/MoneyInput"
           description: Harga jual/penggantian/uang muka/termin (Rp).
         discountAmount:
-          $ref: "#/components/schemas/Money"
+          $ref: "#/components/schemas/MoneyInput"
           default: "0.00"
           description: Potongan harga; tidak wajib, 0.00 bila tidak ada (Skema Data Awal).
         receivedAdvanceAmount:
-          $ref: "#/components/schemas/Money"
+          $ref: "#/components/schemas/MoneyInput"
           default: "0.00"
           description: Uang muka yang telah diterima; tidak wajib, 0.00 bila tidak ada (Skema Data Awal).
     ExtractionResult:
@@ -1583,11 +1595,11 @@ components:
         taxPeriod:
           $ref: "#/components/schemas/TaxPeriod"
         dpp:
-          $ref: "#/components/schemas/Money"
+          $ref: "#/components/schemas/MoneyInput"
         ppn:
-          $ref: "#/components/schemas/Money"
+          $ref: "#/components/schemas/MoneyInput"
         ppnbm:
-          $ref: "#/components/schemas/MoneyNullable"
+          $ref: "#/components/schemas/MoneyInputNullable"
         items:
           type: array
           items:
@@ -1679,7 +1691,7 @@ components:
         invoiceCount:
           type: integer
           minimum: 0
-          description: Jumlah faktur aktif yang dihitung.
+          description: Jumlah faktur NORMAL keluaran yang belum terganti (Q-13).
         totalDpp:
           $ref: "#/components/schemas/Money"
         totalPpn:
@@ -1688,7 +1700,7 @@ components:
           $ref: "#/components/schemas/MoneyNullable"
         amountPaid:
           $ref: "#/components/schemas/Money"
-          description: Jumlah setor pada masa pajak; 0.00 bila belum ada pembayaran.
+          description: Jumlah setor pada masa pajak; 0,00 bila belum ada pembayaran.
         paymentDifference:
           $ref: "#/components/schemas/SignedMoney"
           description: amountPaid dikurangi totalPpn; negatif bila jumlah setor kurang dari total PPN.
@@ -1742,7 +1754,7 @@ components:
           $ref: "#/components/schemas/MoneyNullable"
         isCounted:
           type: boolean
-          description: false untuk faktur Dibatalkan atau faktur asal yang sudah diganti; tetap terlihat tetapi tidak dijumlahkan (Q-13).
+          description: true hanya untuk faktur NORMAL keluaran yang belum terganti. CANCELLED, REPLACEMENT, dan faktur asal terganti tetap terlihat dengan false (Q-13 tertutup).
     RecapPayment:
       type: object
       required:
@@ -1808,7 +1820,7 @@ components:
           $ref: "#/components/schemas/TaxPeriod"
         paymentDifference:
           $ref: "#/components/schemas/SignedMoney"
-          description: amountPaid dikurangi totalPpn rekap masa pajak (negatif bila kurang); data tetap tersimpan bila berbeda.
+          description: Jumlah amountPaid seluruh catatan pada masa pajak (termasuk Draft) dikurangi totalPpn rekap; negatif bila kurang. Data tetap tersimpan bila berbeda.
     TaxPaymentCompleted:
       type: object
       required:
@@ -1829,7 +1841,7 @@ components:
           $ref: "#/components/schemas/RecapPaymentStatus"
     TaxSummary:
       type: object
-      description: Ringkasan pajak satu masa pajak (ENT-KE01-03 dan ENT-KE01-04); hanya faktur aktif yang dihitung (Q-13).
+      description: Ringkasan pajak satu masa pajak (ENT-KE01-03 dan ENT-KE01-04); hanya NORMAL keluaran yang belum terganti dihitung; CANCELLED dan REPLACEMENT dikecualikan (Q-13 tertutup).
       required:
         - taxPeriod
         - invoiceCount
@@ -1843,7 +1855,7 @@ components:
         invoiceCount:
           type: integer
           minimum: 0
-          description: Jumlah faktur aktif yang dihitung (bukan jumlah invoice D-2).
+          description: Jumlah faktur NORMAL keluaran yang belum terganti (Q-13) (bukan jumlah invoice D-2).
         totalDpp:
           $ref: "#/components/schemas/Money"
         totalPpn:

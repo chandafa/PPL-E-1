@@ -6,16 +6,19 @@ use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
  * Berkas Excel rekap: tiga lembar (Ringkasan, Faktur, Pembayaran) dari RecapReport
- * yang sama dengan PDF. Nominal ditulis sebagai angka berformat #,##0.00.
+ * yang sama dengan PDF. Nominal ditulis sebagai teks decimal tepat dua angka desimal agar
+ * seluruh presisi decimal(18,2) dan ID berawalan nol tetap utuh di Excel.
  */
 class RecapWorkbook implements Export, WithMultipleSheets
 {
@@ -26,7 +29,7 @@ class RecapWorkbook implements Export, WithMultipleSheets
         $r = $this->report;
 
         return [
-            new class($r) implements FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
+            new class($r) extends StringValueBinder implements WithCustomValueBinder, FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
             {
                 public function __construct(private readonly RecapReport $r) {}
 
@@ -42,17 +45,12 @@ class RecapWorkbook implements Export, WithMultipleSheets
 
                 public function array(): array
                 {
-                    $money = ['Total DPP', 'Total PPN', 'Total PPnBM', 'Jumlah setor', 'Selisih (jumlah setor - total PPN)'];
-
-                    return array_map(
-                        fn (array $row) => [$row[0], in_array($row[0], $money, true) ? (float) $row[1] : $row[1]],
-                        $this->r->summaryRows(),
-                    );
+                    return $this->r->summaryRows();
                 }
 
                 public function columnFormats(): array
                 {
-                    return ['B' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1];
+                    return ['B' => NumberFormat::FORMAT_TEXT];
                 }
 
                 public function styles(Worksheet $sheet): array
@@ -60,7 +58,7 @@ class RecapWorkbook implements Export, WithMultipleSheets
                     return [1 => ['font' => ['bold' => true]]];
                 }
             },
-            new class($r) implements FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
+            new class($r) extends StringValueBinder implements WithCustomValueBinder, FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
             {
                 public function __construct(private readonly RecapReport $r) {}
 
@@ -78,13 +76,13 @@ class RecapWorkbook implements Export, WithMultipleSheets
                 {
                     return array_map(fn (array $i) => [
                         $i['taxInvoiceNumber'], $i['taxInvoiceDate'], $i['invoiceId'], $i['projectId'], $i['clientId'],
-                        $i['status'], (float) $i['dpp'], (float) $i['ppn'], (float) $i['ppnbm'], $i['isCounted'],
+                        $i['status'], $i['dpp'], $i['ppn'], $i['ppnbm'], $i['isCounted'],
                     ], $this->r->invoices);
                 }
 
                 public function columnFormats(): array
                 {
-                    $f = NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1;
+                    $f = NumberFormat::FORMAT_TEXT;
 
                     return ['G' => $f, 'H' => $f, 'I' => $f];
                 }
@@ -94,7 +92,7 @@ class RecapWorkbook implements Export, WithMultipleSheets
                     return [1 => ['font' => ['bold' => true]]];
                 }
             },
-            new class($r) implements FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
+            new class($r) extends StringValueBinder implements WithCustomValueBinder, FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithTitle
             {
                 public function __construct(private readonly RecapReport $r) {}
 
@@ -111,13 +109,13 @@ class RecapWorkbook implements Export, WithMultipleSheets
                 public function array(): array
                 {
                     return array_map(fn (array $p) => [
-                        $p['billingId'], $p['ntpn'], (float) $p['amountPaid'], $p['status'], $p['createdAt'],
+                        $p['billingId'], $p['ntpn'], $p['amountPaid'], $p['status'], $p['createdAt'],
                     ], $this->r->payments);
                 }
 
                 public function columnFormats(): array
                 {
-                    return ['C' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1];
+                    return ['C' => NumberFormat::FORMAT_TEXT];
                 }
 
                 public function styles(Worksheet $sheet): array

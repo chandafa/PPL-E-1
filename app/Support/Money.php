@@ -53,4 +53,20 @@ final class Money
     {
         return bccomp($a, $b, 2) === 0;
     }
+
+    /** Format nominal tersimpan ke tampilan Indonesia tanpa konversi float. */
+    public static function display(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (preg_match('/^(-?)([0-9]{1,16})\.([0-9]{2})$/', $value, $parts) !== 1) {
+            throw new InvalidArgumentException("Nominal tersimpan tidak valid: {$value}");
+        }
+
+        $whole = preg_replace('/\B(?=(?:\d{3})+(?!\d))/', '.', $parts[2]);
+
+        return $parts[1].$whole.','.$parts[3];
+    }
 }

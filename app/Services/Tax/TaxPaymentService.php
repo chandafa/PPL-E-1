@@ -51,10 +51,13 @@ class TaxPaymentService
         }
 
         $id = (string) Str::uuid7();
-        $eBillingUri = $this->files->put('e-billing', $id, $eBilling);
-        $proofUri = $proof !== null ? $this->files->put('payment-proof', $id, $proof) : null;
+        $eBillingUri = null;
+        $proofUri = null;
 
         try {
+            $eBillingUri = $this->files->put('e-billing', $id, $eBilling);
+            $proofUri = $proof !== null ? $this->files->put('payment-proof', $id, $proof) : null;
+
             return DB::transaction(function () use ($id, $taxPeriod, $taxYear, $amountPaid, $billingId, $ntpn, $eBillingUri, $proofUri, $actor): array {
                 $payment = new PembayaranPajak;
                 $payment->forceFill([
@@ -77,7 +80,9 @@ class TaxPaymentService
                 return ['payment' => $payment->fresh(), 'paymentDifference' => $recap->payment_difference];
             });
         } catch (Throwable $e) {
-            $this->files->delete($eBillingUri);
+            if ($eBillingUri !== null) {
+                $this->files->delete($eBillingUri);
+            }
             if ($proofUri !== null) {
                 $this->files->delete($proofUri);
             }

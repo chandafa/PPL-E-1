@@ -7,7 +7,7 @@ use Tests\TestCase;
 /** API-KE01-07: rekap per masa pajak. */
 class TaxRecapTest extends TestCase
 {
-    public function test_rekap_hanya_menjumlahkan_faktur_aktif_dan_menandai_is_counted(): void
+    public function test_q13_hanya_normal_belum_terganti_dihitung_batal_dan_pengganti_dikecualikan(): void
     {
         $a = $this->createFaktur('inv-demo-001', ['nsfp' => '010.000-26.00000501']);                                    // normal, dihitung
         $b = $this->createFaktur('inv-demo-002', ['nsfp' => '010.000-26.00000502', 'dpp' => '250000000.00', 'ppn' => '27500000.00']); // akan diganti
@@ -21,21 +21,21 @@ class TaxRecapTest extends TestCase
             ->assertJsonPath('code', '200')
             ->assertJsonPath('message', 'Rekap masa pajak')
             ->assertJsonPath('data.recap.taxPeriod', '2026-11')
-            ->assertJsonPath('data.recap.invoiceCount', 2)
-            ->assertJsonPath('data.recap.totalDpp', '300000000.00')
-            ->assertJsonPath('data.recap.totalPpn', '33000000.00')
+            ->assertJsonPath('data.recap.invoiceCount', 1)
+            ->assertJsonPath('data.recap.totalDpp', '100000000.00')
+            ->assertJsonPath('data.recap.totalPpn', '11000000.00')
             ->assertJsonPath('data.recap.totalPpnbm', '0.00')
             ->assertJsonPath('data.recap.amountPaid', '0.00')
-            ->assertJsonPath('data.recap.paymentDifference', '-33000000.00')
+            ->assertJsonPath('data.recap.paymentDifference', '-11000000.00')
             ->assertJsonPath('data.recap.paymentStatus', 'NOT_RECORDED');
 
-        // seluruh faktur periode tampil; hanya a dan b2 yang dihitung
+        // seluruh faktur periode tampil; hanya a yang dihitung (Q-13 tertutup)
         $counted = collect($response->json('data.invoices'))->pluck('isCounted', 'taxInvoiceId')->all();
         $this->assertSame([
             $a['taxInvoiceId'] => true,
             $b['taxInvoiceId'] => false,
             $c['taxInvoiceId'] => false,
-            $b2['taxInvoiceId'] => true,
+            $b2['taxInvoiceId'] => false,
         ], $counted);
 
         $statuses = collect($response->json('data.invoices'))->pluck('status', 'taxInvoiceId')->all();

@@ -13,11 +13,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Rekap pajak per masa pajak (FTR-KE01-04): jumlah faktur aktif, total DPP/PPN/
+ * Rekap pajak per masa pajak (FTR-KE01-04): jumlah faktur dihitung, total DPP/PPN/
  * PPnBM, jumlah setor, selisih, dan status pembayaran.
  *
- * Aturan (Q-13): hanya faktur aktif yang dijumlahkan; faktur Dibatalkan dan
- * faktur asal yang sudah diganti tetap tampil di daftar tetapi isCounted=false.
+ * Aturan Q-13 Pertemuan 3 (tertutup): hanya NORMAL keluaran yang belum diganti
+ * dijumlahkan. CANCELLED, REPLACEMENT, dan asal terganti tetap tampil, isCounted=false.
  * Status pembayaran per masa pajak: tidak ada catatan = NOT_RECORDED; ada catatan
  * INCOMPLETE = INCOMPLETE; semua catatan CONFIRMED = CONFIRMED.
  */
@@ -46,7 +46,7 @@ class RecapService
      */
     public function compute(string $taxPeriod, ?string $projectId = null, ?Carbon $computedAt = null): RecapData
     {
-        $query = FakturPajak::query()->active()->where('tax_period', $taxPeriod);
+        $query = FakturPajak::query()->counted()->where('tax_period', $taxPeriod);
         if ($projectId !== null) {
             $query->where('project_id', $projectId);
         }
@@ -121,7 +121,9 @@ class RecapService
             ->get()
             ->map(fn (FakturPajak $f) => [
                 'faktur' => $f,
-                'isCounted' => ! $f->isCancelled() && $f->replacedBy === null,
+                'isCounted' => $f->status === FakturPajak::STATUS_NORMAL
+                    && $f->type === FakturPajak::TYPE_OUTGOING
+                    && $f->replacedBy === null,
             ]);
     }
 

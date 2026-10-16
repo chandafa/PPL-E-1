@@ -36,15 +36,21 @@ class HttpInvoiceProvider implements InvoiceProvider
             return null;
         }
 
-        if ($response->failed()) {
+        if (! $response->successful()) {
             throw $this->unavailable();
         }
 
-        $json = (array) $response->json();
-        $row = (array) ($json['data'] ?? $json);
+        $json = $response->json();
+        $row = is_array($json) ? ($json['data'] ?? $json) : null;
 
-        if (! isset($row['invoiceId'])) {
-            return null;
+        if (! is_array($row) || ($row['invoiceId'] ?? null) !== $invoiceId) {
+            throw $this->unavailable();
+        }
+
+        foreach (['invoiceNumber', 'invoiceDate', 'status', 'projectId', 'projectName', 'clientId', 'clientName', 'dppAmount', 'ppnAmount'] as $field) {
+            if (isset($row[$field]) && ! is_string($row[$field])) {
+                throw $this->unavailable();
+            }
         }
 
         return new InvoiceData(

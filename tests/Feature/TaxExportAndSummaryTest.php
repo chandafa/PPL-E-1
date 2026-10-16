@@ -40,9 +40,9 @@ class TaxExportAndSummaryTest extends TestCase
         foreach ($book->getSheetByName('Ringkasan')->toArray(null, true, false) as $row) {
             $summary[$row[0]] = $row[1];
         }
-        $this->assertEquals(350000000.0, $summary['Total DPP']);
-        $this->assertEquals(38500000.0, $summary['Total PPN']);
-        $this->assertSame('2', (string) $summary['Jumlah faktur aktif']);
+        $this->assertSame('350000000.00', $summary['Total DPP']);
+        $this->assertSame('38500000.00', $summary['Total PPN']);
+        $this->assertSame('2', (string) $summary['Jumlah faktur dihitung']);
         $this->assertSame('Belum dicatat', $summary['Status pembayaran']);
 
         $invoices = $book->getSheetByName('Faktur')->toArray(null, true, false);
