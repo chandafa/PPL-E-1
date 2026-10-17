@@ -7,6 +7,7 @@ use App\Models\PembayaranPajak;
 use App\Models\RekapPajakBulanan;
 use App\Services\Tax\RecapData;
 use App\Services\Tax\RecapService;
+use App\Support\DateDisplay;
 use Carbon\CarbonInterface;
 
 /**
@@ -37,7 +38,7 @@ final class RecapReport
 
             return [
                 'taxInvoiceNumber' => $f->tax_invoice_number,
-                'taxInvoiceDate' => $f->tax_invoice_date->format('Y-m-d'),
+                'taxInvoiceDate' => DateDisplay::date($f->tax_invoice_date),
                 'invoiceId' => (string) $f->invoice_id,
                 'projectId' => (string) $f->project_id,
                 'clientId' => (string) $f->client_id,
@@ -54,7 +55,7 @@ final class RecapReport
             'ntpn' => (string) $p->ntpn,
             'amountPaid' => $p->amount_paid,
             'status' => self::paymentStatusLabel($p->status),
-            'createdAt' => $p->created_at->copy()->utc()->format('Y-m-d H:i').' UTC',
+            'createdAt' => DateDisplay::dateTime($p->created_at),
         ])->all();
 
         return new self($taxPeriod, $recap, $invoices, $payments, $recap->computedAt);
@@ -64,7 +65,7 @@ final class RecapReport
     public function summaryRows(): array
     {
         return [
-            ['Masa pajak', $this->taxPeriod],
+            ['Masa pajak', DateDisplay::period($this->taxPeriod)],
             ['Jumlah faktur dihitung', (string) $this->recap->invoiceCount],
             ['Total DPP', $this->recap->totalDpp],
             ['Total PPN', $this->recap->totalPpn],
@@ -72,7 +73,7 @@ final class RecapReport
             ['Jumlah setor', $this->recap->amountPaid],
             ['Selisih (jumlah setor - total PPN)', $this->recap->paymentDifference],
             ['Status pembayaran', self::recapStatusLabel($this->recap->paymentStatus)],
-            ['Dihitung pada', $this->generatedAt->copy()->utc()->format('Y-m-d H:i').' UTC'],
+            ['Dihitung pada', DateDisplay::dateTime($this->generatedAt)],
         ];
     }
 

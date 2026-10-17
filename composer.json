@@ -57,7 +57,7 @@
         ],
         "serve": [
             "ComposerConfig::disableProcessTimeout",
-            "@php -d upload_max_filesize=6M -d post_max_size=16M -S 127.0.0.1:8080 -t public public/index.php"
+            "@php -d upload_max_filesize=6M -d post_max_size=16M -S 127.0.0.1:8080 -t public server.php"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

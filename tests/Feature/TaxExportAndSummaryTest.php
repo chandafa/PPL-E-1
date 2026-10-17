@@ -34,21 +34,32 @@ class TaxExportAndSummaryTest extends TestCase
         $book = IOFactory::load($path);
         unlink($path);
 
-        $this->assertSame(['Ringkasan', 'Faktur', 'Pembayaran'], $book->getSheetNames());
+        $this->assertSame(['Rekap Pajak'], $book->getSheetNames());
+        $sheet = $book->getActiveSheet();
+        $rows = $sheet->toArray(null, true, false);
+        $this->assertSame('Rekap Pajak Masa November 2026', $rows[0][0]);
+        $this->assertSame('landscape', $sheet->getPageSetup()->getOrientation());
+        $this->assertSame(1, $sheet->getPageSetup()->getFitToWidth());
 
         $summary = [];
-        foreach ($book->getSheetByName('Ringkasan')->toArray(null, true, false) as $row) {
+        foreach ($rows as $row) {
             $summary[$row[0]] = $row[1];
         }
         $this->assertSame('350000000.00', $summary['Total DPP']);
         $this->assertSame('38500000.00', $summary['Total PPN']);
         $this->assertSame('2', (string) $summary['Jumlah faktur dihitung']);
         $this->assertSame('Belum dicatat', $summary['Status pembayaran']);
+        $this->assertSame('November 2026', $summary['Masa pajak']);
+        $this->assertStringContainsString(' WIB', $summary['Dihitung pada']);
 
-        $invoices = $book->getSheetByName('Faktur')->toArray(null, true, false);
+        $invoiceHeader = array_search('NSFP', array_column($rows, 0), true);
+        $invoices = array_slice($rows, $invoiceHeader, 4);
         $this->assertCount(4, $invoices);   // judul kolom + 3 faktur (termasuk yang dibatalkan)
         $this->assertSame('Dihitung', $invoices[0][9]);
+        $this->assertSame('1 November 2026', $invoices[1][1]);
         $this->assertSame(['Ya', 'Ya', 'Tidak'], array_column(array_slice($invoices, 1), 9));
+        $this->assertGreaterThan($invoiceHeader + 3, array_search('Pembayaran', array_column($rows, 0), true));
+        $this->assertContains('Belum ada pembayaran dicatat.', array_column($rows, 0));
     }
 
     public function test_ekspor_pdf(): void
@@ -66,7 +77,9 @@ class TaxExportAndSummaryTest extends TestCase
         $content = $this->get('/api/v1/tax-recaps/2026-11/export?format=pdf', $this->auth())->getContent();
         $text = (new Parser)->parseContent($content)->getText();
 
-        $this->assertStringContainsString('Rekap Pajak Masa 2026-11', $text);
+        $this->assertStringContainsString('Rekap Pajak Masa November 2026', $text);
+        $this->assertStringContainsString('1 November 2026', $text);
+        $this->assertStringContainsString('WIB', $text);
         $this->assertStringContainsString('Rp 38.500.000,00', $text);   // total PPN faktur aktif
         $this->assertStringContainsString('Dibatalkan', $text);
         $this->assertStringContainsString('010.000-26.00000603', $text);

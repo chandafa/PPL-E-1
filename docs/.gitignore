@@ -1,0 +1,6 @@
+# Dokumen contoh hasil php artisan demo:samples
+/postman/samples/
+
+# Batch lokal hasil php artisan demo:flow dan laporan pengujiannya
+/testing-invoice-flow/*/
+/testing-invoice-flow/HASIL_VERIFIKASI.md

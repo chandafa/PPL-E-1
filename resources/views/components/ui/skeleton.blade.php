@@ -1,0 +1,1 @@
+<div {{ $attributes->class(['space-y-4 p-5']) }} role="status"><span class="text-sm text-muted">Memuat data…</span><div class="skeleton-bar w-2/3"></div><div class="skeleton-bar w-full"></div><div class="skeleton-bar w-4/5"></div></div>

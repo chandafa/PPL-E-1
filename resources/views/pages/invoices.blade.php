@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('title', 'Faktur Pajak Keluaran')
+@section('content')
+<div class="page-header"><div><h1 class="page-title">Faktur Pajak Keluaran</h1><p class="page-description">Telusuri e-Faktur yang tertaut ke invoice proyek D-2.</p></div><x-ui.button href="/tax-invoices/create" icon="plus">Catat e-Faktur Keluaran</x-ui.button></div>
+<form id="filters" class="panel mb-6 grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-6"><x-ui.input label="Nomor faktur / NSFP" name="taxInvoiceNumber" placeholder="Cari nomor faktur" /><x-ui.input label="Proyek" name="project" placeholder="ID atau nama proyek" /><x-ui.input label="Klien" name="client" placeholder="ID atau nama klien" /><x-ui.select label="Masa pajak" name="taxPeriod"><option value="">Semua masa pajak</option></x-ui.select><x-ui.select label="Status" name="status"><option value="">Semua status</option><option value="NORMAL">Normal</option><option value="REPLACEMENT">Pengganti</option><option value="CANCELLED">Dibatalkan</option></x-ui.select><div class="flex items-end gap-2"><x-ui.button type="submit" icon="search">Cari</x-ui.button><x-ui.button variant="secondary" id="reset-filters">Reset</x-ui.button></div></form>
+<section class="panel"><div class="panel-heading"><h2 class="panel-title">Daftar faktur</h2><span id="invoice-count" class="text-xs text-muted"></span></div><div id="invoice-list"><x-ui.skeleton /></div><x-ui.pagination id="invoice-pagination" /></section>
+<p class="mt-4 text-xs leading-relaxed text-muted">Faktur berlabel Terganti tetap tercatat. Hanya faktur Normal dan Pengganti yang masih aktif dihitung dalam rekap.</p>
+@endsection

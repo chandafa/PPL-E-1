@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * ENT-KE01-01 FakturPajak: faktur dan statusnya.
  *
  * "Aktif" untuk keunikan invoice (Q-04) berbeda dari "dihitung" pada rekap (Q-13).
- * Rekap hanya menghitung NORMAL yang belum digantikan; REPLACEMENT tidak dihitung.
+ * Rekap menghitung NORMAL dan REPLACEMENT keluaran yang belum digantikan.
  */
 class FakturPajak extends Model
 {
@@ -100,11 +100,11 @@ class FakturPajak extends Model
         return self::query()->where('replaces_tax_invoice_id', $this->tax_invoice_id)->exists();
     }
 
-    /** Q-13 Pertemuan 3 (tertutup): batal dan pengganti tidak dijumlahkan. */
+    /** Rancangan UI v0.2: faktur Normal dan Pengganti aktif dijumlahkan. */
     public function scopeCounted(Builder $query): Builder
     {
         return $query->active()
-            ->where($this->qualifyColumn('status'), self::STATUS_NORMAL)
+            ->whereIn($this->qualifyColumn('status'), [self::STATUS_NORMAL, self::STATUS_REPLACEMENT])
             ->where($this->qualifyColumn('type'), self::TYPE_OUTGOING);
     }
 }

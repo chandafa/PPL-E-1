@@ -4,7 +4,7 @@ info:
   version: "0.2.0"
   contact:
     name: "Kelompok 1 / Kelas E (E-1): Pencatatan e-Faktur dan pajak proyek"
-  description: "Kontrak E-1 hasil audit Pertemuan 4, disinkronkan dengan sumber Pertemuan 3 (2026-10-16). Q-13 tertutup: CANCELLED, REPLACEMENT, dan faktur asal terganti tidak dihitung. Nominal JSON string decimal tanpa pemisah ribuan. type/vendorName merupakan field tambahan skema data yang didokumentasikan; belum membuka API faktur masukan. Kesepakatan lintas kelompok tetap menunggu review. Kontrak API modul pencatatan e-Faktur dan pajak proyek, Kelompok 1 / Kelas E. Memuat 11 operasi API-KE01-01 sampai API-KE01-11; satu operasi (API-KE01-10) dibaca modul lain termasuk E-2, sisanya dipakai antarmuka web E-1. Rujukan: Daftar Kontrak API (04), Spesifikasi Fitur Minimum (01), Rancangan Antarmuka (02), Skema Data Awal (03). Path, field, enum, dan kode kesalahan berstatus usulan sampai ditinjau kelompok konsumen. Kesalahan umum di luar daftar per operasi memakai bentuk Error yang sama: 404 NOT_FOUND (rute tidak dikenal), 405 METHOD_NOT_ALLOWED, 413 PAYLOAD_TOO_LARGE, 500 INTERNAL_ERROR."
+  description: "Kontrak E-1 dengan aturan rekap Rancangan Antarmuka v0.2: NORMAL dan REPLACEMENT keluaran yang masih aktif dihitung; CANCELLED dan faktur asal terganti tidak dihitung. Aturan ini menggantikan pengecualian REPLACEMENT pada audit 2026-10-16 sesuai keputusan implementasi UI. Nominal JSON string decimal tanpa pemisah ribuan. type/vendorName merupakan field tambahan skema data yang didokumentasikan; belum membuka API faktur masukan. Kesepakatan lintas kelompok tetap menunggu review. Kontrak API modul pencatatan e-Faktur dan pajak proyek, Kelompok 1 / Kelas E. Memuat 11 operasi API-KE01-01 sampai API-KE01-11; satu operasi (API-KE01-10) dibaca modul lain termasuk E-2, sisanya dipakai antarmuka web E-1. Rujukan: Daftar Kontrak API (04), Spesifikasi Fitur Minimum (01), Rancangan Antarmuka (02), Skema Data Awal (03). Path, field, enum, dan kode kesalahan berstatus usulan sampai ditinjau kelompok konsumen. Kesalahan umum di luar daftar per operasi memakai bentuk Error yang sama: 404 NOT_FOUND (rute tidak dikenal), 405 METHOD_NOT_ALLOWED, 413 PAYLOAD_TOO_LARGE, 500 INTERNAL_ERROR."
 servers:
   - url: /
     description: Lingkungan uji lokal Laravel (composer serve)
@@ -710,7 +710,7 @@ paths:
       tags:
         - Faktur dan pembayaran
       summary: "API-KE01-07: Rekap pajak per masa pajak"
-      description: "Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur NORMAL keluaran yang belum terganti, daftar seluruh faktur periode, dan pembayaran. Sumber: Backlog BL-05; Peta Aktor dan Proses E-1 (Langkah 7); jawaban mitra Q-03, Q-12, Q-13."
+      description: "Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur NORMAL dan REPLACEMENT keluaran yang belum terganti, daftar seluruh faktur periode, dan pembayaran. Aturan angka mengikuti Rancangan Antarmuka v0.2."
       parameters:
         - name: taxPeriod
           in: path
@@ -1691,7 +1691,7 @@ components:
         invoiceCount:
           type: integer
           minimum: 0
-          description: Jumlah faktur NORMAL keluaran yang belum terganti (Q-13).
+          description: Jumlah faktur NORMAL dan REPLACEMENT keluaran yang belum terganti (UI v0.2).
         totalDpp:
           $ref: "#/components/schemas/Money"
         totalPpn:
@@ -1754,7 +1754,7 @@ components:
           $ref: "#/components/schemas/MoneyNullable"
         isCounted:
           type: boolean
-          description: true hanya untuk faktur NORMAL keluaran yang belum terganti. CANCELLED, REPLACEMENT, dan faktur asal terganti tetap terlihat dengan false (Q-13 tertutup).
+          description: true untuk faktur NORMAL dan REPLACEMENT keluaran yang belum terganti. CANCELLED dan faktur asal terganti tetap terlihat dengan false (UI v0.2).
     RecapPayment:
       type: object
       required:
@@ -1841,7 +1841,7 @@ components:
           $ref: "#/components/schemas/RecapPaymentStatus"
     TaxSummary:
       type: object
-      description: Ringkasan pajak satu masa pajak (ENT-KE01-03 dan ENT-KE01-04); hanya NORMAL keluaran yang belum terganti dihitung; CANCELLED dan REPLACEMENT dikecualikan (Q-13 tertutup).
+      description: Ringkasan pajak satu masa pajak (ENT-KE01-03 dan ENT-KE01-04); NORMAL dan REPLACEMENT keluaran yang belum terganti dihitung; CANCELLED dan faktur asal terganti dikecualikan (UI v0.2).
       required:
         - taxPeriod
         - invoiceCount
@@ -1855,7 +1855,7 @@ components:
         invoiceCount:
           type: integer
           minimum: 0
-          description: Jumlah faktur NORMAL keluaran yang belum terganti (Q-13) (bukan jumlah invoice D-2).
+          description: Jumlah faktur NORMAL dan REPLACEMENT keluaran yang belum terganti (UI v0.2), bukan jumlah invoice D-2.
         totalDpp:
           $ref: "#/components/schemas/Money"
         totalPpn:

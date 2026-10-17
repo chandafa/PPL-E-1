@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Services\Invoices\HttpInvoiceProvider;
 use App\Services\Invoices\InvoiceProvider;
 use App\Services\Tax\FileStore;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -16,13 +17,13 @@ use Tests\TestCase;
 
 class OperationalIntegrityTest extends TestCase
 {
-    public function test_pengganti_tidak_dihitung_tetapi_tetap_mengunci_invoice_aktif(): void
+    public function test_pengganti_aktif_dihitung_dan_tetap_mengunci_invoice(): void
     {
         $original = $this->createFaktur();
         $replacement = $this->createFaktur('inv-demo-001', [], $original['taxInvoiceId']);
         $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()
-            ->assertJsonPath('data.recap.invoiceCount', 0)
-            ->assertJsonPath('data.recap.totalPpn', '0.00');
+            ->assertJsonPath('data.recap.invoiceCount', 1)
+            ->assertJsonPath('data.recap.totalPpn', '11000000.00');
 
         $this->post('/api/v1/tax-invoices/outgoing', [
             'invoiceId' => 'inv-demo-001', 'eFakturFile' => $this->pdfUpload($this->efakturPdf()),
@@ -79,7 +80,7 @@ class OperationalIntegrityTest extends TestCase
             Http::response([], 503),
             Http::failedConnection(),
         ] as $failure) {
-            Http::swap(new \Illuminate\Http\Client\Factory);
+            Http::swap(new Factory);
             Http::fake(['d2.test/*' => $failure]);
             $this->post('/api/v1/tax-invoices/outgoing', [
                 'invoiceId' => 'inv-demo-001', 'eFakturFile' => $this->pdfUpload($this->efakturPdf()),
@@ -115,10 +116,12 @@ class OperationalIntegrityTest extends TestCase
         try {
             file_put_contents($path, $this->get('/api/v1/tax-recaps/2026-12/export?format=xlsx', $this->auth())->getContent());
             $book = IOFactory::load($path);
-            $this->assertSame('9999999999999999.99', $book->getSheetByName('Faktur')->getCell('G2')->getValue());
-            $this->assertSame('1234567890123456.78', $book->getSheetByName('Pembayaran')->getCell('C2')->getValue());
-            $this->assertSame(DataType::TYPE_STRING, $book->getSheetByName('Pembayaran')->getCell('A2')->getDataType());
-            $this->assertSame('=1+1', $book->getSheetByName('Pembayaran')->getCell('A2')->getValue());
+            $this->assertSame(['Rekap Pajak'], $book->getSheetNames());
+            $sheet = $book->getActiveSheet();
+            $this->assertSame('9999999999999999.99', $sheet->getCell('G17')->getValue());
+            $this->assertSame('1234567890123456.78', $sheet->getCell('C21')->getValue());
+            $this->assertSame(DataType::TYPE_STRING, $sheet->getCell('A21')->getDataType());
+            $this->assertSame('=1+1', $sheet->getCell('A21')->getValue());
         } finally {
             unlink($path);
         }

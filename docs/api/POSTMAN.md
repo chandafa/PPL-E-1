@@ -21,6 +21,11 @@ Pada Postman:
 
 Pembuat berkas PDF contoh: `php artisan demo:samples`.
 
+Panduan ini dimulai dari database kosong dan membuat enam faktur melalui API. Paket
+seeder UI berisi 32 faktur dan tidak boleh digabungkan ke urutan request ini jika ingin
+angka yang sama. Untuk demo UI tanpa reset data, gunakan [Panduan Seeder Demo](../panduan/DEMO_SEEDER.md)
+dan PDF invoice 006/007 yang sengaja belum dicatat.
+
 ## 2. Alur login
 
 E-1 tidak memiliki endpoint login: login dimiliki **F-1**. Untuk lokal tersedia login tiruan (hanya aktif bila `E1_DEV_LOGIN=true`).

@@ -21,7 +21,7 @@
         <h1>API E-1: e-Faktur dan pajak proyek</h1>
         <p>11 operasi API untuk faktur, rekap, pembayaran, ekspor, dan ringkasan pajak.</p>
         <p>Gunakan <strong>Authorize</strong> untuk memasukkan token F-1 tanpa awalan Bearer, lalu pilih <strong>Try it out</strong>. Permintaan tulis mengubah data pada server yang dipilih.</p>
-        <p><a href="{{ route('docs.openapi', absolute: false) }}">Unduh kontrak OpenAPI</a>. Petunjuk login lokal tersedia di <code>docs/PENGUJIAN_API.md</code>.</p>
+        <p><a href="{{ route('docs.openapi', absolute: false) }}">Unduh kontrak OpenAPI</a>. Petunjuk login lokal tersedia di <code>docs/api/POSTMAN.md</code>.</p>
     </header>
     <main id="swagger-ui" aria-label="Dokumentasi dan pengujian API">
         <p class="docs-status" role="status">Memuat Swagger UI...</p>

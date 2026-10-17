@@ -16,8 +16,8 @@ use Illuminate\Support\Str;
  * Rekap pajak per masa pajak (FTR-KE01-04): jumlah faktur dihitung, total DPP/PPN/
  * PPnBM, jumlah setor, selisih, dan status pembayaran.
  *
- * Aturan Q-13 Pertemuan 3 (tertutup): hanya NORMAL keluaran yang belum diganti
- * dijumlahkan. CANCELLED, REPLACEMENT, dan asal terganti tetap tampil, isCounted=false.
+ * Rancangan UI v0.2: NORMAL dan REPLACEMENT keluaran yang belum diganti
+ * dijumlahkan. CANCELLED dan asal terganti tetap tampil, isCounted=false.
  * Status pembayaran per masa pajak: tidak ada catatan = NOT_RECORDED; ada catatan
  * INCOMPLETE = INCOMPLETE; semua catatan CONFIRMED = CONFIRMED.
  */
@@ -121,7 +121,7 @@ class RecapService
             ->get()
             ->map(fn (FakturPajak $f) => [
                 'faktur' => $f,
-                'isCounted' => $f->status === FakturPajak::STATUS_NORMAL
+                'isCounted' => in_array($f->status, [FakturPajak::STATUS_NORMAL, FakturPajak::STATUS_REPLACEMENT], true)
                     && $f->type === FakturPajak::TYPE_OUTGOING
                     && $f->replacedBy === null,
             ]);

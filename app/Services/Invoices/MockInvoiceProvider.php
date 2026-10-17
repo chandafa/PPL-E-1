@@ -16,6 +16,12 @@ class MockInvoiceProvider implements InvoiceProvider
 
     public function __construct(private readonly string $file) {}
 
+    /** @return list<array<string, mixed>> */
+    public function catalog(): array
+    {
+        return array_values($this->all());
+    }
+
     public function find(string $invoiceId): ?InvoiceData
     {
         $row = $this->all()[$invoiceId] ?? null;

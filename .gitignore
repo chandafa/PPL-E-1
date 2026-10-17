@@ -18,6 +18,8 @@
 /public/vendor/swagger-ui
 /public/fonts-manifest.dev.json
 /public/hot
+/test-results
+/playwright-report
 /public/storage
 /storage/*.key
 /storage/pail

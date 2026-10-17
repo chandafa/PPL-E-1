@@ -1,8 +1,10 @@
 # Respons berhasil dan gagal setiap API
 
-[Kembali ke README](../README.md) · [Cara menguji](PENGUJIAN_API.md) · [OpenAPI](../openapi.yaml)
+[Indeks dokumentasi](../README.md) · [README proyek](../../README.md) · [Cara menguji](POSTMAN.md) · [OpenAPI](../../openapi.yaml)
 
 Dihasilkan dari OpenAPI **0.2.0** dengan `php scripts/generate-api-reference.php`. Sumber field, tipe, enum, dan contoh tersedia pada kontrak yang sama di Swagger `/docs`.
+
+Keputusan demo lokal dan penyelarasan terhadap PDF spesifikasi/kontrak dijelaskan pada [Adendum E-1 v0.3](../acuan/ADENDUM_DEMO_E1_v0.3.md) ([PDF](../acuan/ADENDUM_DEMO_E1_v0.3.pdf)). NTPN dan bukti pembayaran boleh menyusul saat pencatatan Draft (API-KE01-08), tetapi wajib saat konfirmasi (API-KE01-11).
 
 ## Ketentuan umum
 
@@ -13,7 +15,7 @@ Dihasilkan dari OpenAPI **0.2.0** dengan `php scripts/generate-api-reference.php
 - ID UUID pada contoh adalah fiktif; gunakan ID dari hasil penyimpanan saat menguji.
 - Token F-1 wajib: tanpa token/tidak sah = 401, peran ditolak = 403.
 - `type` dan `vendorName` merupakan field tambahan yang sudah didokumentasikan. API pembuatan hanya menghasilkan `OUTGOING`. URI `/files/tax/...` adalah referensi penyimpanan privat, belum endpoint unduh publik.
-- Q-13 tertutup: hanya NORMAL keluaran belum terganti dihitung. CANCELLED, REPLACEMENT, dan asal terganti tetap terlihat dengan `isCounted:false`.
+- Rancangan UI v0.2: NORMAL dan REPLACEMENT keluaran aktif dihitung. CANCELLED dan asal terganti tetap terlihat dengan `isCounted:false`.
 - `status` pembayaran adalah satu catatan; `paymentStatus` adalah seluruh masa pajak. Satu Draft saja membuat rekap INCOMPLETE. Filter proyek tidak mengubah lingkup status pembayaran.
 - `paymentDifference` = jumlah setor seluruh catatan periode, termasuk Draft, dikurangi total PPN. Kompensasi otomatis belum dibuat (Q-24).
 
@@ -792,7 +794,7 @@ ID tidak ditemukan: taxInvoiceId tidak dikenal
 
 `GET /api/v1/tax-recaps/{taxPeriod}`
 
-Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur NORMAL keluaran yang belum terganti, daftar seluruh faktur periode, dan pembayaran. Sumber: Backlog BL-05; Peta Aktor dan Proses E-1 (Langkah 7); jawaban mitra Q-03, Q-12, Q-13.
+Fitur FTR-KE01-04; dipakai UI-KE01-04 (internal). Rekap per masa pajak bulanan ditampilkan: ringkasan faktur NORMAL dan REPLACEMENT keluaran yang belum terganti, daftar seluruh faktur periode, dan pembayaran. Aturan angka mengikuti Rancangan Antarmuka v0.2.
 
 ### HTTP 200
 
@@ -989,7 +991,7 @@ Badan respons berisi berkas, bukan JSON. `Content-Disposition: attachment; filen
 - `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
 - `Content-Type: application/pdf`
 
-Excel memuat Ringkasan, Faktur, Pembayaran. Nominal dan ID ditulis sebagai teks untuk menjaga seluruh digit; PDF menampilkan rupiah dengan format Indonesia.
+Excel memuat satu lembar Rekap Pajak dengan Ringkasan, Daftar Faktur, dan Pembayaran berurutan seperti PDF. Nominal dan ID ditulis sebagai teks untuk menjaga seluruh digit; PDF menampilkan rupiah dengan format Indonesia.
 
 ### HTTP 400
 

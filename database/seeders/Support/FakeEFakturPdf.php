@@ -95,6 +95,20 @@ final class FakeEFakturPdf
         return $dompdf->output();
     }
 
+    /** Lampiran pembayaran fiktif dengan label demo yang terlihat di dokumen. */
+    public static function attachment(string $title, array $fields = []): string
+    {
+        $html = '<html><body><h1>'.htmlspecialchars($title).'</h1><p>DOKUMEN DEMO FIKTIF. Bukan bukti transaksi nyata.</p><dl>';
+        foreach ($fields as $key => $value) {
+            $html .= '<dt>'.htmlspecialchars((string) $key).'</dt><dd>'.htmlspecialchars((string) $value).'</dd>';
+        }
+        $dompdf = new Dompdf;
+        $dompdf->loadHtml($html.'</dl></body></html>');
+        $dompdf->render();
+
+        return $dompdf->output();
+    }
+
     /** "100000000.00" -> "100.000.000,00" */
     public static function id(string $value): string
     {

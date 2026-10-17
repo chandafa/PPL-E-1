@@ -4,12 +4,12 @@
   "data": {
     "recap": {
       "taxPeriod": "2026-11",
-      "invoiceCount": 1,
-      "totalDpp": "100000000.00",
-      "totalPpn": "11000000.00",
+      "invoiceCount": 2,
+      "totalDpp": "300000000.00",
+      "totalPpn": "33000000.00",
       "totalPpnbm": "0.00",
       "amountPaid": "11000000.00",
-      "paymentDifference": "0.00",
+      "paymentDifference": "-22000000.00",
       "paymentStatus": "CONFIRMED",
       "computedAt": "2026-12-10T02:00:05Z"
     },
@@ -23,6 +23,18 @@
         "status": "NORMAL",
         "dpp": "100000000.00",
         "ppn": "11000000.00",
+        "ppnbm": "0.00",
+        "isCounted": true
+      },
+      {
+        "taxInvoiceId": "01a1950c-b380-73a9-91c4-7e20d5b86f15",
+        "taxInvoiceNumber": "011.000-26.12345679",
+        "invoiceId": "inv-demo-002",
+        "projectId": "prj-demo-002",
+        "clientId": null,
+        "status": "REPLACEMENT",
+        "dpp": "200000000.00",
+        "ppn": "22000000.00",
         "ppnbm": "0.00",
         "isCounted": true
       }

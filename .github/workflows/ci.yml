@@ -23,6 +23,7 @@ jobs:
           sudo systemctl start postgresql.service
           sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
           sudo -u postgres createdb e1_pajak_test
+          sudo -u postgres createdb e1_pajak_ui_test
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -35,6 +36,18 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Siapkan aset UI
+        run: |
+          npm ci
+          npm run build
+          npm run test:unit
+
       - name: Siapkan environment
         run: |
           cp .env.example .env
@@ -42,3 +55,17 @@ jobs:
 
       - name: Jalankan pengujian (termasuk uji kontrak OpenAPI)
         run: php artisan test
+
+      - name: Siapkan browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Uji alur browser dan aksesibilitas
+        run: npm run test:ui
+
+      - name: Simpan hasil browser
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-browser-results
+          path: test-results/
+          if-no-files-found: ignore

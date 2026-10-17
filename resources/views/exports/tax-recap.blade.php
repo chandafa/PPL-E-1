@@ -6,7 +6,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Rekap Pajak {{ $report->taxPeriod }}</title>
+    <title>Rekap Pajak {{ \App\Support\DateDisplay::period($report->taxPeriod) }}</title>
     <style>
         body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #111; }
         h1 { font-size: 16px; margin: 0 0 4px; }
@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    <h1>Rekap Pajak Masa {{ $report->taxPeriod }}</h1>
+    <h1>Rekap Pajak Masa {{ \App\Support\DateDisplay::period($report->taxPeriod) }}</h1>
     <div class="meta">PT Anaheim Nimbus Universal &middot; Modul E-1 Pencatatan e-Faktur dan pajak proyek</div>
 
     <h2>Ringkasan</h2>
@@ -43,7 +43,7 @@
     <table>
         <thead>
             <tr>
-                <th>NSFP</th><th>Tanggal</th><th>Invoice</th><th>Proyek</th><th>Status</th>
+                <th>NSFP</th><th>Tanggal</th><th>Invoice</th><th>Proyek</th><th>Klien</th><th>Status</th>
                 <th class="r">DPP</th><th class="r">PPN</th><th class="r">PPnBM</th><th>Dihitung</th>
             </tr>
         </thead>
@@ -54,6 +54,7 @@
                     <td>{{ $i['taxInvoiceDate'] }}</td>
                     <td>{{ $i['invoiceId'] }}</td>
                     <td>{{ $i['projectId'] }}</td>
+                    <td>{{ $i['clientId'] }}</td>
                     <td>{{ $i['status'] }}</td>
                     <td class="r">{{ $rp($i['dpp']) }}</td>
                     <td class="r">{{ $rp($i['ppn']) }}</td>
@@ -61,7 +62,7 @@
                     <td>{{ $i['isCounted'] }}</td>
                 </tr>
             @empty
-                <tr><td colspan="9">Belum ada faktur pada masa pajak ini.</td></tr>
+                <tr><td colspan="10">Belum ada faktur pada masa pajak ini.</td></tr>
             @endforelse
         </tbody>
     </table>

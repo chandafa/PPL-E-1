@@ -55,6 +55,46 @@
 17. [👥 Tim](#tim)
 
 <a id="tentang-proyek"></a>
+## Antarmuka web Blade
+
+Seluruh panduan dan dokumen acuan tersedia di [Indeks dokumentasi](docs/README.md).
+Keputusan demo lokal dan penyelarasan spesifikasi/kontrak PDF dicatat dalam
+[Adendum E-1 v0.3](docs/acuan/ADENDUM_DEMO_E1_v0.3.md)
+([versi PDF](docs/acuan/ADENDUM_DEMO_E1_v0.3.pdf)).
+
+Antarmuka E-1 tersedia di `/login` dan menggunakan Blade, Tailwind CSS, Solar Icons,
+serta komponen Blade dengan desain shadcn/ui. Data dibaca dan disimpan melalui 11 API yang tersedia.
+
+```bash
+npm ci
+npm run build
+composer serve
+```
+
+Buka `http://127.0.0.1:8080/login`. Gunakan token F-1, atau akun demo lokal bila
+`E1_DEV_LOGIN=true`. `npm run dev` dapat dipakai selama pengembangan sebagai pengganti build.
+
+Aturan rekap mengikuti Rancangan Antarmuka v0.2: faktur **Normal dan Pengganti aktif**
+dihitung; faktur Dibatalkan dan faktur asal terganti tetap terlihat tetapi tidak dijumlahkan.
+Setelah memperbarui aplikasi yang sudah memiliki data, jalankan:
+
+```bash
+php artisan e1:recaps:rebuild
+```
+
+Route, batasan integrasi, pengujian, dan keputusan desain tersedia di [Panduan UI Blade](docs/panduan/UI_BLADE.md).
+
+Untuk mengisi demo UI, jalankan `php artisan db:seed` lalu `php artisan demo:samples`.
+Seeder menambahkan data yang belum ada tanpa menghapus edit pengguna: 32 faktur,
+5 pembayaran, dan 5 masa pajak pada database kosong. Invoice `inv-demo-006` dan
+`inv-demo-007` disisakan untuk pencatatan baru. Lihat [Panduan Seeder Demo](docs/panduan/DEMO_SEEDER.md).
+
+Untuk menguji flow dari invoice yang belum pernah dipakai, jalankan
+`php artisan demo:flow`. Perintah ini menambahkan empat invoice mock D-2 baru,
+tanpa mencatat faktur E-1, serta membuat PDF, panduan, dan checklist dalam
+`docs/testing-invoice-flow/<batch>/`. Dropdown pencatatan hanya menampilkan invoice
+tanpa faktur keluaran aktif. Lihat [Paket Pengujian Invoice](docs/testing-invoice-flow/README.md).
+
 ## 🎯 Tentang proyek
 
 Modul **E-1** mencatat **Faktur Pajak Keluaran (e-Faktur)** dari berkas PDF yang dibuat di luar sistem, menautkannya ke invoice
@@ -125,7 +165,22 @@ Pustaka utama: `firebase/php-jwt` (token F-1), `smalot/pdfparser` (baca PDF), `m
    php artisan key:generate
    ```
 
-3. **Buat role dan database PostgreSQL** (sekali saja; akan meminta password superuser `postgres`)
+3. **Jalankan PostgreSQL dengan Docker Compose**
+
+   Compose membaca `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, dan `DB_PORT` dari
+   `.env`. Gunakan `DB_HOST=127.0.0.1` dan `DB_PORT=15439` untuk Laravel di host.
+
+   ```bash
+   docker compose up -d --wait postgres
+   ```
+
+   Data disimpan dalam volume `postgres_data` dan tetap ada setelah container dihentikan.
+   Port hanya tersedia di localhost. Jika akses socket Docker ditolak, jalankan
+   perintah Docker dengan `sudo`. Database dan akun dibuat pada inisialisasi volume
+   pertama; perubahan kredensial di `.env` tidak mengubah akun pada volume yang sudah ada.
+
+   Untuk memakai PostgreSQL yang sudah terpasang, sesuaikan `DB_PORT` dan buat role
+   serta database secara manual (akan meminta password superuser `postgres`):
 
    ```bash
    psql -U postgres -c "CREATE ROLE e1_app LOGIN PASSWORD 'e1_dev_pass' CREATEDB;"
@@ -140,9 +195,12 @@ Pustaka utama: `firebase/php-jwt` (token F-1), `smalot/pdfparser` (baca PDF), `m
 4. **Buat tabel**
 
    ```bash
-   php artisan migrate:fresh            # database kosong (disarankan untuk mengikuti tutorial)
-   php artisan migrate:fresh --seed     # atau, dengan data demo siap pakai
+   php artisan migrate                 # membuat tabel tanpa menghapus data
+   php artisan db:seed                 # opsional: menambahkan paket demo UI
    ```
+
+   Tutorial Postman menggunakan database kosong tersendiri. `migrate:fresh` menghapus
+   seluruh data dan tidak diperlukan untuk melengkapi demo UI.
 
 5. **Jalankan server**
 
@@ -469,7 +527,7 @@ Setelah semua alur sukses, coba contoh berikut. Respons gagal tetap memakai `{co
 
 Koleksi [`E1-API.postman_collection.json`](docs/postman/E1-API.postman_collection.json) berisi login, seluruh 11 operasi API, variasi data, dan kasus gagal. Jalankan folder **0. Login**, lalu folder **1** sampai **7** secara berurutan pada **database demo kosong**. Koleksi ini membuat data sendiri dan menyimpan ID dari respons ke variabel Postman. Jika ingin mengulang alur dari awal, kosongkan **hanya database demo** dengan `php artisan migrate:fresh`.
 
-Jika Anda memakai `php artisan migrate --seed`, data A–E dan pembayaran Draft November sudah tersedia untuk membaca daftar, detail, riwayat, rekap, ekspor, ringkasan, serta melengkapi pembayaran. Alur ekstraksi dan simpan faktur baru dalam panduan ini memerlukan database demo kosong karena kelima invoice mock sudah terpakai oleh seeder. Rincian koleksi ada di [`docs/POSTMAN.md`](docs/POSTMAN.md).
+Jika Anda memakai `php artisan migrate --seed`, data A–E dan pembayaran Draft November sudah tersedia untuk membaca daftar, detail, riwayat, rekap, ekspor, ringkasan, serta melengkapi pembayaran. Alur ekstraksi dan simpan faktur baru dalam panduan ini memerlukan database demo kosong karena kelima invoice mock sudah terpakai oleh seeder. Rincian koleksi ada di [`docs/api/POSTMAN.md`](docs/api/POSTMAN.md).
 
 <a id="kode-kesalahan"></a>
 ## ❌ Kode kesalahan
@@ -558,9 +616,14 @@ e1-api/
 │   ├── seeders/                   DemoSeeder dan generator PDF fiktif
 │   └── data/d2-invoices.json      data invoice D-2 tiruan
 ├── docs/
+│   ├── README.md                  indeks dokumentasi dan panduan membaca
+│   ├── acuan/                     PDF spesifikasi, rancangan, kontrak, dan adendum
+│   ├── api/                       respons API dan panduan Postman
+│   ├── panduan/                   antarmuka web dan data demo
 │   ├── assets/                    thumbnail dan diagram alur
 │   ├── postman/                   koleksi, environment, dan PDF contoh
-│   └── POSTMAN.md                 panduan Postman lengkap
+│   ├── testing-invoice-flow/      paket dan bukti pengujian invoice
+│   └── arsip/                     catatan verifikasi dan rencana terdahulu
 ├── examples/                      contoh respons per API
 ├── openapi.yaml                   kontrak API (sumber kebenaran)
 └── tests/                         uji fitur, unit, dan uji kontrak

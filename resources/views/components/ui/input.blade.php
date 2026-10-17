@@ -1,0 +1,2 @@
+@props(['label', 'name', 'type' => 'text', 'help' => null])
+<div><label class="field-label" for="{{ $attributes->get('id', $name) }}">{{ $label }}</label><input type="{{ $type }}" name="{{ $name }}" id="{{ $attributes->get('id', $name) }}" @if($help) aria-describedby="{{ $name }}-help" @endif {{ $attributes->except('id')->class(['field']) }}>@if($help)<p class="field-help" id="{{ $name }}-help">{{ $help }}</p>@endif<p class="mt-2 text-xs text-danger" data-error-for="{{ $name }}" hidden></p></div>

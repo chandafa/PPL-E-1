@@ -80,7 +80,7 @@ class TaxInvoiceCreateTest extends TestCase
             ->assertJsonPath('data.replacedByTaxInvoiceId', $replacement['taxInvoiceId']);
 
         $this->assertDatabaseHas('rekap_pajak_bulanan', [
-            'tax_period' => '2026-11', 'invoice_count' => 0, 'total_dpp' => '0.00', 'total_ppn' => '0.00',
+            'tax_period' => '2026-11', 'invoice_count' => 1, 'total_dpp' => '90000000.00', 'total_ppn' => '9900000.00',
         ]);
 
         // riwayat faktur asal mencatat penggantian

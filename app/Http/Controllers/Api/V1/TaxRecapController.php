@@ -23,6 +23,14 @@ class TaxRecapController extends Controller
         private readonly RecapExporter $exporter,
     ) {}
 
+    public function periods(): JsonResponse
+    {
+        return ApiResponse::ok([
+            'periods' => FakturPajak::query()->select('tax_period')->distinct()
+                ->orderByDesc('tax_period')->pluck('tax_period')->all(),
+        ], 'Masa pajak tersedia');
+    }
+
     /** API-KE01-07 rekap masa pajak (periode kosong = rekap nol, bukan 404). */
     public function show(string $taxPeriod): JsonResponse
     {

@@ -1,0 +1,23 @@
+name: e1-pajak
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-e1_pajak}
+      POSTGRES_USER: ${DB_USERNAME:-e1_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Isi DB_PASSWORD di .env}
+    ports:
+      - "127.0.0.1:${DB_PORT:-15439}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
