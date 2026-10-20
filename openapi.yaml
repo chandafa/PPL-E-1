@@ -1563,6 +1563,15 @@ components:
         - replacesTaxInvoiceId
         - replacedByTaxInvoiceId
       properties:
+        invoiceReference:
+          description: Referensi D-2 terkini (bukan snapshot historis atau dasar Masa Pajak); null jika tidak tersedia.
+          type: [object, "null"]
+          properties:
+            invoiceNumber:
+              type: [string, "null"]
+            invoiceDate:
+              type: [string, "null"]
+              format: date
         taxInvoice:
           $ref: "#/components/schemas/TaxInvoice"
         items:
@@ -1584,7 +1593,7 @@ components:
     TaxInvoiceChanges:
       type: object
       minProperties: 1
-      description: "Perubahan yang diizinkan: koreksi field hasil ekstraksi atau status CANCELLED untuk pembatalan. invoiceId dan nilai invoice D-2 tidak dapat diubah."
+      description: "Perubahan yang diizinkan: koreksi field hasil ekstraksi atau status CANCELLED untuk pembatalan. invoiceId dan nilai invoice D-2 tidak dapat diubah. Koreksi taxInvoiceDate otomatis menghitung ulang taxPeriod. Jika taxPeriod dikirim, nilainya wajib sesuai tahun-bulan tanggal e-Faktur efektif; perbedaan ditolak 400 INVALID_CHANGE."
       properties:
         taxInvoiceNumber:
           type: string

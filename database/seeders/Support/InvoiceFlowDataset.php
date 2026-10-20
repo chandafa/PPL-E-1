@@ -7,9 +7,17 @@ final class InvoiceFlowDataset
     public static function make(string $batch, int $serial): array
     {
         $references = $samples = [];
-        foreach ([1 => '10000000.00', 2 => '20000000.00', 3 => '10000000.00', 4 => '5000000.00'] as $number => $dpp) {
+        $scenarios = [
+            1 => ['2026-10-15', '2026-10-15', '15 Oktober 2026', 'same_month'],
+            2 => ['2026-11-16', '2026-10-16', '16 Oktober 2026', 'next_month'],
+            3 => ['2026-12-17', '2026-10-17', '17 Oktober 2026', 'two_months_later'],
+            4 => ['2026-10-18', '2026-10-18', '18 Oktober 2026', 'reserve'],
+            5 => ['2026-12-19', '2026-11-19', '19 November 2026', 'next_month'],
+            6 => ['2027-01-20', '2026-12-20', '20 Desember 2026', 'next_year'],
+        ];
+        foreach ([1 => '10000000.00', 2 => '20000000.00', 3 => '10000000.00', 4 => '5000000.00', 5 => '7000000.00', 6 => '8000000.00'] as $number => $dpp) {
             $id = sprintf('inv-flow-%s-%03d', $batch, $number);
-            $date = sprintf('2026-09-%02d', 14 + $number);
+            [$date, $taxDate, $pdfDate, $scenario] = $scenarios[$number];
             $ppn = bcmul($dpp, '0.11', 2);
             $reference = [
                 'invoiceId' => $id, 'invoiceNumber' => sprintf('INV-FLOW-%s-%03d', strtoupper($batch), $number),
@@ -22,7 +30,7 @@ final class InvoiceFlowDataset
             ];
             $references[] = $reference;
             $pdf = [
-                'nsfp' => sprintf('010.000-26.%08d', $serial + $number), 'date' => (14 + $number).' September 2026',
+                'nsfp' => sprintf('010.000-26.%08d', $serial + $number), 'date' => $pdfDate,
                 'seller' => 'PT Anaheim Nimbus Universal (DUMMY - BUKAN DOKUMEN PAJAK RESMI)',
                 'buyer' => $reference['clientName'].' (DUMMY)',
                 'items' => [['code' => '620100', 'name' => 'Jasa uji '.$reference['invoiceNumber'], 'amount' => $dpp]],
@@ -36,29 +44,41 @@ final class InvoiceFlowDataset
                 $pdf += ['discount' => '100000.00', 'advance' => '500000.00'];
                 $pdf['ppnbm'] = '100000.00';
             }
-            $samples[sprintf('%02d-faktur-%03d.pdf', $number, $number)] = ['invoiceId' => $id, 'flow' => $number === 4 ? 'reserve' : 'create', 'pdf' => $pdf];
+            $fileNumber = $number <= 4 ? $number : $number + 6;
+            $samples[sprintf('%02d-faktur-%03d.pdf', $fileNumber, $number)] = [
+                'invoiceId' => $id, 'invoiceDate' => $date, 'taxInvoiceDate' => $taxDate,
+                'taxPeriod' => substr($taxDate, 0, 7), 'scenario' => $scenario,
+                'flow' => $number === 4 ? 'reserve' : 'create', 'pdf' => $pdf,
+            ];
         }
         $replacement = $samples['01-faktur-001.pdf'];
         $replacement['flow'] = 'replace';
         $replacement['pdf'] = array_replace($replacement['pdf'], [
-            'nsfp' => sprintf('011.000-26.%08d', $serial + 5), 'date' => '20 September 2026',
+            'nsfp' => sprintf('011.000-26.%08d', $serial + 7), 'date' => '20 Oktober 2026',
             'dpp' => '9000000.00', 'ppn' => '990000.00',
             'items' => [['code' => '620100', 'name' => 'Jasa dummy pengganti invoice 001', 'amount' => '9000000.00']],
         ]);
+        $replacement['taxInvoiceDate'] = '2026-10-20';
         $samples['05-pengganti-001.pdf'] = $replacement;
         $reissued = $samples['02-faktur-002.pdf'];
         $reissued['flow'] = 'reissue_after_cancel';
         $reissued['pdf'] = array_replace($reissued['pdf'], [
-            'nsfp' => sprintf('010.000-26.%08d', $serial + 6), 'date' => '21 September 2026',
+            'nsfp' => sprintf('010.000-26.%08d', $serial + 8), 'date' => '21 Oktober 2026',
             'dpp' => '18000000.00', 'ppn' => '1980000.00',
             'items' => [['code' => '620100', 'name' => 'Jasa dummy pencatatan ulang invoice 002', 'amount' => '18000000.00']],
         ]);
+        $reissued['taxInvoiceDate'] = '2026-10-21';
         $samples['06-catat-ulang-002.pdf'] = $reissued;
 
         return ['batch' => $batch, 'references' => $references, 'samples' => $samples,
-            'taxPeriod' => '2026-09', 'projectId' => 'prj-flow-'.$batch,
+            'taxPeriod' => '2026-10', 'projectId' => 'prj-flow-'.$batch,
             'billingId' => 'BILL-FLOW-'.$batch, 'ntpn' => 'NTPN-FLOW-'.$batch,
-            'expected' => ['invoiceCount' => 3, 'totalDpp' => '37000000.00', 'totalPpn' => '4070000.00', 'totalPpnbm' => '100000.00', 'amountPaid' => '4070000.00'],
+            'expected' => [
+                '2026-10' => ['invoiceCount' => 3, 'totalDpp' => '37000000.00', 'totalPpn' => '4070000.00', 'totalPpnbm' => '100000.00', 'amountPaid' => '4070000.00'],
+                '2026-11' => ['invoiceCount' => 1, 'totalDpp' => '7000000.00', 'totalPpn' => '770000.00', 'totalPpnbm' => '0.00', 'amountPaid' => '0.00'],
+                '2026-12' => ['invoiceCount' => 1, 'totalDpp' => '8000000.00', 'totalPpn' => '880000.00', 'totalPpnbm' => '0.00', 'amountPaid' => '0.00'],
+                '2027-01' => ['invoiceCount' => 0, 'totalDpp' => '0.00', 'totalPpn' => '0.00', 'totalPpnbm' => '0.00', 'amountPaid' => '0.00'],
+            ],
         ];
     }
 }

@@ -89,10 +89,15 @@ Seeder menambahkan data yang belum ada tanpa menghapus edit pengguna: 32 faktur,
 `inv-demo-007` disisakan untuk pencatatan baru. Lihat [Panduan Seeder Demo](docs/panduan/DEMO_SEEDER.md).
 
 Untuk menguji flow dari invoice yang belum pernah dipakai, jalankan
-`php artisan demo:flow`. Perintah ini menambahkan empat invoice mock D-2 baru,
+`php artisan demo:flow`. Perintah ini menambahkan enam invoice mock D-2 baru dengan variasi tanggal mulai Oktober dan lintas tahun,
 tanpa mencatat faktur E-1, serta membuat PDF, panduan, dan checklist dalam
 `docs/testing-invoice-flow/<batch>/`. Dropdown pencatatan hanya menampilkan invoice
 tanpa faktur keluaran aktif. Lihat [Paket Pengujian Invoice](docs/testing-invoice-flow/README.md).
+
+Masa Pajak demo mengikuti tanggal e-Faktur, bukan tanggal invoice D-2. Koreksi
+tanggal otomatis menyelaraskan periode; pembayaran lama tidak dipindahkan.
+Periksa data lama tanpa mengubahnya dengan `php artisan tax:audit-periods`.
+Lihat [aturan dan batas validasi demo](docs/acuan/ADENDUM_DEMO_E1_v0.3.md).
 
 ## 🎯 Tentang proyek
 

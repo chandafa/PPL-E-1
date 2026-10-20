@@ -60,10 +60,47 @@ class TaxInvoiceUpdateTest extends TestCase
     {
         $faktur = $this->createFaktur('inv-demo-001');
 
-        $this->koreksi($faktur['taxInvoiceId'], ['changes' => ['taxPeriod' => '2026-12']])->assertOk();
+        $this->koreksi($faktur['taxInvoiceId'], ['changes' => ['taxInvoiceDate' => '2026-12-01']])->assertOk()
+            ->assertJsonPath('data.taxInvoice.taxPeriod', '2026-12');
 
         $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'invoice_count' => 0, 'total_ppn' => '0.00']);
         $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-12', 'invoice_count' => 1, 'total_ppn' => '11000000.00']);
+    }
+
+    public function test_masa_pajak_tidak_boleh_berbeda_dari_tanggal_faktur(): void
+    {
+        $faktur = $this->createFaktur();
+        foreach ([['taxPeriod' => '2026-12'], ['taxInvoiceDate' => '2026-12-01', 'taxPeriod' => '2026-11']] as $changes) {
+            $this->koreksi($faktur['taxInvoiceId'], ['changes' => $changes])
+                ->assertBadRequest()->assertJsonPath('errorCode', 'INVALID_CHANGE');
+        }
+        $this->assertDatabaseHas('faktur_pajak', ['tax_invoice_id' => $faktur['taxInvoiceId'], 'tax_period' => '2026-11']);
+        $this->assertSame(1, RiwayatPerubahanFaktur::where('tax_invoice_id', $faktur['taxInvoiceId'])->count());
+    }
+
+    public function test_koreksi_lintas_tahun_mencatat_periode_otomatis_dan_menjaga_pembayaran_lama(): void
+    {
+        $faktur = $this->createFaktur();
+        $this->post('/api/v1/tax-payments', [
+            'taxPeriod' => '2026-11', 'taxYear' => 2026, 'amountPaid' => '11000000.00',
+            'billingId' => 'BILL-KOREKSI', 'eBillingFile' => $this->pdfUpload($this->simplePdf()),
+        ], $this->auth())->assertOk();
+        $response = $this->koreksi($faktur['taxInvoiceId'], ['changes' => ['taxInvoiceDate' => '2027-01-02']])->assertOk()
+            ->assertJsonPath('data.taxInvoice.taxPeriod', '2027-01');
+        $audit = RiwayatPerubahanFaktur::findOrFail($response->json('data.auditId'));
+        $this->assertSame('2026-11', $audit->before_snapshot['taxPeriod']);
+        $this->assertSame('2027-01', $audit->after_snapshot['taxPeriod']);
+        $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'invoice_count' => 0, 'total_ppn' => '0.00', 'amount_paid' => '11000000.00']);
+        $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2027-01', 'invoice_count' => 1, 'total_ppn' => '11000000.00', 'amount_paid' => '0.00']);
+    }
+
+    public function test_audit_periode_lama_hanya_melaporkan_tanpa_mengubah_data(): void
+    {
+        $faktur = $this->createFaktur();
+        $this->artisan('tax:audit-periods')->assertSuccessful();
+        DB::table('faktur_pajak')->where('tax_invoice_id', $faktur['taxInvoiceId'])->update(['tax_period' => '2026-12']);
+        $this->artisan('tax:audit-periods')->expectsOutputToContain('Ditemukan 1 faktur')->assertFailed();
+        $this->assertDatabaseHas('faktur_pajak', ['tax_invoice_id' => $faktur['taxInvoiceId'], 'tax_period' => '2026-12']);
     }
 
     public function test_koreksi_item_mengganti_seluruh_daftar_dan_tercatat(): void
@@ -124,7 +161,7 @@ class TaxInvoiceUpdateTest extends TestCase
 
         $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'invoice_count' => 1, 'total_ppn' => '11000000.00']);
 
-        $replacementHistory = RiwayatPerubahanFaktur::query()->where('tax_invoice_id', $replacement['taxInvoiceId'])->orderBy('changed_at')->get();
+        $replacementHistory = RiwayatPerubahanFaktur::query()->where('tax_invoice_id', $replacement['taxInvoiceId'])->where('action', 'STATUS_CHANGE')->get();
         $this->assertSame($original['taxInvoiceId'], $replacementHistory->last()->before_snapshot['replacesTaxInvoiceId']);
         $this->assertNull($replacementHistory->last()->after_snapshot['replacesTaxInvoiceId']);
     }

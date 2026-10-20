@@ -231,6 +231,7 @@ async function createPage() {
         ]) : replacesId && invoice.value
             ? `<p class="text-sm text-muted">Invoice ${e(invoice.value)} mengikuti faktur asal dan tidak dapat diganti.</p>`
             : '<p class="text-sm text-muted">Pilih invoice untuk melihat proyek, klien, dan nilai tagihan.</p>';
+        context.insertAdjacentHTML('beforeend', '<p class="field-help">Masa Pajak mengikuti tanggal e-Faktur hasil pemeriksaan PDF, bukan tanggal invoice. Perbedaan bulan perlu ditinjau, tetapi tidak otomatis memindahkan Masa Pajak atau membuktikan kepatuhan pajak.</p>');
     }
     async function loadInvoiceCatalog() {
         const context = $('#invoice-context'), retry = $('#retry-invoices');
@@ -333,6 +334,12 @@ function correctionItem(item = {}) {
 
 async function detailPage() {
     let snapshot;
+    const correctionForm = $('#correction-form');
+    const correctionDate = $('[name="taxInvoiceDate"]', correctionForm);
+    const correctionPeriod = $('[name="taxPeriod"]', correctionForm);
+    correctionPeriod.readOnly = true;
+    correctionDate.oninput = () => { correctionPeriod.value = correctionDate.value.slice(0, 7); };
+    correctionPeriod.insertAdjacentHTML('afterend', '<p class="field-help">Otomatis mengikuti tanggal e-Faktur; bukan tanggal invoice D-2.</p>');
     const endpoint = `/tax-invoices/${encodeURIComponent(invoiceId)}`;
     async function loadDetail() {
         snapshot = await api(endpoint);
@@ -343,6 +350,20 @@ async function detailPage() {
         $('#replace-invoice').disabled = !!snapshot.replacedByTaxInvoiceId;
         $('#detail-data').innerHTML = `<div class="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]"><section class="panel"><div class="panel-heading"><h2 class="panel-title">Identitas faktur</h2></div><div class="panel-body">${details([['Nomor faktur / NSFP', e(f.taxInvoiceNumber)], ['Tanggal e-Faktur', e(dateLabel(f.taxInvoiceDate))], ['Masa pajak', link(`/tax-recaps/${f.taxPeriod}`, taxPeriodLabel(f.taxPeriod))], ['Invoice D-2', `<span class="id-text">${e(f.invoiceId)}</span>`], ['Proyek', `<span class="id-text">${e(f.projectId) || 'Belum tersedia'}</span>`], ['Klien', `<span class="id-text">${e(f.clientId) || 'Belum tersedia'}</span>`], ['Dicatat oleh', e(f.createdByAkunId)], ['Waktu pencatatan', e(dateLabel(f.createdAt))]])}<div class="mt-5 space-y-3 border-t border-border pt-4">${snapshot.replacesTaxInvoiceId ? `<p class="text-sm">Faktur asal: ${link(detailHref(snapshot.replacesTaxInvoiceId), 'Buka faktur asal')}</p>` : ''}${snapshot.replacedByTaxInvoiceId ? `<p class="text-sm">Digantikan oleh: ${link(detailHref(snapshot.replacedByTaxInvoiceId), 'Buka faktur pengganti')}</p>` : ''}<p class="text-xs text-muted">PDF tersimpan <span class="mt-1 block break-all">${e(f.pdfUri)}</span></p><p class="field-help">Berkas tercatat; akses pembukaan PDF belum tersedia.</p></div></div></section><section class="panel"><div class="panel-heading"><h2 class="panel-title">Nilai pajak</h2></div><div class="panel-body">${details([['DPP', money(f.dpp)], ['PPN', money(f.ppn)], ['PPnBM', money(f.ppnbm)]])}</div></section></div><section class="panel mt-6"><div class="panel-heading"><h2 class="panel-title">Item barang / jasa</h2></div>${itemsTable(snapshot.items)}</section>`;
     }
+    function showDateContext() {
+        const f = snapshot.taxInvoice;
+        const invoiceDate = snapshot.invoiceReference?.invoiceDate;
+        const differs = invoiceDate && invoiceDate.slice(0, 7) !== f.taxInvoiceDate.slice(0, 7);
+        if (f.taxPeriod !== f.taxInvoiceDate.slice(0, 7)) {
+            $('#detail-data').insertAdjacentHTML('afterbegin', '<p class="notice notice-error mb-6">Data tersimpan memiliki Masa Pajak berbeda dari bulan tanggal e-Faktur. Rekap masih mengikuti Masa Pajak tersimpan. Tinjau PDF dan riwayat sebelum mengoreksi; tidak ada pemindahan otomatis.</p>');
+        }
+        $('#detail-data').insertAdjacentHTML('afterbegin', `<section class="panel mb-6"><div class="panel-body">${details([
+            ['Tanggal invoice D-2 (referensi terkini)', e(dateLabel(invoiceDate))],
+            ['Tanggal e-Faktur', e(dateLabel(f.taxInvoiceDate))],
+            ['Masa Pajak', e(taxPeriodLabel(f.taxPeriod))],
+            ['Dasar Masa Pajak demo', 'Tanggal e-Faktur, bukan tanggal invoice D-2'],
+        ])}<p class="field-help">${differs ? 'Bulan invoice dan e-Faktur berbeda. Perbedaan ini tidak otomatis memindahkan Masa Pajak. ' : ''}Pengelompokan ini bukan validasi kepatuhan pajak. Referensi D-2 bukan snapshot saat pencatatan.</p></div></section>`);
+    }
     async function loadHistory() {
         try {
             const data = await api(`${endpoint}/history`);
@@ -351,6 +372,7 @@ async function detailPage() {
         } catch (error) { $('#invoice-history').innerHTML = empty('Riwayat gagal dimuat', error.message); }
     }
     await Promise.all([loadDetail(), loadHistory()]);
+    showDateContext();
     $('#replace-invoice').onclick = () => location.assign(`/tax-invoices/create?replacesTaxInvoiceId=${encodeURIComponent(invoiceId)}`);
     $('#correct-invoice').onclick = () => {
         const f = snapshot.taxInvoice;
@@ -367,12 +389,13 @@ async function detailPage() {
             await busy(form, () => api(endpoint, { method: 'PATCH', body: { changes, note: note || null } }), 'Menyimpan perubahan…');
             $(`#${dialog}`).close(); notice('Perubahan faktur berhasil disimpan.', 'success');
             await Promise.all([loadDetail(), loadHistory()]);
+            showDateContext();
         } catch (error) { notice(error.message, 'error', errorTarget); }
     }
     $('#correction-form').onsubmit = async (event) => {
         event.preventDefault(); const form = event.currentTarget;
         const data = Object.fromEntries(new FormData(form));
-        const changes = Object.fromEntries(Object.entries(data).filter(([key]) => key !== 'note'));
+        const changes = Object.fromEntries(Object.entries(data).filter(([key]) => !['note', 'taxPeriod'].includes(key)));
         changes.items = $$('[data-correction-item]').map((row) => Object.fromEntries($$('[data-item-field]', row).map((input) => [input.dataset.itemField, input.value])));
         if (!changes.items.length) { notice('Faktur wajib memiliki minimal satu item.', 'error', '#correction-error'); return; }
         await update(form, changes, data.note, 'correction-dialog', '#correction-error');

@@ -9,6 +9,15 @@ final class DemoDataset
 {
     public static function invoices(): array
     {
+        // Tanggal pajak adalah fixture tersendiri, tidak diturunkan dari invoice D-2.
+        $taxDates = [
+            1 => '2026-11-01', 2 => '2026-11-05', 3 => '2026-11-12',
+            4 => '2026-12-02', 5 => '2026-12-15', 6 => '2026-10-25', 7 => '2026-10-26',
+            34 => '2027-01-10', 35 => '2027-02-10',
+        ];
+        foreach (range(10, 33) as $number) {
+            $taxDates[$number] = sprintf('2026-10-%02d', $number - 9);
+        }
         $references = json_decode(file_get_contents(database_path('data/d2-invoices.json')), true, flags: JSON_THROW_ON_ERROR);
         $fixtures = [];
         foreach ($references as $reference) {
@@ -17,9 +26,11 @@ final class DemoDataset
             }
             $id = $reference['invoiceId'];
             $number = (int) substr($id, -3);
-            $date = CarbonImmutable::parse($reference['invoiceDate']);
+            $date = CarbonImmutable::parse($taxDates[$number]);
             $fixtures[$id] = [
                 'invoiceId' => $id,
+                'invoiceDate' => $reference['invoiceDate'],
+                'taxInvoiceDate' => $date->format('Y-m-d'),
                 'file' => 'efaktur-'.$id.'.pdf',
                 'pdf' => [
                     'nsfp' => sprintf('010.000-%s.%08d', $date->format('y'), 88000000 + $number),

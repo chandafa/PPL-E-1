@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\FakturPajak;
 use App\Models\PembayaranPajak;
+use App\Services\EFaktur\EFakturPdfParser;
 use App\Services\Tax\TaxPaymentService;
 use Database\Seeders\DemoSeeder;
 use Database\Seeders\Support\DemoDataset;
@@ -41,6 +42,22 @@ class DemoSeederTest extends TestCase
         $this->assertSame(41, count(Storage::disk('local')->allFiles('tax')));
         foreach (FakturPajak::all() as $invoice) {
             Storage::disk('local')->assertExists(substr($invoice->pdf_uri, strlen('/files/')));
+            $this->assertSame($invoice->tax_invoice_date->format('Y-m'), $invoice->tax_period);
+        }
+        foreach ([
+            'inv-demo-010' => ['2026-11-01', '2026-10-01'],
+            'inv-demo-011' => ['2026-12-02', '2026-10-02'],
+            'inv-demo-033' => ['2027-01-24', '2026-10-24'],
+            'inv-demo-034' => ['2027-02-10', '2027-01-10'],
+        ] as $id => [$invoiceDate, $taxDate]) {
+            $fixture = DemoDataset::invoices()[$id];
+            $this->assertSame($invoiceDate, $fixture['invoiceDate']);
+            $this->assertSame($taxDate, $fixture['taxInvoiceDate']);
+            $faktur = FakturPajak::where('invoice_id', $id)->firstOrFail();
+            $this->getJson('/api/v1/tax-invoices/'.$faktur->tax_invoice_id, $this->auth())->assertOk()
+                ->assertJsonPath('data.invoiceReference.invoiceDate', $invoiceDate)
+                ->assertJsonPath('data.taxInvoice.taxInvoiceDate', $taxDate)
+                ->assertJsonPath('data.taxInvoice.taxPeriod', substr($taxDate, 0, 7));
         }
         foreach (PembayaranPajak::all() as $payment) {
             Storage::disk('local')->assertExists(substr($payment->e_billing_uri, strlen('/files/')));
@@ -79,6 +96,11 @@ class DemoSeederTest extends TestCase
             $manifest = json_decode(file_get_contents($directory.'/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertCount(37, $manifest);
             $this->assertCount(37, array_unique(array_column($manifest, 'nsfp')));
+            foreach ($manifest as $document) {
+                $parsed = app(EFakturPdfParser::class)->parse(file_get_contents($directory.'/'.$document['file']));
+                $this->assertSame($document['taxInvoiceDate'], $parsed->taxInvoiceDate);
+                $this->assertSame($document['taxPeriod'], $parsed->taxPeriod);
+            }
             foreach (['006', '007'] as $suffix) {
                 $id = 'inv-demo-'.$suffix;
                 $this->assertDatabaseMissing('faktur_pajak', ['invoice_id' => $id]);

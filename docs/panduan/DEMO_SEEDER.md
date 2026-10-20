@@ -86,7 +86,30 @@ Gunakan database demo terpisah untuk tutorial itu. Menjalankan request pembuatan
 sesuai aturan bisnis. `migrate:fresh` menghapus data; tidak diperlukan untuk menambah
 dataset baru dengan `db:seed`.
 
-## Hasil verifikasi lokal
+## Variasi tanggal invoice dan e-Faktur
+
+Seeder utama kini memiliki tanggal pajak tersendiri, tidak menyalin tanggal invoice
+D-2. Nominal dan distribusi Masa Pajak lama dipertahankan:
+
+| Invoice | Tanggal invoice D-2 | Tanggal e-Faktur | Masa Pajak |
+| --- | --- | --- | --- |
+| inv-demo-010 | 1 November 2026 | 1 Oktober 2026 | Oktober 2026 |
+| inv-demo-011 | 2 Desember 2026 | 2 Oktober 2026 | Oktober 2026 |
+| inv-demo-033 | 24 Januari 2027 | 24 Oktober 2026 | Oktober 2026 |
+| inv-demo-034 | 10 Februari 2027 | 10 Januari 2027 | Januari 2027 |
+
+`demo:samples` menghasilkan manifest dengan kedua tanggal dan Masa Pajak sesuai
+PDF. Seeder tetap aditif: faktur lama/edit pengguna tidak ditimpa. Referensi D-2
+di detail adalah data terkini, bukan snapshot saat pencatatan.
+
+Masa Pajak koreksi mengikuti tanggal e-Faktur secara otomatis. Pembayaran periode
+lama tidak ikut dipindahkan. Jalankan `php artisan tax:audit-periods` untuk mendeteksi
+perbedaan tanggal/periode pada data lama tanpa mengubahnya.
+
+Perbedaan tanggal adalah skenario pengujian, bukan pernyataan transaksi sah secara
+pajak. Pengganti lintas periode masih memerlukan kesepakatan aturan tersendiri.
+
+## Hasil verifikasi lokal sebelumnya
 
 Pada 17 Oktober 2026, 118 tes PHP (1.130 assertions) dan 7 skenario browser lulus.
 Pengujian seeder mencakup jumlah dan nominal data, pagination API, PDF pencatatan

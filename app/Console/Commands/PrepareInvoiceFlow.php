@@ -10,7 +10,7 @@ class PrepareInvoiceFlow extends Command
 {
     protected $signature = 'demo:flow {--batch= : Batch baru (huruf kecil, angka, tanda hubung)}';
 
-    protected $description = 'Seed empat invoice D-2 belum dipakai, PDF upload, dan panduan flow pengujian';
+    protected $description = 'Seed enam invoice D-2 lintas bulan/tahun, PDF upload, dan panduan flow pengujian';
 
     public function handle(): int
     {

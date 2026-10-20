@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\ApiException;
+use App\Services\Invoices\InvoiceProvider;
 use Tests\TestCase;
 
 /** API-KE01-03 (cari/filter), API-KE01-04 (detail), API-KE01-06 (riwayat). */
@@ -98,6 +100,16 @@ class TaxInvoiceQueryTest extends TestCase
                 ->assertJsonPath('code', '400')
                 ->assertJsonPath('errorCode', 'INVALID_FILTER');
         }
+    }
+
+    public function test_detail_tetap_dapat_dibaca_saat_referensi_d2_tidak_tersedia(): void
+    {
+        $provider = \Mockery::mock(InvoiceProvider::class);
+        $provider->shouldReceive('find')->once()->andThrow(new ApiException(503, 'INVOICE_SERVICE_UNAVAILABLE', 'D-2 tidak tersedia'));
+        $this->app->instance(InvoiceProvider::class, $provider);
+        $this->getJson('/api/v1/tax-invoices/'.$this->f['A']['taxInvoiceId'], $this->auth())->assertOk()
+            ->assertJsonPath('data.invoiceReference', null)
+            ->assertJsonPath('data.taxInvoice.taxPeriod', '2026-11');
     }
 
     public function test_detail_memuat_item_dan_tautan_asal_pengganti(): void

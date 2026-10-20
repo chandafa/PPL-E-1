@@ -263,6 +263,15 @@ class TaxInvoiceService
     /** @param array<string, mixed> $changes */
     private function correct(FakturPajak $faktur, array $changes, ?string $note, F1Identity $actor): RiwayatPerubahanFaktur
     {
+        // Satu sumber kebenaran: koreksi periode tidak boleh terlepas dari tanggal.
+        if (isset($changes['taxInvoiceDate']) || isset($changes['taxPeriod'])) {
+            $date = $changes['taxInvoiceDate'] ?? $faktur->tax_invoice_date->format('Y-m-d');
+            $period = substr($date, 0, 7);
+            if (isset($changes['taxPeriod']) && $changes['taxPeriod'] !== $period) {
+                throw $this->invalidChange('Masa pajak harus sesuai bulan dan tahun tanggal e-Faktur');
+            }
+            $changes['taxPeriod'] = $period;
+        }
         $before = [];
         $after = [];
         $currentItems = $this->history->snapshot($faktur, true)['items'];

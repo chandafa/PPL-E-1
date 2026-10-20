@@ -62,6 +62,37 @@ class EFakturPdfParserTest extends TestCase
         $this->assertSame('500000.00', $result->items[1]['discountAmount']);
     }
 
+    public function test_tanggal_referensi_invoice_dan_cetak_tidak_menggeser_tanggal_faktur(): void
+    {
+        $pdf = FakeEFakturPdf::make([
+            'date' => '15 Oktober 2026</p><p>Tanggal invoice: 15 November 2026</p><p>Tanggal cetak: 20 Desember 2026',
+        ]);
+        $result = (new EFakturPdfParser)->parse($pdf);
+        $this->assertSame('2026-10-15', $result->taxInvoiceDate);
+        $this->assertSame('2026-10', $result->taxPeriod);
+    }
+
+    public function test_label_tanggal_faktur_dapat_dibaca_dalam_format_iso(): void
+    {
+        $pdf = FakeEFakturPdf::make(['place' => 'Tanggal e-Faktur: 2026-10-15</p><p>Referensi cetak:', 'date' => 'bukan tanggal']);
+        $this->assertSame('2026-10-15', (new EFakturPdfParser)->parse($pdf)->taxInvoiceDate);
+    }
+
+    public function test_tanggal_faktur_yang_ambigu_atau_hanya_tanggal_invoice_ditolak(): void
+    {
+        foreach ([
+            ['date' => '15 Oktober 2026</p><p>Tanggal Faktur: 16 November 2026'],
+            ['place' => 'Tanggal invoice:', 'date' => '15 November 2026'],
+        ] as $options) {
+            try {
+                (new EFakturPdfParser)->parse(FakeEFakturPdf::make($options));
+                $this->fail('Tanggal faktur yang tidak jelas harus ditolak');
+            } catch (ApiException $exception) {
+                $this->assertSame('EXTRACTION_FAILED', $exception->errorCode);
+            }
+        }
+    }
+
     public function test_ppnbm_tidak_ada_pada_pdf_dianggap_nol(): void
     {
         $result = (new EFakturPdfParser)->parse(FakeEFakturPdf::make(['ppnbm' => null]));

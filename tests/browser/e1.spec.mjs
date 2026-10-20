@@ -277,6 +277,24 @@ test('dropdown masa pajak menyembunyikan periode kosong dan menangani daftar kos
     await expect(page.getByRole('heading', { name: 'Rekap masa pajak kosong' })).toBeVisible();
 });
 
+test('tanggal invoice berbeda bulan tidak mengubah dasar Masa Pajak dan koreksi periode otomatis', async ({ page }) => {
+    await login(page);
+    await page.locator('#taxInvoiceNumber').fill('88000010');
+    await page.getByRole('button', { name: 'Cari', exact: true }).click();
+    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(1);
+    await page.locator('#invoice-list tbody tr a').first().click();
+    await expect(page.locator('#detail-data')).toContainText('1 November 2026');
+    await expect(page.locator('#detail-data')).toContainText('1 Oktober 2026');
+    await expect(page.locator('#detail-data')).toContainText('Bulan invoice dan e-Faktur berbeda');
+    await page.getByRole('button', { name: 'Koreksi Faktur', exact: true }).click();
+    const period = page.locator('#correction-form [name="taxPeriod"]');
+    await expect(period).toHaveAttribute('readonly', '');
+    await expect(period).toHaveValue('2026-10');
+    await page.locator('#correction-form [name="taxInvoiceDate"]').fill('2027-01-02');
+    await expect(period).toHaveValue('2027-01');
+    await page.locator('#correction-dialog').getByRole('button', { name: 'Batal', exact: true }).click();
+});
+
 test('kontrol navigasi, validasi wajib, dan tombol kembali', async ({ page }) => {
     await login(page);
     await page.getByRole('link', { name: 'Catat e-Faktur Keluaran', exact: true }).click();

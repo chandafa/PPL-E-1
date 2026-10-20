@@ -42,7 +42,7 @@ class EFakturPdfParser
         $flat = implode(' ', $lines);
 
         $nsfp = $this->nsfp($lines, $flat);
-        $date = $this->date($flat);
+        $date = $this->date(implode("\n", $lines));
         $dpp = $this->amountAfter($flat, '(?:Dasar\s+Pengenaan\s+Pajak|DPP)');
         $ppn = $this->amountAfter($flat, '(?:Jumlah|Total)\s+PPN(?!\s*BM)(?:\s*\([^)]*\))?');
         $ppnbm = $this->amountAfter($flat, '(?:Jumlah|Total)\s+PPn?BM(?:\s*\([^)]*\))?');
@@ -104,25 +104,50 @@ class EFakturPdfParser
         return null;
     }
 
-    /** Tanggal faktur (baris tanda tangan "Kota, 1 November 2026"); yang terakhir dipakai. */
+    /** Hanya label tanggal faktur atau baris tanda tangan kota; konflik ditolak. */
     private function date(string $flat): ?string
+    {
+        // Label tanggal boleh terpisah satu baris dari nilainya.
+        $flat = preg_replace('/(Tanggal\s+(?:e[ -]?Faktur|Faktur(?:\s+Pajak)?)[ \t]*:?[ \t]*)\n[ \t]*(?=[0-9])/iu', '$1 ', $flat);
+        $contexts = [];
+        foreach (explode("\n", $flat) as $line) {
+            if (preg_match('/^\s*(?:(?:Tanggal\s+(?:e[ -]?Faktur|Faktur(?:\s+Pajak)?))\s*:?\s*|[\p{L} .\-]+,\s*(?=[0-9]))(.+)$/iu', $line, $match) === 1) {
+                $contexts[] = $match[1];
+            }
+        }
+        if ($contexts === []) {
+            return null;
+        }
+        $dates = [];
+        foreach ($contexts as $context) {
+            $date = $this->dateValue($context);
+            if ($date === null) {
+                return null;
+            }
+            $dates[] = $date;
+        }
+
+        return count(array_unique($dates)) === 1 ? $dates[0] : null;
+    }
+
+    private function dateValue(string $flat): ?string
     {
         $months = implode('|', array_keys(self::MONTHS));
 
-        if (preg_match_all('/\b([0-9]{1,2})\s+('.$months.')\.?\s+([0-9]{4})\b/iu', $flat, $all, PREG_SET_ORDER) > 0) {
+        if (preg_match_all('/^([0-9]{1,2})\s+('.$months.')\.?\s+([0-9]{4})\s*$/iu', $flat, $all, PREG_SET_ORDER) > 0) {
             $m = end($all);
             $month = self::MONTHS[mb_strtolower($m[2])];
 
             return $this->validDate((int) $m[3], $month, (int) $m[1]);
         }
 
-        if (preg_match_all('/\b([0-9]{4})-([0-9]{2})-([0-9]{2})\b/u', $flat, $all, PREG_SET_ORDER) > 0) {
+        if (preg_match_all('/^([0-9]{4})-([0-9]{2})-([0-9]{2})\s*$/u', $flat, $all, PREG_SET_ORDER) > 0) {
             $m = end($all);
 
             return $this->validDate((int) $m[1], (int) $m[2], (int) $m[3]);
         }
 
-        if (preg_match_all('/\b([0-9]{2})[\/-]([0-9]{2})[\/-]([0-9]{4})\b/u', $flat, $all, PREG_SET_ORDER) > 0) {
+        if (preg_match_all('/^([0-9]{2})[\/-]([0-9]{2})[\/-]([0-9]{4})\s*$/u', $flat, $all, PREG_SET_ORDER) > 0) {
             $m = end($all);
 
             return $this->validDate((int) $m[3], (int) $m[2], (int) $m[1]);

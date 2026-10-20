@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\EFaktur\EFakturPdfParser;
 use Database\Seeders\Support\DemoDataset;
 use Database\Seeders\Support\FakeEFakturPdf;
 use Illuminate\Console\Command;
@@ -26,11 +27,16 @@ class GenerateSamplePdfs extends Command
             return self::FAILURE;
         }
         $manifest = [];
+        $invoices = DemoDataset::invoices();
         foreach (DemoDataset::samples() as $name => $fixture) {
-            file_put_contents($dir.DIRECTORY_SEPARATOR.$name, FakeEFakturPdf::make($fixture['pdf']));
+            $pdf = FakeEFakturPdf::make($fixture['pdf']);
+            $extracted = app(EFakturPdfParser::class)->parse($pdf);
+            file_put_contents($dir.DIRECTORY_SEPARATOR.$name, $pdf);
             $manifest[] = [
                 'file' => $name, 'invoiceId' => $fixture['invoiceId'], 'nsfp' => $fixture['pdf']['nsfp'],
                 'seededByDefault' => $fixture['seeded'], 'flow' => $fixture['flow'],
+                'invoiceDate' => $invoices[$fixture['invoiceId']]['invoiceDate'],
+                'taxInvoiceDate' => $extracted->taxInvoiceDate, 'taxPeriod' => $extracted->taxPeriod,
             ];
             $this->line("dibuat: {$name}");
         }

@@ -26,6 +26,30 @@ lanjutan; hasil uji mock tidak dinyatakan sebagai bukti integrasi tersebut.
 Aturan ini memenuhi kriteria periode kosong pada halaman 6 spesifikasi dan halaman
 10 kontrak API, sekaligus mempertahankan dropdown yang hanya memuat data tersedia.
 
+## Penyelarasan tanggal dan Masa Pajak demo (20 Oktober 2026)
+
+- Untuk faktur normal demo, Masa Pajak adalah tahun-bulan tanggal e-Faktur dari PDF,
+  bukan tanggal invoice D-2 atau waktu unggah/pencatatan aplikasi.
+- Invoice D-2 boleh berbeda bulan/tahun. Perbedaan tidak otomatis mengubah periode,
+  menolak pencatatan, atau membuktikan kepatuhan terhadap ketentuan perpajakan.
+  Validasi waktu penyerahan/pembayaran/uang muka belum menjadi kemampuan modul ini.
+- Koreksi tanggal menghitung ulang Masa Pajak, menyimpan perubahan keduanya dalam
+  audit, dan menghitung ulang periode lama serta baru. `taxPeriod` yang dikirim
+  tidak sesuai tanggal efektif ditolak HTTP 400 `INVALID_CHANGE`.
+- Pembayaran tetap melekat pada periode yang dibayar; tidak dipindahkan otomatis
+  saat tanggal faktur dikoreksi. Selisih periode lama/baru harus ditinjau kembali.
+- Detail mengembalikan tambahan opsional `invoiceReference` (tanggal/nomor invoice
+  D-2 terkini), bukan snapshot historis. Nilai null bila referensi tidak tersedia.
+- Parser menerima tanggal berlabel tanggal faktur atau baris tanda tangan kota.
+  Tanggal cetak/referensi invoice tidak dipakai; kandidat tanggal faktur yang
+  bertentangan ditolak untuk pemeriksaan dokumen. PDF asli mitra belum tervalidasi.
+- Pengganti pada paket demo diuji dalam Masa Pajak yang sama. Implementasi saat
+  ini mengambil periode pengganti dari tanggal PDF, tetapi perilaku pengganti
+  lintas periode **belum disahkan sebagai aturan perpajakan**. Pemetaan pembetulan
+  ke periode faktur asal perlu keputusan terpisah sebelum digunakan untuk itu.
+- Data lama tidak diubah otomatis. Jalankan `php artisan tax:audit-periods` untuk
+  pemeriksaan baca-saja, lalu tinjau PDF/riwayat sebelum koreksi lewat API.
+
 ## Pencatatan pembayaran: API-KE01-08
 
 Endpoint tetap `POST /api/v1/tax-payments`, memakai `multipart/form-data`.

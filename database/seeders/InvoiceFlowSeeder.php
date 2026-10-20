@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\FakturPajak;
+use App\Support\Money;
 use Database\Seeders\Support\FakeEFakturPdf;
 use Database\Seeders\Support\InvoiceFlowDataset;
 use Illuminate\Database\Seeder;
@@ -49,13 +50,16 @@ class InvoiceFlowSeeder extends Seeder
             foreach ($package['samples'] as $name => $fixture) {
                 File::put($directory.'/'.$name, FakeEFakturPdf::make($fixture['pdf']));
                 $manifest['documents'][] = ['file' => $name, 'invoiceId' => $fixture['invoiceId'], 'flow' => $fixture['flow'],
+                    'invoiceDate' => $fixture['invoiceDate'], 'taxInvoiceDate' => $fixture['taxInvoiceDate'],
+                    'taxPeriod' => $fixture['taxPeriod'], 'scenario' => $fixture['scenario'],
                     'nsfp' => $fixture['pdf']['nsfp'], 'dpp' => $fixture['pdf']['dpp'], 'ppn' => $fixture['pdf']['ppn'], 'ppnbm' => $fixture['pdf']['ppnbm']];
             }
+            $paymentAmount = 'Rp '.Money::display($package['expected'][$package['taxPeriod']]['amountPaid']);
             File::put($directory.'/07-e-billing.pdf', FakeEFakturPdf::attachment('e-Billing Uji Flow (DUMMY)', [
-                'Batch' => $batch, 'Masa pajak' => $package['taxPeriod'], 'ID Billing' => $package['billingId'], 'Jumlah setor' => 'Rp 4.070.000,00',
+                'Batch' => $batch, 'Masa pajak' => $package['taxPeriod'], 'ID Billing' => $package['billingId'], 'Jumlah setor' => $paymentAmount,
             ]));
             File::put($directory.'/08-bukti-pembayaran.pdf', FakeEFakturPdf::attachment('Bukti Pembayaran Uji Flow (DUMMY)', [
-                'Batch' => $batch, 'NTPN' => $package['ntpn'], 'Jumlah setor' => 'Rp 4.070.000,00',
+                'Batch' => $batch, 'Masa pajak' => $package['taxPeriod'], 'NTPN' => $package['ntpn'], 'Jumlah setor' => $paymentAmount,
             ]));
             File::put($directory.'/09-bukan-efaktur.pdf', FakeEFakturPdf::attachment('Dokumen Uji Bukan e-Faktur (DUMMY)'));
             File::put($directory.'/10-bukan-pdf.txt', "Dokumen uji penolakan format, bukan PDF.\n");
@@ -72,7 +76,7 @@ class InvoiceFlowSeeder extends Seeder
             File::deleteDirectory($directory);
             throw $exception;
         }
-        $this->command?->info('Empat invoice D-2 baru disiapkan tanpa menyimpan faktur/pembayaran E-1.');
+        $this->command?->info('Enam invoice D-2 baru disiapkan tanpa menyimpan faktur/pembayaran E-1.');
         $this->command?->info('Batch: '.$batch);
         $this->command?->info('Dokumen dan panduan: '.$directory);
     }
