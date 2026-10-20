@@ -1,29 +1,20 @@
-# Paket pengujian invoice baru
+# Arsip paket pengujian invoice
 
-Siapkan batch baru:
-
-```bash
-php artisan demo:flow
-```
-
-Atau tentukan nama batch yang belum pernah digunakan:
+Pembuat batch lama beserta seedernya dihapus pada 20 Oktober 2026.
+Alur aktif untuk setiap laptop:
 
 ```bash
-php artisan demo:flow --batch=uji-baru-01
+php artisan migrate
+php artisan db:seed
+php artisan demo:samples
 ```
 
-Alternatif seeder Laravel: `php artisan db:seed --class=InvoiceFlowSeeder`.
-Setiap eksekusi tanpa nama batch membuat empat referensi invoice mock D-2 baru,
-sembilan PDF, satu berkas bukan PDF, manifest, panduan, dan checklist dalam folder
-batch. Belum ada faktur atau pembayaran E-1 yang disimpan, sehingga invoice siap
-dipilih di dropdown. Seeder demo biasa melewati invoice ini (`manualUploadOnly`).
+PDF terbaru tersedia di `docs/postman/samples/`, termasuk invoice manual.
+Gunakan `manifest.json` untuk mencocokkan PDF dengan invoice, dan `validation.json`
+untuk hasil pembacaan parser. Ikuti [panduan demo](../panduan/DEMO_SEEDER.md).
 
-Buka `PANDUAN.md` dalam folder batch untuk pasangan invoice/PDF dan hasil yang
-diharapkan. Kolom hasil aktual pada `CHECKLIST.csv` sengaja kosong untuk pengujian
-Anda. `VALIDASI.json`, bila tersedia, mencatat pemeriksaan pratinjau tanpa penyimpanan.
+Batch, template, checklist, dan laporan di folder ini adalah arsip pengujian lama.
+Petunjuk pembuatan batch dalam dokumen arsip tidak berlaku lagi. Referensi invoice
+manual yang sudah ada dipertahankan dan memiliki PDF dalam generator terbaru.
 
-Batch yang sudah ada ditolak agar tidak menimpa dokumen atau data pengujian lama.
-Untuk mengulang flow dari awal gunakan batch baru, tanpa `migrate:fresh`.
-Perintah hanya tersedia di luar production dengan `D2_DRIVER=mock`.
-
-Dokumen adalah simulasi, bukan dokumen pajak atau bukti pembayaran resmi.
+Semua dokumen adalah data fiktif untuk pengujian.

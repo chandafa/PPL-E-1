@@ -28,7 +28,7 @@
     .btn-secondary { @apply border border-[#7c8c98] bg-white text-primary hover:bg-slate-100; }
     .btn-danger { @apply bg-danger text-white hover:bg-[#81201f]; }
     .btn-ghost { @apply text-primary hover:bg-slate-100; }
-    .field { @apply block min-h-11 w-full rounded-md border border-[#7c8c98] bg-white px-3 py-2 text-sm placeholder:text-muted read-only:bg-slate-100 disabled:bg-slate-100; }
+    .field { @apply block min-h-11 min-w-0 w-full rounded-md border border-[#7c8c98] bg-white px-3 py-2 text-sm placeholder:text-muted read-only:bg-slate-100 disabled:bg-slate-100; }
     .field[aria-invalid='true'] { @apply border-danger; }
     .field-label { @apply mb-2 block text-sm font-semibold; }
     .field-help { @apply mt-2 text-xs leading-relaxed text-muted; }
@@ -65,7 +65,8 @@
     .empty-state p { @apply mx-auto mt-2 max-w-lg text-sm leading-relaxed text-muted; }
     .detail-grid { @apply grid gap-x-6 gap-y-5 sm:grid-cols-2; }
     .detail-grid dt { @apply mb-1 text-xs text-muted; }
-    .detail-grid dd { @apply break-words text-sm font-medium; }
+    .detail-grid > div { @apply min-w-0; }
+    .detail-grid dd { @apply text-sm font-medium; overflow-wrap: anywhere; }
     .metric { @apply rounded-lg border border-border bg-white p-5; }
     .metric dt { @apply text-xs font-medium text-muted; }
     .metric dd { @apply mt-2 text-lg font-semibold tabular-nums; }

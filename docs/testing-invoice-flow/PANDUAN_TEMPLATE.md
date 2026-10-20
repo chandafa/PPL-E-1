@@ -85,6 +85,7 @@ total seluruh periode. Invoice cadangan 004 juga menambah rekap jika disimpan.
 
 ## Pengujian ulang
 
-Jangan mengunggah NSFP sama untuk pencatatan kedua. Gunakan `php artisan demo:flow`
-untuk mendapatkan empat invoice serta nomor seri baru. Data yang sudah dicatat
-tetap dipertahankan; tidak perlu mengosongkan database.
+Template ini adalah arsip. Generator aktif `php artisan demo:samples` membuat PDF
+sesuai katalog tetap; tidak membuat invoice atau nomor seri acak baru. Pilih PDF
+dengan NSFP yang belum disimpan sesuai manifest. Data yang sudah dicatat tetap
+dipertahankan; menjalankan generator ulang tidak mereset transaksi.

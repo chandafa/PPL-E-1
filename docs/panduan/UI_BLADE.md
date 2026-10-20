@@ -129,6 +129,20 @@ terpisah `e1_pajak_ui_test`, yang harus dibuat dahulu dengan pemilik sesuai `.en
 CREATE DATABASE e1_pajak_ui_test OWNER e1_app;
 ```
 
+Database browser dapat diganti lewat `E1_UI_TEST_DATABASE`; buat database itu dahulu.
+Di Windows, contoh memakai Chrome yang sudah terpasang:
+
+```powershell
+$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH='C:\Program Files\Google\Chrome\Application\chrome.exe'
+npm.cmd run test:ui
+```
+
+Screenshot pengujian memakai folder keluaran Playwright sehingga dapat dijalankan
+di Windows maupun Linux. Pengujian PDF memeriksa tanggal invoice dan hasil tombol
+Periksa PDF menggunakan server nyata, termasuk tampilan mobile.
+Lingkungan testing memakai aset hasil `npm run build`; server Vite pengembangan
+yang sedang berjalan tidak memicu reload pada halaman uji.
+
 Browser tests menjalankan server sendiri pada port 8081 dan **mengosongkan serta mengisi
 ulang hanya database `e1_pajak_ui_test`**. Port 8080 dan database operasional tidak digunakan
 oleh konfigurasi browser default. `E1_UI_BASE_URL` dapat menunjuk server uji yang sudah

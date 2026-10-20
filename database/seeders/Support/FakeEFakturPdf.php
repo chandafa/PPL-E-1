@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Support;
 
+use App\Support\Money;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -18,7 +19,7 @@ final class FakeEFakturPdf
      *   nsfp?: string, date?: string, place?: string,
      *   items?: list<array{code: string, name: string, amount: string, discount?: string}>,
      *   discount?: string, advance?: string, dpp?: string, ppn?: string, ppnbm?: string|null,
-     *   seller?: string, buyer?: string
+     *   seller?: string, buyer?: string, invoiceNumber?: string
      * }  $o  nominal diberikan sebagai string "100000000.00"
      */
     public static function make(array $o = []): string
@@ -45,10 +46,8 @@ final class FakeEFakturPdf
             $rows .= '<tr><td>'.($i + 1).'</td><td>'.$item['code'].'</td><td>'.htmlspecialchars($item['name'])
                 .'<br>Rp '.$fmt($item['amount']).' x 1,00 Unit'
                 .'<br>Potongan Harga = Rp '.$fmt($item['discount'] ?? '0.00')
-                .'<br>PPnBM (0,00%) = Rp 0,00</td><td class="r">'.$fmt($item['amount']).'</td></tr>';
+                .'</td><td class="r">'.$fmt($item['amount']).'</td></tr>';
         }
-
-        $ppnbmRow = $o['ppnbm'] === null ? '' : '<tr><td>Jumlah PPnBM (Pajak Penjualan atas Barang Mewah)</td><td class="r">'.$fmt($o['ppnbm']).'</td></tr>';
 
         $html = '<html><head><meta charset="utf-8"><style>
             body{font-family:Helvetica,Arial,sans-serif;font-size:10px}
@@ -56,7 +55,9 @@ final class FakeEFakturPdf
             .r{text-align:right} h2{text-align:center}
         </style></head><body>
             <h2>FAKTUR PAJAK</h2>
+            <p>DOKUMEN DEMO FIKTIF - Bukan dokumen pajak resmi.</p>
             <p>Kode dan Nomor Seri Faktur Pajak : '.$o['nsfp'].'</p>
+            '.(isset($o['invoiceNumber']) ? '<p>Referensi Invoice : '.htmlspecialchars($o['invoiceNumber']).'</p>' : '').'
             <p><b>Pengusaha Kena Pajak</b><br>Nama : '.htmlspecialchars($o['seller']).'<br>Alamat : Jl. Fiktif No. 1, Jakarta<br>NPWP : 00.000.000.0-000.000</p>
             <p><b>Pembeli Barang Kena Pajak / Penerima Jasa Kena Pajak</b><br>Nama : '.htmlspecialchars($o['buyer']).'<br>Alamat : Jl. Contoh No. 2, Bandung<br>NPWP : 11.111.111.1-111.111</p>
             <table>
@@ -72,8 +73,6 @@ final class FakeEFakturPdf
             <p>'.$o['place'].', '.$o['date'].'</p>
             <p>Ditandatangani secara elektronik<br>Direktur Utama</p>
         </body></html>';
-
-        unset($ppnbmRow);
 
         $options = new Options;
         $options->set('isRemoteEnabled', false);
@@ -112,8 +111,6 @@ final class FakeEFakturPdf
     /** "100000000.00" -> "100.000.000,00" */
     public static function id(string $value): string
     {
-        [$int, $dec] = array_pad(explode('.', $value, 2), 2, '00');
-
-        return number_format((int) $int, 0, ',', '.').','.str_pad($dec, 2, '0');
+        return Money::display($value);
     }
 }

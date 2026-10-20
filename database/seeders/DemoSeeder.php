@@ -9,6 +9,7 @@ use App\Services\Tax\FileStore;
 use App\Services\Tax\TaxInvoiceService;
 use App\Services\Tax\TaxPaymentService;
 use Database\Seeders\Support\DemoDataset;
+use Database\Seeders\Support\DemoSampleValidator;
 use Database\Seeders\Support\FakeEFakturPdf;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
@@ -22,7 +23,7 @@ class DemoSeeder extends Seeder
 
     private array $createdUris = [];
 
-    public function run(TaxInvoiceService $invoices, TaxPaymentService $payments, FileStore $files): void
+    public function run(TaxInvoiceService $invoices, TaxPaymentService $payments, FileStore $files, DemoSampleValidator $validator): void
     {
         if (app()->isProduction() || config('e1.d2.driver') !== 'mock') {
             $this->command?->warn('DemoSeeder hanya tersedia di luar production dengan D2_DRIVER=mock.');
@@ -34,22 +35,24 @@ class DemoSeeder extends Seeder
             // Render PDF sebelum mengambil lock agar waktu transaksi tetap terbatas.
             $prepared = [];
             foreach (DemoDataset::seededInvoices() as $id => $fixture) {
-                $options = $fixture['pdf'];
-                $options['date'] = $fixture['seedDate'] ?? $options['date'];
-                $prepared[$id] = $this->upload(FakeEFakturPdf::make($options));
+                $binary = FakeEFakturPdf::make($fixture['pdf']);
+                $validator->validate($binary, $fixture);
+                $prepared[$id] = $this->upload($binary);
             }
-            $replacement = $this->upload(FakeEFakturPdf::make(DemoDataset::originalReplacement()['pdf']));
+            $replacementFixture = DemoDataset::originalReplacement();
+            $replacementBinary = FakeEFakturPdf::make($replacementFixture['pdf']);
+            $validator->validate($replacementBinary, $replacementFixture);
+            $replacement = $this->upload($replacementBinary);
             $attachments = [];
             foreach (DemoDataset::payments() as $payment) {
                 $attachments[$payment['billingId']] = [
-                    $this->upload(FakeEFakturPdf::attachment('e-Billing Demo', $payment)),
-                    isset($payment['ntpn']) ? $this->upload(FakeEFakturPdf::attachment('Bukti Pembayaran Demo', $payment)) : null,
+                    $this->upload(FakeEFakturPdf::attachment('e-Billing Demo', DemoDataset::paymentDocumentFields($payment))),
+                    isset($payment['ntpn']) ? $this->upload(FakeEFakturPdf::attachment('Bukti Pembayaran Demo', DemoDataset::paymentDocumentFields($payment, proof: true))) : null,
                 ];
             }
             $counts = DB::transaction(function () use ($invoices, $payments, $prepared, $replacement, $attachments): array {
                 DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['e1.demo-seeder']);
                 $admin = new F1Identity('AKN-0002', 'Admin');
-                $coo = new F1Identity('AKN-0005', 'COO');
                 $counts = ['invoices' => 0, 'payments' => 0];
                 foreach (DemoDataset::seededInvoices() as $id => $fixture) {
                     if (FakturPajak::query()->where('invoice_id', $id)->exists()) {
@@ -62,9 +65,6 @@ class DemoSeeder extends Seeder
                         $new = $invoices->createOutgoing($id, $replacement, $faktur->tax_invoice_id, $admin);
                         $this->createdUris[] = $new->pdf_uri;
                         $counts['invoices']++;
-                    }
-                    if (isset($fixture['correctDate'])) {
-                        $invoices->update($faktur->tax_invoice_id, ['taxInvoiceDate' => $fixture['correctDate']], 'Koreksi tanggal faktur demo', $coo);
                     }
                     if ($fixture['cancel'] ?? false) {
                         $invoices->update($faktur->tax_invoice_id, ['status' => 'CANCELLED'], 'Faktur demo dibatalkan; tersedia PDF baru untuk pencatatan ulang', $admin);

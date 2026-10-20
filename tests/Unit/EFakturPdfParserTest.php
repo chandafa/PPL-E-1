@@ -5,10 +5,35 @@ namespace Tests\Unit;
 use App\Exceptions\ApiException;
 use App\Services\EFaktur\EFakturPdfParser;
 use Database\Seeders\Support\FakeEFakturPdf;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Tests\Support\TaxPdf;
 
 class EFakturPdfParserTest extends TestCase
 {
+    public static function nominalPdf(): array
+    {
+        return [
+            'Indonesia' => ['1.234.567,89', '1234567.89'],
+            'internasional' => ['1,234,567.89', '1234567.89'],
+            'desimal koma' => ['1234567,8', '1234567.80'],
+            'desimal titik' => ['1234567.89', '1234567.89'],
+            'ribuan titik' => ['1.234.567', '1234567.00'],
+            'ribuan koma' => ['1,234,567', '1234567.00'],
+            'tanpa pemisah' => ['1234567', '1234567.00'],
+            'nol' => ['0,00', '0.00'],
+            'batas presisi' => ['9.999.999.999.999.999,99', '9999999999999999.99'],
+        ];
+    }
+
+    #[DataProvider('nominalPdf')]
+    public function test_ppn_dan_ppnbm_mempertahankan_nominal_dokumen_tanpa_float(string $raw, string $expected): void
+    {
+        $result = (new EFakturPdfParser)->parse(TaxPdf::make(['ppn' => $raw, 'ppnbm' => $raw]));
+        $this->assertSame($expected, $result->ppn);
+        $this->assertSame($expected, $result->ppnbm);
+    }
+
     public function test_membaca_semua_data_inti_faktur_keluaran(): void
     {
         $result = (new EFakturPdfParser)->parse(FakeEFakturPdf::make());

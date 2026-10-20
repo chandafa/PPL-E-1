@@ -65,7 +65,7 @@ test('dropdown pencarian dapat dibaca pada layar kecil dan memiliki label aksesi
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const results = await new AxeBuilder({ page }).include('#invoice-form').analyze();
     expect(results.violations).toEqual([]);
-    await page.screenshot({ path: '/tmp/ppl-e1-invoice-search-mobile.png', fullPage: true });
+    await page.screenshot({ path: test.info().outputPath('invoice-search-mobile.png'), fullPage: true });
     await page.getByRole('option').click();
     await expect(page.locator('#invoice-context')).toContainText('INV-2026-0002');
 });

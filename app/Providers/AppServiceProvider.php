@@ -7,6 +7,7 @@ use App\Services\Invoices\HttpInvoiceProvider;
 use App\Services\Invoices\InvoiceProvider;
 use App\Services\Invoices\MockInvoiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        //
+        if ($this->app->environment('testing')) {
+            // Uji browser memakai build tetap; Vite pengembang tidak me-reload halaman uji.
+            Vite::useHotFile(storage_path('framework/testing/vite.hot'));
+        }
     }
 }

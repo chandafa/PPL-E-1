@@ -136,14 +136,19 @@ class EFakturPdfParser
         return checkdate($month, $day, $year) ? sprintf('%04d-%02d-%02d', $year, $month, $day) : null;
     }
 
-    /** Nominal tepat setelah label (label dan nominal boleh dipisah apa saja selain angka). */
+    /** Label boleh tidak ada; label yang ada tetapi nominalnya rusak wajib ditolak. */
     private function amountAfter(string $flat, string $labelPattern): ?string
     {
-        if (preg_match('/'.$labelPattern.'\s*[:=*)\s]*'.self::AMOUNT.'/iu', $flat, $m) !== 1) {
+        if (preg_match('/'.$labelPattern.'/iu', $flat, $label, PREG_OFFSET_CAPTURE) !== 1) {
             return null;
         }
 
-        return $this->amount($m[1]);
+        $after = substr($flat, $label[0][1] + strlen($label[0][0]));
+        if (preg_match('/^\s*[:=*)\s]*(?:Rp\.?\s*)?([^\s]+)/iu', $after, $m) !== 1) {
+            throw $this->failed();
+        }
+
+        return $this->amount($m[1]) ?? throw $this->failed();
     }
 
     /**
@@ -187,7 +192,7 @@ class EFakturPdfParser
 
             if (preg_match('/^Potongan\s+Harga\s*=\s*'.$amount.'/iu', $line, $m) === 1) {
                 if ($current !== null) {
-                    $current['discount'] = $this->amount($m[1]);
+                    $current['discount'] = $this->amount($m[1]) ?? throw $this->failed();
                 }
 
                 continue;
@@ -203,7 +208,7 @@ class EFakturPdfParser
                 $rowAmount = null;
                 if (preg_match('/^(.*?)\s+'.self::AMOUNT.'$/u', $name, $n) === 1 && $this->looksMoney($n[2])) {
                     $name = $n[1];
-                    $rowAmount = $this->amount($n[2]);
+                    $rowAmount = $this->amount($n[2]) ?? throw $this->failed();
                 }
                 $current = ['code' => $m[2], 'name' => $name, 'amount' => $rowAmount, 'discount' => null];
 
@@ -212,7 +217,7 @@ class EFakturPdfParser
 
             if ($current !== null) {
                 if (preg_match('/^'.$amount.'$/u', $line, $m) === 1 && $this->looksMoney($m[1])) {
-                    $current['amount'] = $this->amount($m[1]);
+                    $current['amount'] = $this->amount($m[1]) ?? throw $this->failed();
                 } else {
                     $current['name'] .= ' '.$line;
                 }
@@ -247,55 +252,23 @@ class EFakturPdfParser
      */
     private function amount(string $raw): ?string
     {
-        $raw = trim($raw, " .,\t");
-        if ($raw === '' || preg_match('/^-?[0-9][0-9.,]*$/', $raw) !== 1) {
+        $raw = trim($raw);
+        if (preg_match('/^([0-9]+)(?:[.,]([0-9]{1,2}))?$/D', $raw, $parts) === 1) {
+            $integer = $parts[1];
+            $fraction = $parts[2] ?? '00';
+        } elseif (preg_match('/^([0-9]{1,3}(?:\.[0-9]{3})+)(?:,([0-9]{1,2}))?$/D', $raw, $parts) === 1) {
+            $integer = str_replace('.', '', $parts[1]);
+            $fraction = $parts[2] ?? '00';
+        } elseif (preg_match('/^([0-9]{1,3}(?:,[0-9]{3})+)(?:\.([0-9]{1,2}))?$/D', $raw, $parts) === 1) {
+            $integer = str_replace(',', '', $parts[1]);
+            $fraction = $parts[2] ?? '00';
+        } else {
             return null;
         }
 
-        $negative = str_starts_with($raw, '-');
-        $raw = ltrim($raw, '-');
+        $value = $integer.'.'.str_pad($fraction, 2, '0');
 
-        $dots = substr_count($raw, '.');
-        $commas = substr_count($raw, ',');
-        $lastDot = strrpos($raw, '.');
-        $lastComma = strrpos($raw, ',');
-
-        if ($dots > 0 && $commas > 0) {
-            // keduanya ada: pemisah yang muncul terakhir adalah desimal
-            $decimalSep = $lastDot > $lastComma ? '.' : ',';
-        } elseif ($commas > 0) {
-            $decimalSep = $commas === 1 && $this->isDecimalTail($raw, $lastComma) ? ',' : null;
-        } elseif ($dots > 0) {
-            $decimalSep = $dots === 1 && $this->isDecimalTail($raw, $lastDot) ? '.' : null;
-        } else {
-            $decimalSep = null;
-        }
-
-        if ($decimalSep === null) {
-            $integer = preg_replace('/[.,]/', '', $raw);
-            $fraction = '00';
-        } else {
-            $pos = strrpos($raw, $decimalSep);
-            $integer = preg_replace('/[.,]/', '', substr($raw, 0, $pos));
-            $fraction = substr($raw, $pos + 1);
-        }
-
-        $value = $integer.'.'.str_pad(substr($fraction, 0, 2), 2, '0');
-        if (! Money::isValid($value)) {
-            return null;
-        }
-
-        $value = bcadd($value, '0', 2);
-
-        return $negative && $value !== '0.00' ? '-'.$value : $value;
-    }
-
-    /** Pemisah terakhir dianggap desimal bila diikuti 1–2 digit (bukan kelompok ribuan 3 digit). */
-    private function isDecimalTail(string $raw, int $pos): bool
-    {
-        $tail = strlen($raw) - $pos - 1;
-
-        return $tail >= 1 && $tail <= 2;
+        return Money::isValid($value) ? Money::normalize($value) : null;
     }
 
     private function failed(): ApiException

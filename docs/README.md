@@ -12,7 +12,8 @@ Indeks ini mengelompokkan dokumen acuan, panduan aktif, paket pengujian, dan ars
 | Mencoba API melalui Postman | [Panduan Postman](api/POSTMAN.md) |
 | Melihat respons sukses dan galat | [Referensi respons API](api/RESPON_API.md) |
 | Memeriksa kontrak mesin | [OpenAPI](../openapi.yaml) |
-| Menjalankan pengujian unggah dari awal | [Paket pengujian invoice](testing-invoice-flow/README.md) |
+| Membuat dan memeriksa PDF untuk unggah | [Panduan data demo](panduan/DEMO_SEEDER.md) |
+| Memeriksa PPN, PPnBM, produk, dan proyek | [Panduan pajak dan skenario uji](panduan/PPN_DAN_PPNBM.md) |
 
 ## Acuan dan keputusan demo
 
@@ -31,8 +32,8 @@ pengujian integrasi langsung F-1, D-2, dan E-2.
 
 - [Koleksi Postman](postman/E1-API.postman_collection.json) dan [environment lokal](postman/E1-Local.postman_environment.json).
 - PDF contoh Postman berada di `postman/samples/`; buat ulang dengan `php artisan demo:samples`.
-- [Panduan paket invoice](testing-invoice-flow/README.md), [template panduan](testing-invoice-flow/PANDUAN_TEMPLATE.md), dan [template checklist](testing-invoice-flow/CHECKLIST_TEMPLATE.csv).
-- Batch pengujian dan manifest berada di `testing-invoice-flow/<batch>/`; buat batch baru dengan `php artisan demo:flow`. Laporan lokal, bila tersedia, berada di `testing-invoice-flow/HASIL_VERIFIKASI.md`.
+- `postman/samples/manifest.json` memetakan invoice, tanggal, masa pajak, NSFP, dan hash PDF. `validation.json` mencatat hasil pemeriksaan parser dan lampiran.
+- [Arsip paket invoice](testing-invoice-flow/README.md) menyimpan pengujian lama. Pembuat batch sudah dihapus; generator aktif adalah `php artisan demo:samples`.
 
 Catatan hasil pengujian berlaku pada waktu eksekusi yang tercantum. Checklist yang
 belum diisi bukan bukti bahwa pengujian sudah lulus. Setiap batch dipertahankan

@@ -350,7 +350,6 @@ async function detailPage() {
             $('#invoice-history').innerHTML = data.history.length ? `<ol class="divide-y divide-border">${data.history.map((entry) => `<li class="px-5 py-5"><div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-sm font-semibold">${e(labels[entry.action] || entry.action)}</h3><span class="text-xs text-muted">${e(dateLabel(entry.changedAt))}</span></div><p class="mt-1 text-xs text-muted">Oleh ${e(entry.actorAkunId)}</p>${entry.note ? `<p class="mt-3 text-sm">${e(entry.note)}</p>` : ''}<details class="mt-3"><summary class="inline-flex min-h-11 cursor-pointer items-center text-xs font-semibold text-primary">Lihat nilai sebelum dan sesudah</summary><div class="grid gap-3 sm:grid-cols-2"><div><h4 class="mb-2 text-xs text-muted">Sebelum</h4><pre class="max-h-72 overflow-auto whitespace-pre-wrap break-all rounded bg-slate-50 p-3 text-xs">${e(JSON.stringify(entry.beforeSnapshot, null, 2))}</pre></div><div><h4 class="mb-2 text-xs text-muted">Sesudah</h4><pre class="max-h-72 overflow-auto whitespace-pre-wrap break-all rounded bg-slate-50 p-3 text-xs">${e(JSON.stringify(entry.afterSnapshot, null, 2))}</pre></div></div></details></li>`).join('')}</ol>` : empty('Belum ada riwayat', 'Perubahan faktur akan tercatat di sini.');
         } catch (error) { $('#invoice-history').innerHTML = empty('Riwayat gagal dimuat', error.message); }
     }
-    await Promise.all([loadDetail(), loadHistory()]);
     $('#replace-invoice').onclick = () => location.assign(`/tax-invoices/create?replacesTaxInvoiceId=${encodeURIComponent(invoiceId)}`);
     $('#correct-invoice').onclick = () => {
         const f = snapshot.taxInvoice;
@@ -378,6 +377,8 @@ async function detailPage() {
         await update(form, changes, data.note, 'correction-dialog', '#correction-error');
     };
     $('#cancellation-form').onsubmit = async (event) => { event.preventDefault(); await update(event.currentTarget, { status: 'CANCELLED' }, $('#cancelNote').value, 'cancellation-dialog', '#cancellation-error'); };
+    // Kontrol siap sebelum detail terlihat, meskipun riwayat masih dimuat.
+    await Promise.all([loadDetail(), loadHistory()]);
 }
 
 async function allInvoices(taxPeriod) {

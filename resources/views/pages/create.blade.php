@@ -4,8 +4,8 @@
 @section('content')
 <div class="page-header"><div><h1 class="page-title" id="create-title">Catat e-Faktur Keluaran</h1><p class="page-description">Pilih invoice D-2, unggah PDF, lalu periksa hasil ekstraksi.</p></div><x-ui.button href="/tax-invoices" variant="secondary" id="create-back">Kembali</x-ui.button></div>
 <div id="replacement-info" class="notice mb-5" hidden></div>
-<form id="invoice-form" class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
-    <div class="space-y-6"><x-ui.card title="1. Invoice proyek">
+<form id="invoice-form" class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+    <div class="min-w-0 space-y-6"><x-ui.card title="1. Invoice proyek">
         @if(config('e1.d2.driver') === 'mock')
             <x-ui.select label="Invoice D-2" name="invoiceId" required disabled aria-describedby="invoiceId-help"><option value="">Memuat invoice D-2…</option></x-ui.select>
             <p id="invoiceId-help" class="field-help">Data dummy D-2 untuk simulasi. Hanya invoice tanpa faktur keluaran aktif yang ditampilkan. Cari nomor, ID invoice, proyek, atau klien.</p>

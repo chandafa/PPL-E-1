@@ -188,7 +188,7 @@ Setiap request sengaja salah. Pola respons: `{"code":"4xx","message":"...","data
 
 ## 5. Aturan nilai yang perlu diingat
 
-- Nominal pada input berupa **string** desimal, misalnya `"11000000.00"` (juga menerima `"11000000"`); respons menggunakan format Indonesia `"11.000.000,00"`.
+- Nominal pada input berupa **string** desimal, misalnya `"11000000.00"` (juga menerima `"11000000"`); respons JSON memakai `"11000000.00"`. Format Indonesia `"11.000.000,00"` digunakan pada tampilan web/PDF.
 - `taxPeriod` berformat `YYYY-MM`; `taxYear` harus sama dengan tahun pada `taxPeriod`.
 - PDF maksimum **5 MB**. Server bawaan PHP menolak lebih awal bila `upload_max_filesize` kecil; gunakan `composer serve`.
 - Satu invoice hanya boleh punya **satu faktur aktif**; NSFP tidak boleh ganda (termasuk faktur yang sudah dibatalkan).

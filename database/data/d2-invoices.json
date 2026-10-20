@@ -687,5 +687,41 @@
         "projectName": "Proyek Uji Flow 20261017-072712-kpwv",
         "clientId": "client-flow-20261017-072712-kpwv",
         "clientName": "Klien Uji Flow 20261017-072712-kpwv"
+    },
+    {
+        "invoiceId": "inv-manual-ppnbm-001",
+        "invoiceNumber": "INV-SIMULASI-PPNBM-001",
+        "manualUploadOnly": true,
+        "terminId": "trm-simulasi-ppnbm-001",
+        "taxParamId": "pjk-simulasi-ppnbm-001",
+        "invoiceDate": "2026-10-20",
+        "dppAmount": "1000000000.00",
+        "ppnAmount": "120000000.00",
+        "ppnbmAmount": "750000000.00",
+        "pphAmount": "0.00",
+        "totalAmount": "1870000000.00",
+        "status": "TERTAGIH",
+        "projectId": "prj-simulasi-yacht-001",
+        "projectName": "Simulasi Produksi Yacht Privat",
+        "clientId": "client-simulasi-yacht-001",
+        "clientName": "Klien Simulasi Yacht Privat"
+    },
+    {
+        "invoiceId": "inv-manual-jasa-001",
+        "invoiceNumber": "INV-SIMULASI-JASA-001",
+        "manualUploadOnly": true,
+        "terminId": "trm-simulasi-jasa-001",
+        "taxParamId": "pjk-demo-001",
+        "invoiceDate": "2026-10-20",
+        "dppAmount": "10000000.00",
+        "ppnAmount": "1100000.00",
+        "ppnbmAmount": "0.00",
+        "pphAmount": "0.00",
+        "totalAmount": "11100000.00",
+        "status": "TERTAGIH",
+        "projectId": "prj-simulasi-yacht-001",
+        "projectName": "Simulasi Produksi Yacht Privat",
+        "clientId": "client-simulasi-yacht-001",
+        "clientName": "Klien Simulasi Yacht Privat"
     }
 ]
