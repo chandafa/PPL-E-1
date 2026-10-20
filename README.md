@@ -26,6 +26,9 @@
 3. [🗺️ Alur proses](#alur-proses)
 4. [🧰 Teknologi dan prasyarat](#teknologi)
 5. [🚀 Instalasi dan menjalankan](#instalasi)
+    - [Linux: PostgreSQL Docker](#instalasi-linux)
+    - [Windows: PostgreSQL native](#instalasi-windows)
+    - [Konteks SQLite](#instalasi-sqlite)
 6. [⚙️ Konfigurasi `.env`](#konfigurasi)
 7. [🔐 Login dan hak akses](#login)
 8. [📡 Daftar 11 API](#daftar-api)
@@ -65,11 +68,7 @@ Keputusan demo lokal dan penyelarasan spesifikasi/kontrak PDF dicatat dalam
 Antarmuka E-1 tersedia di `/login` dan menggunakan Blade, Tailwind CSS, Solar Icons,
 serta komponen Blade dengan desain shadcn/ui. Data dibaca dan disimpan melalui 11 API yang tersedia.
 
-```bash
-npm ci
-npm run build
-composer serve
-```
+Ikuti [panduan instalasi Linux atau Windows](#instalasi) untuk menyiapkan runtime, database, dependensi, dan aset frontend.
 
 Buka `http://127.0.0.1:8080/login`. Gunakan token F-1, atau akun demo lokal bila
 `E1_DEV_LOGIN=true`. `npm run dev` dapat dipakai selama pengembangan sebagai pengganti build.
@@ -139,86 +138,261 @@ proyek dari **D-2**, lalu merekap pajak per masa pajak sampai pembayarannya terd
 
 | Komponen | Versi / keterangan |
 |---|---|
-| PHP | 8.4 dengan ekstensi `pdo_pgsql`, `mbstring`, `bcmath`, `gd`, `zip`, `fileinfo`, `openssl` |
-| Composer | 2.x |
-| PostgreSQL | 16 atau lebih baru (diuji pada 18) |
-| Laravel | 13 |
-| Alat uji | Postman, atau `curl` lewat Git Bash |
+| PHP | 8.4 atau 8.5, sesuai `composer.json` dan `composer.lock` |
+| Ekstensi PHP | `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `filter`, `gd`, `mbstring`, `openssl`, `pdo`, `pdo_pgsql`, `session`, `tokenizer`, `xml`, `xmlreader`, `xmlwriter`, `zip` |
+| Composer | 2.x; gunakan `composer install` untuk mengikuti lockfile |
+| Node.js / npm | Node 22 terbaru (minimal 22.12), melalui nvm atau nvm-windows |
+| PostgreSQL | 16 atau lebih baru; Docker Compose pada Linux, installer native pada Windows |
+| Git | untuk mengambil proyek |
+| Alat uji | Postman atau `curl` (`curl.exe` pada PowerShell) |
 
 Pustaka utama: `firebase/php-jwt` (token F-1), `smalot/pdfparser` (baca PDF), `maatwebsite/excel` (Excel), `barryvdh/laravel-dompdf` (PDF).
-
-<p align="right"><sub><a href="#daftar-isi">⬆ Kembali ke daftar isi</a></sub></p>
 
 <a id="instalasi"></a>
 ## 🚀 Instalasi dan menjalankan
 
-1. **Ambil dependensi**
+PHP/Laravel dan Node dijalankan di host. Pilih persiapan sesuai OS, lalu lanjutkan langkah bersama.
+Semua perintah proyek dijalankan dari folder `PPL-E-1`.
+
+- [1. Persiapan Linux Ubuntu/Debian](#instalasi-linux)
+- [2. Persiapan Windows native](#instalasi-windows)
+- [3. Clone, dependensi, dan `.env`](#instalasi-proyek)
+- [4. Menyiapkan database sesuai OS](#instalasi-database)
+- [5. Migrasi, build, dan menjalankan aplikasi](#instalasi-jalankan)
+- [6. Konteks beralih ke SQLite](#instalasi-sqlite)
+
+<a id="instalasi-linux"></a>
+### 1. Persiapan Linux Ubuntu/Debian (Bash)
+
+1. Pasang Git, PHP CLI 8.4/8.5, dan Composer 2. Paket PHP harus tersedia pada repositori distribusi yang dipakai; jika versi bawaan terlalu lama, siapkan sumber paket PHP yang sesuai terlebih dahulu. Ikuti [panduan Composer](https://getcomposer.org/download/) untuk pemasangan Composer.
+2. Pasang ekstensi dengan versi yang sama dengan PHP CLI aktif. Contoh berikut **untuk PHP 8.5**; ganti seluruh `8.5` menjadi `8.4` bila memakai PHP 8.4:
 
    ```bash
-   composer install
+   sudo apt-get update
+   sudo apt-get install git unzip php8.5-cli php8.5-common php8.5-bcmath php8.5-curl php8.5-gd php8.5-mbstring php8.5-pgsql php8.5-xml php8.5-zip
    ```
 
-2. **Siapkan `.env`**
+3. Pasang [nvm](https://github.com/nvm-sh/nvm#installing-and-updating), buka ulang terminal, lalu:
 
    ```bash
-   cp .env.example .env
-   php artisan key:generate
+   nvm install 22
+   nvm use 22
+   node --version
+   npm --version
    ```
 
-3. **Jalankan PostgreSQL dengan Docker Compose**
-
-   Compose membaca `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, dan `DB_PORT` dari
-   `.env`. Gunakan `DB_HOST=127.0.0.1` dan `DB_PORT=15439` untuk Laravel di host.
+   Proyek belum memiliki `.nvmrc`. Gunakan Node 22 terbaru dan jalankan `nvm use 22` pada terminal baru sebelum memakai npm/npx. Jangan memakai `sudo npm`.
+4. Pasang [Docker Engine beserta Compose plugin](https://docs.docker.com/engine/install/ubuntu/) sesuai distribusi. Untuk Debian, pilih instruksi Debian pada dokumentasi tersebut. Periksa daemon dan plugin:
 
    ```bash
-   docker compose up -d --wait postgres
+   docker version
+   docker compose version
    ```
 
-   Data disimpan dalam volume `postgres_data` dan tetap ada setelah container dihentikan.
-   Port hanya tersedia di localhost. Jika akses socket Docker ditolak, jalankan
-   perintah Docker dengan `sudo`. Database dan akun dibuat pada inisialisasi volume
-   pertama; perubahan kredensial di `.env` tidak mengubah akun pada volume yang sudah ada.
+   Jika socket Docker ditolak, jalankan perintah Docker di panduan ini dengan `sudo`, atau ikuti [pengaturan akses Docker](https://docs.docker.com/engine/install/linux-postinstall/). Tidak perlu memasang server PostgreSQL native pada jalur ini.
 
-   Untuk memakai PostgreSQL yang sudah terpasang, sesuaikan `DB_PORT` dan buat role
-   serta database secara manual (akan meminta password superuser `postgres`):
+<a id="instalasi-windows"></a>
+### 2. Persiapan Windows native (PowerShell)
 
-   ```bash
-   psql -U postgres -c "CREATE ROLE e1_app LOGIN PASSWORD 'e1_dev_pass' CREATEDB;"
-   psql -U postgres -c "CREATE DATABASE e1_pajak OWNER e1_app;"
-   psql -U postgres -c "CREATE DATABASE e1_pajak_test OWNER e1_app;"
+1. Pasang [Git for Windows](https://git-scm.com/downloads/win) dan [PHP untuk Windows](https://windows.php.net/download/) versi 8.4/8.5 x64 beserta runtime Visual C++ yang diminta halaman unduhan. Ekstrak PHP, misalnya ke `C:\php`, lalu tambahkan folder itu ke **PATH** pengguna. Buka ulang PowerShell.
+2. Jika belum ada `php.ini`, salin `php.ini-development` di folder PHP menjadi `php.ini`. Jalankan `php --ini` untuk memastikan file yang dibaca CLI. Atur `extension_dir` ke folder `ext` PHP dan aktifkan baris berikut (hapus `;` di awal bila sudah tersedia; jangan menduplikasi):
+
+   ```ini
+   extension_dir = "C:\php\ext"
+   extension=bcmath
+   extension=curl
+   extension=fileinfo
+   extension=gd
+   extension=mbstring
+   extension=openssl
+   extension=pdo_pgsql
+   extension=zip
    ```
 
-   > [!TIP]
-   > Di Windows, `psql` ada di `C:\Program Files\PostgreSQL\<versi>\bin\psql.exe`. Nama role, database, dan password di atas
-   > sesuai bawaan `.env.example` (`DB_USERNAME`, `DB_DATABASE`, `DB_PASSWORD`).
+   Sesuaikan path jika PHP dipasang di lokasi lain. `dom`, `xml`, `xmlreader`, dan `xmlwriter` umumnya sudah disertakan pada build Windows; pastikan terdaftar melalui `php -m`. Jika DLL gagal dimuat, cocokkan versi/build DLL dengan PHP sesuai [panduan ekstensi Windows](https://www.php.net/install.pecl.windows).
+3. Pasang [Composer-Setup.exe](https://getcomposer.org/download/) dan pilih `php.exe` dari instalasi yang sama. Buka ulang PowerShell setelah perubahan PATH.
+4. Pasang [nvm-windows](https://github.com/coreybutler/nvm-windows#installation--upgrades), lalu jalankan `nvm install 22`. Gunakan `nvm list`, kemudian `nvm use <versi-22.x.y-yang-terpasang>` dengan nomor lengkap yang ditampilkan. Periksa `node --version` dan `npm --version`. Jika penggantian versi meminta elevasi, jalankan nvm pada PowerShell Administrator; perintah proyek dapat dijalankan pada terminal biasa.
+5. Pasang [PostgreSQL untuk Windows](https://www.postgresql.org/download/windows/) versi 16 atau lebih baru. Pilih **PostgreSQL Server**, **pgAdmin 4**, dan **Command Line Tools**. Catat password superuser `postgres` dan port instalasi (contoh `5432`). Docker tidak diperlukan.
+6. Buka `services.msc`, pastikan service PostgreSQL berstatus **Running**. Buka pgAdmin dan hubungkan server lokal dengan password superuser tadi. Password master pgAdmin, bila diminta, berbeda dari password akun PostgreSQL.
 
-4. **Buat tabel**
+<a id="instalasi-proyek"></a>
+### 3. Clone, periksa runtime, dan siapkan proyek
 
-   ```bash
-   php artisan migrate                 # membuat tabel tanpa menghapus data
-   php artisan db:seed                 # opsional: menambahkan paket demo UI
+Perintah berikut berlaku pada Bash maupun PowerShell:
+
+```text
+git clone https://github.com/chandafa/PPL-E-1.git
+cd PPL-E-1
+php -v
+php --ini
+php -m
+composer --version
+node --version
+npm --version
+```
+
+Jika proyek sudah ada, cukup masuk ke foldernya. Pastikan versi dan ekstensi memenuhi tabel prasyarat sebelum memasang dependensi. Gunakan `command -v php` pada Linux atau `Get-Command php` pada PowerShell untuk memeriksa PHP yang dipakai.
+
+**Hanya untuk instalasi baru yang belum memiliki `.env`**, salin konfigurasi contoh:
+
+Linux:
+
+```bash
+cp .env.example .env
+```
+
+Windows:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Pertahankan `.env` dan `APP_KEY` pada instalasi yang sudah berjalan. Pasang dependensi mengikuti lockfile:
+
+```text
+composer install
+composer check-platform-reqs
+npm ci
+```
+
+Jangan mengatasi ekstensi hilang dengan `--ignore-platform-req`; pasang/aktifkan ekstensi PHP yang diminta. Pada instalasi baru dengan `APP_KEY` kosong, jalankan:
+
+```text
+php artisan key:generate
+```
+
+<a id="instalasi-database"></a>
+### 4. Siapkan database sesuai OS
+
+#### Linux: PostgreSQL melalui Docker Compose
+
+Gunakan konfigurasi berikut di `.env` (sama dengan `.env.example`; password contoh hanya untuk lokal):
+
+```dotenv
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=15439
+DB_DATABASE=e1_pajak
+DB_USERNAME=e1_app
+DB_PASSWORD=e1_dev_pass
+```
+
+Jalankan dari folder proyek:
+
+```bash
+docker compose up -d --wait postgres
+docker compose ps
+docker compose logs --tail=50 postgres
+```
+
+Compose memakai PostgreSQL 16 dan memetakan `127.0.0.1:15439` pada host ke port `5432` di container. Laravel di host harus memakai **15439**. Penjelasan port host/container tersedia di [dokumentasi jaringan Compose](https://docs.docker.com/compose/how-tos/networking/).
+
+Role dan database dibuat dari `.env` saat volume pertama kali diinisialisasi. Mengubah `.env` setelah itu tidak mengganti akun/password pada database yang sudah ada. Data disimpan dalam volume `postgres_data`; `docker compose stop postgres` menghentikan service tanpa menghapusnya. Jika port host sudah dipakai, pilih port kosong pada `DB_PORT`, lalu jalankan Compose kembali.
+
+#### Windows: PostgreSQL native melalui pgAdmin
+
+1. Di pgAdmin, hubungkan server lokal sebagai `postgres`, pilih database `postgres`, lalu buka **Tools → Query Tool**.
+2. Jalankan SQL berikut untuk membuat akun aplikasi. Ganti password contoh jika diperlukan, lalu samakan dengan `.env`:
+
+   ```sql
+   CREATE ROLE e1_app LOGIN PASSWORD 'e1_dev_pass';
    ```
 
-   Tutorial Postman menggunakan database kosong tersendiri. `migrate:fresh` menghapus
-   seluruh data dan tidak diperlukan untuk melengkapi demo UI.
+3. Jalankan perintah berikut **secara terpisah**, dengan Auto-commit aktif; `CREATE DATABASE` tidak boleh berada dalam transaction block:
 
-5. **Jalankan server**
-
-   ```bash
-   composer serve                       # http://127.0.0.1:8080
+   ```sql
+   CREATE DATABASE e1_pajak OWNER e1_app;
    ```
 
-6. **Periksa**
+   Jika role/database sudah ada, gunakan yang tersedia dan pastikan pemilik serta kredensialnya sesuai; tidak perlu membuat ulang.
+4. Ubah `.env` menjadi:
 
-   ```bash
-   curl http://127.0.0.1:8080/up        # HTTP 200 berarti aplikasi hidup
+   ```dotenv
+   DB_CONNECTION=pgsql
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   DB_DATABASE=e1_pajak
+   DB_USERNAME=e1_app
+   DB_PASSWORD=e1_dev_pass
    ```
 
-7. **Berkas PDF contoh** ada di [`docs/postman/samples/`](docs/postman/samples). Bila hilang, buat ulang dengan `php artisan demo:samples`.
+   Sesuaikan `DB_PORT` dengan port installer dan `DB_PASSWORD` dengan password role `e1_app`, bukan password superuser `postgres`.
+
+Alternatif pemeriksaan melalui PowerShell (contoh instalasi PostgreSQL 16):
+
+```powershell
+& "C:\Program Files\PostgreSQL\16\bin\psql.exe" -h 127.0.0.1 -p 5432 -U e1_app -d e1_pajak -c "SELECT current_database(), current_user;"
+```
+
+Perintah meminta password role aplikasi. Ganti folder `16` dan port sesuai instalasi.
+
+Untuk PostgreSQL native yang sudah tersedia pada Linux, buat role dan database dengan SQL yang sama melalui `psql` sebagai administrator; sesuaikan `.env` dengan port service tersebut dan lewati Compose.
+
+<a id="instalasi-jalankan"></a>
+### 5. Migrasi, build, dan jalankan aplikasi
+
+Setelah database siap, perintah ini berlaku pada kedua OS:
+
+```text
+php artisan config:clear
+php artisan migrate:status
+```
+
+Pada database baru, pesan bahwa tabel migrasi belum ditemukan dapat muncul; lanjutkan migrasi. Error koneksi atau autentikasi harus diselesaikan dahulu.
+
+```text
+php artisan migrate
+npm run build
+composer serve
+```
+
+Biarkan server berjalan, lalu buka terminal kedua di folder proyek untuk memeriksa:
+
+Linux:
+
+```bash
+curl -i http://127.0.0.1:8080/up
+```
+
+Windows:
+
+```powershell
+curl.exe -i http://127.0.0.1:8080/up
+```
+
+HTTP `200` berarti aplikasi hidup. Buka **http://127.0.0.1:8080/login**. Contoh konfigurasi mengaktifkan login demo lokal (`E1_DEV_LOGIN=true`) dan invoice mock (`D2_DRIVER=mock`). Endpoint `/up` tidak menggantikan pemeriksaan koneksi database di atas.
+
+Untuk mengisi demo UI, jalankan secara opsional:
+
+```text
+php artisan db:seed
+php artisan demo:samples
+```
+
+Berkas contoh tersedia di [`docs/postman/samples/`](docs/postman/samples). Tutorial Postman yang mencatat semua invoice dari awal membutuhkan database demo kosong tersendiri; seeder UI bukan prasyarat tutorial tersebut. `migrate:fresh` menghapus data dan tidak diperlukan untuk instalasi rutin.
 
 > [!IMPORTANT]
-> Jalankan dengan `composer serve`, bukan `php artisan serve`. Perintah ini menaikkan batas unggah PHP (`upload_max_filesize=6M`)
-> sehingga berkas sampai 5 MB (batas aplikasi) dapat diterima. Batas bawaan PHP hanya 2 MB.
+> Gunakan `composer serve`: script proyek mengatur `upload_max_filesize=6M` dan `post_max_size=16M` agar batas unggah aplikasi 5 MB dapat digunakan.
+
+Selama pengembangan UI, `npm run dev` dapat menggantikan build; jalankan Vite pada terminal terpisah dengan versi Node yang dipilih melalui nvm.
+
+<a id="instalasi-sqlite"></a>
+### 6. Konteks beralih dari PostgreSQL ke SQLite
+
+SQLite menyimpan database dalam satu file sehingga tidak memerlukan service PostgreSQL atau Docker. Namun, **SQLite belum didukung sebagai alur instalasi yang berfungsi pada proyek ini**. Gunakan PostgreSQL untuk menjalankan aplikasi saat ini.
+
+Konfigurasi Laravel sudah memiliki koneksi SQLite, tetapi migrasi E-1 memakai `ALTER TABLE ... ADD CONSTRAINT`, operator regex PostgreSQL, dan trigger/fungsi PL/pgSQL untuk menjaga riwayat. `composer.json` juga masih mewajibkan `ext-pdo_pgsql`, dan pengujian otomatis dikonfigurasi untuk PostgreSQL. Mengganti `.env` saja belum cukup; migrasi SQLite saat ini akan gagal.
+
+Sebagai konteks **setelah dukungan kode disiapkan**, PHP membutuhkan `pdo_sqlite` dan konfigurasi berbentuk berikut:
+
+```dotenv
+DB_CONNECTION=sqlite
+DB_DATABASE=/path/absolut/PPL-E-1/database/database.sqlite
+```
+
+Pada Windows, contoh path absolutnya `C:/workspace/PPL-E-1/database/database.sqlite`. File database perlu disiapkan; `DB_HOST`, `DB_PORT`, `DB_USERNAME`, dan `DB_PASSWORD` tidak dipakai untuk koneksi SQLite. Kosongkan `DB_URL` jika sebelumnya disetel agar tidak menimpa konfigurasi. Setelah mengganti konfigurasi, cache konfigurasi Laravel perlu dibersihkan.
+
+Peralihan yang benar memerlukan penyesuaian constraint/trigger, pemeriksaan kompatibilitas query dan nominal pajak, serta pengujian pada kedua database. Mengubah koneksi **tidak menyalin data PostgreSQL**: pemindahan data memerlukan ekspor/impor dan verifikasi tersendiri. Bagian ini menjelaskan konteks, bukan instruksi migrasi SQLite yang siap dijalankan.
 
 <p align="right"><sub><a href="#daftar-isi">⬆ Kembali ke daftar isi</a></sub></p>
 
@@ -227,7 +401,7 @@ Pustaka utama: `firebase/php-jwt` (token F-1), `smalot/pdfparser` (baca PDF), `m
 
 | Variabel | Bawaan | Fungsi |
 |---|---|---|
-| `DB_*` | `127.0.0.1:5432`, `e1_pajak`, `e1_app` | koneksi PostgreSQL |
+| `DB_*` | `127.0.0.1:15439`, `e1_pajak`, `e1_app` (contoh Compose; Windows native biasanya port `5432`) | koneksi PostgreSQL |
 | `F1_JWT_ALGO` | `HS256` | algoritma token (`HS256` atau `RS256`) |
 | `F1_JWT_SECRET` | rahasia contoh | rahasia bersama HS256 (ganti; minimal 32 karakter) |
 | `F1_JWT_PUBLIC_KEY_PATH` | kosong | kunci publik F-1 untuk `RS256` |
@@ -581,16 +755,34 @@ Kesalahan umum lain: `404 NOT_FOUND` (rute tidak ada), `405 METHOD_NOT_ALLOWED`,
 <a id="pengujian-otomatis"></a>
 ## ✅ Pengujian otomatis
 
+Pengujian memakai database **terpisah** `e1_pajak_test` sesuai `phpunit.xml`; jangan arahkan ke database berisi data kerja. Buat database ini sekali sebelum menjalankan tes.
+
+**Linux (Compose):** akun bawaan service adalah `e1_app`. Jika mengganti `DB_USERNAME`, sesuaikan `-U` di bawah.
+
 ```bash
-composer test          # PHPUnit: 100 uji; memerlukan database e1_pajak_test
+docker compose exec postgres psql -U e1_app -d postgres -c "CREATE DATABASE e1_pajak_test OWNER e1_app;"
 ```
+
+**Windows (pgAdmin):** masuk sebagai administrator `postgres`, buka Query Tool pada database `postgres`, dan jalankan perintah berikut sendiri dengan Auto-commit aktif:
+
+```sql
+CREATE DATABASE e1_pajak_test OWNER e1_app;
+```
+
+Jika database tes sudah ada, lewati pembuatannya. Koneksi host, port, username, dan password mengikuti `.env` kecuali ditimpa environment. Setelah database siap, jalankan pada kedua OS:
+
+```text
+composer test
+```
+
+Akun yang menjalankan tes harus dapat membuat dan menghapus tabel pada database tes.
 
 Cakupan: autentikasi dan amplop, setiap operasi (sukses dan seluruh kode kesalahan), ekstraksi PDF, ekspor Excel dan PDF,
 login tiruan, serta **uji kontrak** yang memvalidasi respons nyata dan seluruh [`examples/*.json`](examples)
 terhadap skema [`openapi.yaml`](openapi.yaml).
 
 Variabel `DB_HOST`, `DB_PORT`, `DB_USERNAME`, dan `DB_PASSWORD` dapat ditimpa lewat environment (mis. pada CI).
-Alur Postman dapat dijalankan dari terminal dengan Newman:
+Alur Postman dapat dijalankan dari terminal dengan Newman. Aktifkan Node melalui nvm/nvm-windows terlebih dahulu; `npx` akan meminta pemasangan Newman bila belum tersedia:
 
 ```bash
 npx newman run docs/postman/E1-API.postman_collection.json --working-dir docs/postman
@@ -677,14 +869,23 @@ Angka berformat Indonesia (`100.000.000,00`) maupun internasional diterima.
 
 | Gejala | Penyebab dan solusi |
 |---|---|
-| `password authentication failed for user "e1_app"` | role belum dibuat atau password berbeda; ulangi langkah 3 instalasi dan cek `DB_*` di `.env` |
+| Composer melaporkan `ext-bcmath`, `ext-gd`, `ext-pdo_pgsql`, atau `ext-xml` hilang | Linux: pasang paket ekstensi sesuai versi PHP CLI; Windows: aktifkan ekstensi pada file dari `php --ini`. Periksa `php -m` dan `composer check-platform-reqs`; jangan abaikan platform requirements. |
+| PHP/Composer memakai versi atau `php.ini` berbeda | periksa `command -v php` (Linux), `Get-Command php` (PowerShell), `php -v`, dan `php --ini`; perbaiki PATH lalu buka ulang terminal |
+| Docker tidak dapat terhubung ke daemon / socket ditolak | pastikan service Docker aktif; pada Linux gunakan `sudo docker compose ...` bila akun belum memiliki akses socket |
+| `Connection refused` ke PostgreSQL | Linux: periksa `docker compose ps` dan log, gunakan port host `15439`; Windows: periksa service PostgreSQL di `services.msc` dan port installer. Setelah memperbaiki `.env`, jalankan `php artisan config:clear`. |
+| PostgreSQL dari `docker run` tidak terjangkau dari host | perintah tanpa `-p` tidak memublikasikan port untuk koneksi Laravel melalui localhost; gunakan [Compose proyek](#instalasi-database) yang sudah mengatur pemetaan port |
+| Port PostgreSQL sudah dipakai | Linux: ubah `DB_PORT` ke port kosong lalu jalankan ulang Compose; Windows: pakai port service PostgreSQL yang benar dan samakan `.env` |
+| `password authentication failed for user "e1_app"` | cocokkan password role aplikasi dengan `.env`; pada Docker, perubahan `.env` tidak memperbarui password volume lama. Perbarui role melalui administrator atau gunakan kredensial yang sudah ada, tanpa menghapus volume. |
+| `database "e1_pajak" does not exist` | buat database dengan pemilik role aplikasi sesuai [langkah database](#instalasi-database); pastikan `DB_DATABASE` menunjuk database tersebut |
+| `Vite manifest not found` atau aset UI tidak termuat | aktifkan Node melalui nvm, jalankan `npm ci` lalu `npm run build`; untuk pengembangan, pastikan terminal `npm run dev` tetap berjalan |
+| Migrasi SQLite gagal pada constraint atau trigger | SQLite belum didukung; kembalikan konfigurasi PostgreSQL dan baca [konteks SQLite](#instalasi-sqlite) |
 | `could not find driver` | aktifkan ekstensi `pdo_pgsql` pada `php.ini` |
 | Berkas lebih dari 2 MB ditolak `INVALID_FILE` | jalankan dengan `composer serve` (menaikkan batas unggah) |
 | `401 UNAUTHORIZED` | token kedaluwarsa (bawaan 1 jam) atau rahasia berbeda; login ulang |
 | `403 FORBIDDEN` | peran bukan Admin, CEO, atau COO |
 | Login tiruan menjawab `404 NOT_FOUND` | set `E1_DEV_LOGIN=true`, lalu `php artisan config:clear` |
-| `409` saat mencatat faktur | invoice sudah punya faktur aktif atau NSFP sudah ada; ulangi dengan `php artisan migrate:fresh` |
-| Hasil berbeda dari contoh README | database tidak kosong; jalankan `php artisan migrate:fresh` |
+| `409` saat mencatat faktur | invoice sudah punya faktur aktif atau NSFP sudah ada; gunakan invoice baru atau alur faktur pengganti. Untuk mengulang tutorial, gunakan database demo terpisah yang boleh dikosongkan. |
+| Hasil berbeda dari contoh README | periksa apakah database berisi seeder atau data sebelumnya; ikuti persiapan database demo pada tutorial Postman. Jangan mengosongkan database kerja. |
 | Port 8080 dipakai | ubah port pada script `serve` di `composer.json` dan `BASE` pada tutorial |
 | `curl` di PowerShell aneh | gunakan `curl.exe`, atau pakai Git Bash atau Postman |
 
