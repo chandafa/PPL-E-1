@@ -884,6 +884,20 @@ paths:
                     message: "Masa pajak belum memiliki rekap"
                     data: null
                     errorCode: TAX_RECAP_NOT_FOUND
+        "409":
+          description: ID / kode billing sudah pernah digunakan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                DUPLICATE_BILLING_ID:
+                  summary: ID / kode billing sudah pernah digunakan
+                  value:
+                    code: "409"
+                    message: "ID / kode billing sudah pernah digunakan"
+                    data: null
+                    errorCode: DUPLICATE_BILLING_ID
   /api/v1/tax-recaps/{taxPeriod}/export:
     get:
       operationId: exportTaxRecap
@@ -2068,6 +2082,7 @@ components:
             - INVOICE_NOT_FOUND
             - INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE
             - DUPLICATE_NSFP
+            - DUPLICATE_BILLING_ID
             - REPLACEMENT_INVOICE_MISMATCH
             - TAX_INVOICE_NOT_FOUND
             - INVALID_FILTER
