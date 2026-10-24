@@ -40,7 +40,7 @@ export function taxPeriodLabel(value) {
 }
 
 export function statusBadge(status, replaced = false) {
-    const statuses = { NORMAL: ['Normal', 'normal'], REPLACEMENT: ['Pengganti', 'replacement'], CANCELLED: ['Dibatalkan', 'cancelled'], INCOMPLETE: ['Draft / Belum Konfirmasi', 'incomplete'], CONFIRMED: ['Terkonfirmasi', 'confirmed'], NOT_RECORDED: ['Belum dicatat', 'normal'] };
+    const statuses = { NORMAL: ['Normal', 'normal'], REPLACEMENT: ['Pengganti', 'replacement'], CANCELLED: ['Dibatalkan', 'cancelled'], INCOMPLETE: ['Incompleted', 'incomplete'], CONFIRMED: ['Confirmed', 'confirmed'], NOT_RECORDED: ['Belum dicatat', 'normal'] };
     const [label, style] = statuses[status] || [String(status), 'normal'];
     return `<span class="status status-${style}">${escapeHtml(label)}</span>${replaced ? ' <span class="status status-replaced">Terganti</span>' : ''}`;
 }

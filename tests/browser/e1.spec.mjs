@@ -97,7 +97,7 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
     await page.locator('#paymentProofFile').setInputFiles(resolve('storage/framework/testing/e1-browser-samples/bukti-pembayaran.pdf'));
     await page.getByRole('button', { name: 'Konfirmasi Pembayaran' }).click();
     await expect(page).toHaveURL(/\/tax-recaps\/2026-11$/);
-    await expect(page.locator('#recap-payments')).toContainText('Terkonfirmasi');
+    await expect(page.locator('#recap-payments')).toContainText('Confirmed');
     await page.locator('#recap-invoices').getByRole('link', { name: 'Detail', exact: true }).first().click();
     await expect(page.locator('#invoice-history')).toContainText('Pencatatan faktur');
     await page.getByRole('button', { name: 'Koreksi Faktur', exact: true }).click();
@@ -124,7 +124,7 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
     await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
     await expect(page).toHaveURL(/\/tax-recaps\/2026-12$/);
     await expect(page.locator('#recap-payments')).toContainText('BILL-UI-DRAFT');
-    await expect(page.locator('#recap-payments')).toContainText('Draft / Belum Konfirmasi');
+    await expect(page.locator('#recap-payments')).toContainText('Incompleted');
 });
 
 test('pencatatan PDF, konflik, pembatalan, dan faktur pengganti', async ({ page }) => {

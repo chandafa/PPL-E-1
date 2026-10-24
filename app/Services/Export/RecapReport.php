@@ -90,14 +90,14 @@ final class RecapReport
 
     public static function paymentStatusLabel(string $status): string
     {
-        return $status === PembayaranPajak::STATUS_CONFIRMED ? 'Terkonfirmasi' : 'Draft / Belum Konfirmasi';
+        return $status === PembayaranPajak::STATUS_CONFIRMED ? 'Confirmed' : 'Incompleted';
     }
 
     public static function recapStatusLabel(string $status): string
     {
         return match ($status) {
-            RekapPajakBulanan::PAYMENT_CONFIRMED => 'Terkonfirmasi',
-            RekapPajakBulanan::PAYMENT_INCOMPLETE => 'Draft / Belum Konfirmasi',
+            RekapPajakBulanan::PAYMENT_CONFIRMED => 'Confirmed',
+            RekapPajakBulanan::PAYMENT_INCOMPLETE => 'Incompleted',
             default => 'Belum dicatat',
         };
     }
