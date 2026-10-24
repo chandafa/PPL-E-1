@@ -331,6 +331,69 @@ function correctionItem(item = {}) {
     return `<div class="rounded-md border border-border p-4" data-correction-item><div class="grid gap-3 sm:grid-cols-2">${[['itemCode', 'Kode', item.itemCode], ['itemName', 'Nama barang / jasa', item.itemName], ['saleReplacementAdvanceTermAmount', 'Harga / penggantian / termin', item.saleReplacementAdvanceTermAmount ?? '0.00'], ['discountAmount', 'Potongan', item.discountAmount ?? '0.00'], ['receivedAdvanceAmount', 'Uang muka diterima', item.receivedAdvanceAmount ?? '0.00']].map(([name, label, value]) => `<label class="block text-xs font-medium">${label}<input class="field mt-2" data-item-field="${name}" value="${e(value)}" required ${['itemCode', 'itemName'].includes(name) ? '' : 'inputmode="decimal" pattern="[0-9]+([.][0-9]{1,2})?"'}></label>`).join('')}</div><button type="button" class="btn btn-ghost mt-2" data-remove-item>${icon('trash')}Hapus item</button></div>`;
 }
 
+const historyLabels = {
+    taxInvoiceNumber: 'Nomor faktur / NSFP',
+    taxInvoiceDate: 'Tanggal e-Faktur',
+    taxPeriod: 'Masa pajak',
+    dpp: 'DPP',
+    ppn: 'PPN',
+    ppnbm: 'PPnBM',
+    status: 'Status faktur',
+    replacesTaxInvoiceId: 'Faktur pengganti dari',
+    replacedByTaxInvoiceId: 'Digantikan oleh',
+};
+const historyActions = {
+    CREATE: 'Pencatatan faktur',
+    UPDATE: 'Koreksi faktur',
+    STATUS_CHANGE: 'Perubahan status',
+    DELETE: 'Penghapusan faktur',
+};
+const historyActionIcons = {
+    CREATE: 'plus',
+    UPDATE: 'edit',
+    STATUS_CHANGE: 'replace',
+    DELETE: 'close',
+};
+
+function historyValue(field, value) {
+    if (value === null || value === undefined || value === '') return '<span class="text-muted">Tidak ada</span>';
+    if (field === 'status') return statusBadge(value);
+    if (field === 'taxInvoiceDate') return e(dateLabel(value));
+    if (field === 'taxPeriod') return e(taxPeriodLabel(value));
+    if (['dpp', 'ppn', 'ppnbm', 'saleReplacementAdvanceTermAmount', 'discountAmount', 'receivedAdvanceAmount'].includes(field)) {
+        return /^-?\d+(\.\d{1,2})?$/.test(String(value)) ? money(value) : e(value);
+    }
+    return e(value);
+}
+
+function historyItems(items) {
+    if (!Array.isArray(items) || !items.length) return '<p class="text-sm text-muted">Tidak ada item barang atau jasa.</p>';
+    return `<ul class="space-y-3">${items.map((item, index) => `<li class="rounded-md border border-border bg-white p-3"><p class="text-sm font-semibold">${e(item.itemName || `Item ${index + 1}`)}</p><p class="mt-1 text-xs text-muted">Kode ${e(item.itemCode || '—')}</p><dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3"><div><dt class="text-xs text-muted">Harga / termin</dt><dd class="mt-1 text-sm font-medium">${historyValue('saleReplacementAdvanceTermAmount', item.saleReplacementAdvanceTermAmount)}</dd></div><div><dt class="text-xs text-muted">Potongan</dt><dd class="mt-1 text-sm font-medium">${historyValue('discountAmount', item.discountAmount)}</dd></div><div><dt class="text-xs text-muted">Uang muka diterima</dt><dd class="mt-1 text-sm font-medium">${historyValue('receivedAdvanceAmount', item.receivedAdvanceAmount)}</dd></div></dl></li>`).join('')}</ul>`;
+}
+
+function historySnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object') return '<p class="text-sm text-muted">Belum ada nilai sebelumnya.</p>';
+    const fields = Object.entries(snapshot).filter(([field]) => field !== 'items');
+    return `<dl class="grid gap-x-6 gap-y-4 sm:grid-cols-2">${fields.map(([field, value]) => `<div class="min-w-0"><dt class="text-xs text-muted">${e(historyLabels[field] || field.replace(/([A-Z])/g, ' $1'))}</dt><dd class="mt-1 break-words text-sm font-medium">${historyValue(field, value)}</dd></div>`).join('')}</dl>${Array.isArray(snapshot.items) ? `<div class="${fields.length ? 'mt-5 border-t border-border pt-4' : ''}"><h4 class="mb-3 text-xs font-semibold text-muted">Item barang / jasa (${snapshot.items.length})</h4>${historyItems(snapshot.items)}</div>` : ''}`;
+}
+
+function historyChanges(before, after) {
+    if (!before) return `<div class="rounded-lg border border-[#d9e3eb] bg-[#f7f9fb] p-4"><h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">Rincian faktur</h4>${historySnapshot(after)}</div>`;
+    const fields = [...new Set([...Object.keys(before || {}), ...Object.keys(after || {})])];
+    if (!fields.length) return '<p class="text-sm text-muted">Detail perubahan tidak tersedia.</p>';
+    return `<div class="space-y-3">${fields.map((field) => {
+        const label = historyLabels[field] || field.replace(/([A-Z])/g, ' $1');
+        if (field === 'items') return `<div class="rounded-lg border border-border p-4"><h4 class="mb-3 text-sm font-semibold">Perubahan item barang / jasa</h4><div class="grid gap-4 lg:grid-cols-2"><section><p class="mb-2 text-xs font-semibold text-muted">Sebelum (${Array.isArray(before.items) ? before.items.length : 0} item)</p>${historyItems(before.items)}</section><section><p class="mb-2 text-xs font-semibold text-muted">Sesudah (${Array.isArray(after.items) ? after.items.length : 0} item)</p>${historyItems(after.items)}</section></div></div>`;
+        return `<div class="grid gap-3 rounded-lg border border-border p-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center"><h4 class="text-sm font-semibold sm:col-span-3">${e(label)}</h4><div class="min-w-0"><p class="mb-1 text-xs text-muted">Sebelum</p><div class="break-words text-sm">${historyValue(field, before[field])}</div></div><span class="hidden text-muted sm:block" aria-hidden="true">→</span><div class="min-w-0"><p class="mb-1 text-xs text-muted">Sesudah</p><div class="break-words text-sm font-medium">${historyValue(field, after[field])}</div></div></div>`;
+    }).join('')}</div>`;
+}
+
+function historyEntry(entry) {
+    const title = historyActions[entry.action] || entry.action;
+    const actionIcon = historyActionIcons[entry.action] || 'document';
+    return `<li class="relative pl-8"><span class="absolute left-[-0.625rem] top-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-white text-primary shadow-sm" aria-hidden="true">${icon(actionIcon)}</span><details class="group rounded-lg border border-border bg-white"><summary class="flex min-h-16 cursor-pointer list-none flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg px-4 py-3 hover:bg-slate-50 focus-visible:outline-offset-[-3px]"><span class="min-w-0"><span class="block text-sm font-semibold">${e(title)}</span><span class="mt-1 block text-xs text-muted">Oleh ${e(entry.actorAkunId)}</span></span><time class="text-xs text-muted">${e(dateLabel(entry.changedAt))}</time></summary><div class="border-t border-border p-4 sm:p-5">${entry.note ? `<p class="mb-4 rounded-md border-l-2 border-primary bg-slate-50 px-3 py-2 text-sm leading-relaxed">${e(entry.note)}</p>` : ''}${historyChanges(entry.beforeSnapshot, entry.afterSnapshot)}</div></details></li>`;
+}
+
 async function detailPage() {
     let snapshot;
     const endpoint = `/tax-invoices/${encodeURIComponent(invoiceId)}`;
@@ -346,8 +409,7 @@ async function detailPage() {
     async function loadHistory() {
         try {
             const data = await api(`${endpoint}/history`);
-            const labels = { CREATE: 'Pencatatan faktur', UPDATE: 'Koreksi faktur', STATUS_CHANGE: 'Perubahan status' };
-            $('#invoice-history').innerHTML = data.history.length ? `<ol class="divide-y divide-border">${data.history.map((entry) => `<li class="px-5 py-5"><div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-sm font-semibold">${e(labels[entry.action] || entry.action)}</h3><span class="text-xs text-muted">${e(dateLabel(entry.changedAt))}</span></div><p class="mt-1 text-xs text-muted">Oleh ${e(entry.actorAkunId)}</p>${entry.note ? `<p class="mt-3 text-sm">${e(entry.note)}</p>` : ''}<details class="mt-3"><summary class="inline-flex min-h-11 cursor-pointer items-center text-xs font-semibold text-primary">Lihat nilai sebelum dan sesudah</summary><div class="grid gap-3 sm:grid-cols-2"><div><h4 class="mb-2 text-xs text-muted">Sebelum</h4><pre class="max-h-72 overflow-auto whitespace-pre-wrap break-all rounded bg-slate-50 p-3 text-xs">${e(JSON.stringify(entry.beforeSnapshot, null, 2))}</pre></div><div><h4 class="mb-2 text-xs text-muted">Sesudah</h4><pre class="max-h-72 overflow-auto whitespace-pre-wrap break-all rounded bg-slate-50 p-3 text-xs">${e(JSON.stringify(entry.afterSnapshot, null, 2))}</pre></div></div></details></li>`).join('')}</ol>` : empty('Belum ada riwayat', 'Perubahan faktur akan tercatat di sini.');
+            $('#invoice-history').innerHTML = data.history.length ? `<ol class="space-y-7 p-5 sm:p-6">${data.history.map(historyEntry).join('')}</ol>` : empty('Belum ada riwayat', 'Perubahan faktur akan tercatat di sini.');
         } catch (error) { $('#invoice-history').innerHTML = empty('Riwayat gagal dimuat', error.message); }
     }
     $('#replace-invoice').onclick = () => location.assign(`/tax-invoices/create?replacesTaxInvoiceId=${encodeURIComponent(invoiceId)}`);
