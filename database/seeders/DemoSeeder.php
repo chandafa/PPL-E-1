@@ -32,6 +32,8 @@ class DemoSeeder extends Seeder
         }
         $this->temporaryFiles = $this->createdUris = [];
         try {
+            $this->call(ModulD2DemoSeeder::class);
+
             // Render PDF sebelum mengambil lock agar waktu transaksi tetap terbatas.
             $prepared = [];
             foreach (DemoDataset::seededInvoices() as $id => $fixture) {

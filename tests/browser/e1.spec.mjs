@@ -68,7 +68,7 @@ test('akses, filter, pagination, empty/error, dan login demo', async ({ page }) 
 test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async ({ page }) => {
     await login(page, 'COO');
     await page.goto('/tax-recaps/2026-11');
-    await expect(page.locator('#recap-summary')).toContainText('Rp 46.200.000,00');
+    await expect(page.locator('#recap-summary')).toContainText('Rp 46.750.000,00');
     await expect(page.locator('#recap-invoices')).toContainText('November 2026');
     await expect(page.locator('#recap-invoices tbody tr').first().locator('td').nth(1)).toHaveText(/^[0-9]{1,2} November 2026$/);
     await expect(page.locator('#recap-payments tbody tr').first().locator('td').nth(4)).toHaveText(/ WIB$/);
