@@ -11,6 +11,12 @@ use Tests\TestCase;
 /** API-KE01-05: koreksi atau batalkan faktur dengan riwayat. */
 class TaxInvoiceUpdateTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
+    }
+
     private function koreksi(string $id, array $body, string $role = 'Admin', string $akun = 'AKN-0002')
     {
         return $this->patchJson('/api/v1/tax-invoices/'.$id, $body, $this->auth($role, $akun));

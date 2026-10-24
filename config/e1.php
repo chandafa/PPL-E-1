@@ -52,15 +52,14 @@ return [
     |--------------------------------------------------------------------------
     | Integrasi D-2 (invoice)
     |--------------------------------------------------------------------------
-    | driver "mock" memakai database/data/d2-invoices.json (kontrak D-2 belum
-    | tersedia); driver "http" memanggil layanan D-2 sebenarnya.
+    | driver "mock" membaca snapshot tabel D-2 yang ditanam oleh ModulD2Seeder;
+    | driver "http" memanggil layanan D-2 sebenarnya.
     */
     'd2' => [
         'driver' => env('D2_DRIVER', 'mock'),
         'base_url' => env('D2_BASE_URL'),
         'invoice_path' => env('D2_INVOICE_PATH', '/api/v1/invoices/{invoiceId}'),
         'timeout' => (int) env('D2_TIMEOUT', 5),
-        'mock_file' => database_path('data/d2-invoices.json'),
     ],
 
     /*

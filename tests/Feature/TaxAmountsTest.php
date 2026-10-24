@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\RiwayatPerubahanFaktur;
-use Database\Seeders\Support\DemoDataset;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -13,11 +12,28 @@ use Tests\TestCase;
 
 class TaxAmountsTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
+    }
+
     public function test_produk_dan_jasa_satu_proyek_tidak_saling_mewarisi_ppnbm_dan_rekap_mengikuti_siklus_faktur(): void
     {
-        $fixtures = DemoDataset::invoices(includeManual: true);
-        $goods = $this->createFaktur('inv-manual-ppnbm-001', $fixtures['inv-manual-ppnbm-001']['pdf']);
-        $service = $this->createFaktur('inv-manual-jasa-001', $fixtures['inv-manual-jasa-001']['pdf']);
+        $goods = $this->createFaktur('inv-manual-ppnbm-001', [
+            'date' => '11 Oktober 2026',
+            'dpp' => '1000000000.00',
+            'ppn' => '120000000.00',
+            'ppnbm' => '750000000.00',
+            'items' => [['code' => 'YACHT-01', 'name' => 'Produk simulasi', 'amount' => '1000000000.00']],
+        ]);
+        $service = $this->createFaktur('inv-manual-jasa-001', [
+            'date' => '11 Oktober 2026',
+            'dpp' => '10000000.00',
+            'ppn' => '1100000.00',
+            'ppnbm' => '0.00',
+            'items' => [['code' => 'JASA-01', 'name' => 'Jasa simulasi', 'amount' => '10000000.00']],
+        ]);
         $this->assertSame('750000000.00', $goods['ppnbm']);
         $this->assertSame('0.00', $service['ppnbm']);
         $this->assertSame('YACHT-01', $goods['items'][0]['itemCode']);

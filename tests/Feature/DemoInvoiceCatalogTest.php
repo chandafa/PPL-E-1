@@ -3,7 +3,8 @@
 namespace Tests\Feature;
 
 use App\Services\Auth\DevTokenIssuer;
-use Database\Seeders\Support\DemoDataset;
+use App\Models\Invoice;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class DemoInvoiceCatalogTest extends TestCase
@@ -15,23 +16,43 @@ class DemoInvoiceCatalogTest extends TestCase
         return ['Authorization' => 'Bearer '.$issued['token']];
     }
 
-    public function test_manual_upload_invoice_is_available_but_excluded_from_seeder(): void
+    public function test_database_contains_the_current_d2_reference_records(): void
     {
         config(['e1.d2.driver' => 'mock']);
-        $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk()
-            ->assertJsonFragment(['invoiceId' => 'inv-manual-001', 'manualUploadOnly' => true]);
-        $this->assertArrayNotHasKey('inv-manual-001', DemoDataset::invoices());
-        $this->assertArrayNotHasKey('inv-manual-001', DemoDataset::seededInvoices());
-        $this->assertCount(31, DemoDataset::seededInvoices());
+        $this->assertDatabaseCount('contracts', 3);
+        $this->assertDatabaseCount('termins', 4);
+        $this->assertDatabaseCount('tax_parameters', 1);
+        $this->assertDatabaseCount('invoices', 1);
+        $this->assertDatabaseCount('invoice_histories', 1);
+        $this->assertNotContains('project_name', Schema::getColumnListing('contracts'));
+        $this->assertNotContains('client_id', Schema::getColumnListing('invoices'));
+        $this->assertNotContains('client_name', Schema::getColumnListing('invoices'));
+        $this->assertDatabaseHas('invoices', [
+            'invoice_id' => 'inv-demo-sample',
+            'invoice_number' => 'INV-2026-SAMPLE',
+            'dpp_amount' => 100000000,
+            'ppn_amount' => 11000000,
+        ]);
+        $this->seed(\Database\Seeders\ModulD2Seeder::class);
+        $this->assertDatabaseCount('contracts', 3);
+        $this->assertDatabaseCount('termins', 4);
+        $this->assertDatabaseCount('invoices', 1);
+        $this->assertDatabaseCount('invoice_histories', 1);
     }
 
-    public function test_catalog_uses_the_same_dummy_data_as_d2(): void
+    public function test_catalog_is_read_from_the_seeded_d2_invoice_tables(): void
     {
         config(['e1.d2.driver' => 'mock']);
-        $expected = json_decode(file_get_contents(config('e1.d2.mock_file')), true, flags: JSON_THROW_ON_ERROR);
-
-        $this->getJson('/api/ui/d2/invoices', $this->headers())
-            ->assertOk()->assertJsonPath('data.invoices', $expected);
+        $response = $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk();
+        $this->assertSame(
+            Invoice::query()->orderBy('invoice_id')->pluck('invoice_id')->all(),
+            array_column($response->json('data.invoices'), 'invoiceId'),
+        );
+        $response->assertJsonPath('data.invoices.0.invoiceId', 'inv-demo-sample')
+            ->assertJsonPath('data.invoices.0.projectId', 'prj-demo-001')
+            ->assertJsonPath('data.invoices.0.projectName', null)
+            ->assertJsonPath('data.invoices.0.clientId', null)
+            ->assertJsonPath('data.invoices.0.clientName', null);
     }
 
     public function test_catalog_requires_an_authorized_f1_identity(): void
@@ -42,22 +63,22 @@ class DemoInvoiceCatalogTest extends TestCase
 
     public function test_active_invoices_disappear_and_cancelled_invoices_return(): void
     {
-        $original = $this->createFaktur('inv-demo-001');
+        $original = $this->createFaktur('inv-demo-sample');
         $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk()
-            ->assertJsonMissing(['invoiceId' => 'inv-demo-001']);
-        $replacement = $this->createFaktur('inv-demo-001', [], $original['taxInvoiceId']);
+            ->assertJsonMissing(['invoiceId' => 'inv-demo-sample']);
+        $replacement = $this->createFaktur('inv-demo-sample', [], $original['taxInvoiceId']);
         $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk()
-            ->assertJsonMissing(['invoiceId' => 'inv-demo-001']);
+            ->assertJsonMissing(['invoiceId' => 'inv-demo-sample']);
         $this->patchJson('/api/v1/tax-invoices/'.$replacement['taxInvoiceId'], [
             'changes' => ['status' => 'CANCELLED'], 'note' => 'Uji invoice tersedia kembali',
         ], $this->headers())->assertOk();
         $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk()
-            ->assertJsonMissing(['invoiceId' => 'inv-demo-001']);
+            ->assertJsonMissing(['invoiceId' => 'inv-demo-sample']);
         $this->patchJson('/api/v1/tax-invoices/'.$original['taxInvoiceId'], [
             'changes' => ['status' => 'CANCELLED'], 'note' => 'Batalkan juga faktur asal yang aktif kembali',
         ], $this->headers())->assertOk();
         $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk()
-            ->assertJsonFragment(['invoiceId' => 'inv-demo-001']);
+            ->assertJsonFragment(['invoiceId' => 'inv-demo-sample']);
     }
 
     public function test_http_driver_does_not_offer_dummy_invoices(): void

@@ -13,6 +13,7 @@ class TaxInvoiceQueryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
 
         // A,B,C masa 2026-11; D masa 2026-12. C dibatalkan.
         $this->f['A'] = $this->createFaktur('inv-demo-001', ['nsfp' => '010.000-26.00000101', 'date' => '1 November 2026']);
@@ -57,13 +58,13 @@ class TaxInvoiceQueryTest extends TestCase
         $this->assertSame(['102', '101'], $this->numbers('?taxPeriod=2026-11&status=NORMAL'));
     }
 
-    public function test_filter_proyek_dan_klien_menurut_id_atau_nama(): void
+    public function test_filter_proyek_by_id_and_unavailable_d2_names_and_clients_match_nothing(): void
     {
         $this->assertSame(['103', '102'], $this->numbers('?project=prj-demo-002'));
-        $this->assertSame(['103', '102'], $this->numbers('?project=gudang'));
-        $this->assertSame(['103', '102'], $this->numbers('?client=lintas'));
-        $this->assertSame(['103', '102'], $this->numbers('?client=0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c01'));
-        $this->assertSame(['104'], $this->numbers('?client=Samudra'));
+        $this->assertSame([], $this->numbers('?project=gudang'));
+        $this->assertSame([], $this->numbers('?client=lintas'));
+        $this->assertSame([], $this->numbers('?client=0191f3a0-7c1e-7a52-9d3b-4f6e2a1b8c01'));
+        $this->assertSame([], $this->numbers('?client=Samudra'));
     }
 
     public function test_filter_nomor_faktur_sebagian_dan_karakter_khusus_aman(): void

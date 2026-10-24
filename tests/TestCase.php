@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Database\Seeders\ModulD2Seeder;
 use Database\Seeders\Support\FakeEFakturPdf;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,6 +19,8 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->seed(ModulD2Seeder::class);
 
         Storage::fake('local');
     }
@@ -79,7 +82,7 @@ abstract class TestCase extends BaseTestCase
      * @param  array<string, mixed>  $pdf  opsi FakeEFakturPdf (nsfp, date, dpp, ppn, ...)
      * @return array<string, mixed>
      */
-    protected function createFaktur(string $invoiceId = 'inv-demo-001', array $pdf = [], ?string $replaces = null, string $role = 'Admin'): array
+    protected function createFaktur(string $invoiceId = 'inv-demo-sample', array $pdf = [], ?string $replaces = null, string $role = 'Admin'): array
     {
         $payload = [
             'invoiceId' => $invoiceId,
