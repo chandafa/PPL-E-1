@@ -106,8 +106,15 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
     await page.getByRole('button', { name: 'Simpan Koreksi', exact: true }).click();
     await expect(page.locator('#correction-dialog')).not.toBeVisible();
     await expect(page.locator('#invoice-history')).toContainText('Pemeriksaan koreksi melalui UI');
-    await page.getByText('Lihat nilai sebelum dan sesudah', { exact: true }).last().click();
-    await expect(page.locator('#invoice-history pre').last()).toBeVisible();
+    const latestHistory = page.locator('#invoice-history details').last();
+    await expect(latestHistory).not.toHaveAttribute('open');
+    await latestHistory.locator('summary').click();
+    await expect(latestHistory).toHaveAttribute('open', '');
+    await expect(latestHistory).toContainText('Sebelum');
+    await expect(latestHistory).toContainText('Sesudah');
+    await expect(page.locator('#invoice-history pre')).toHaveCount(0);
+    await latestHistory.locator('summary').click();
+    await expect(latestHistory).not.toHaveAttribute('open');
     await page.goto('/tax-recaps/2026-12/payments/create');
     await expect(page.locator('#taxPeriod')).toHaveValue('Desember 2026');
     await expect(page.locator('#payment-fields')).not.toHaveAttribute('disabled');
