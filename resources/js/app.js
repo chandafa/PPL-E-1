@@ -597,20 +597,11 @@ async function paymentPage() {
         $('#save-payment').innerHTML = `${icon('check')}Konfirmasi Pembayaran`;
     }
     const billingInput = $('#billingId');
-    const billingError = $('[data-error-for="billingId"]');
-    function clearBillingError() {
-        billingInput.removeAttribute('aria-invalid');
-        billingInput.removeAttribute('aria-describedby');
-        billingError.hidden = true;
-        billingError.textContent = '';
-    }
-    billingInput.addEventListener('input', clearBillingError);
     $('#payment-fields').disabled = !data.invoices.length;
     if (!data.invoices.length) notice('Belum ada faktur pada masa pajak ini. Catat faktur atau pilih periode lain melalui rekap.', 'info');
     updateDifference();
     form.onsubmit = async (event) => {
         event.preventDefault(); clearNotice();
-        clearBillingError();
         try {
             if (!existing && newDifference() > 0n) throw new Error('Pembayaran tidak dapat disimpan karena jumlah setor melebihi total PPN (selisih plus). Sesuaikan jumlah setor agar selisih menjadi 0 atau minus.');
             if (!existing) validateFile($('#eBillingFile'));
@@ -622,18 +613,7 @@ async function paymentPage() {
             await busy(form, () => api(existing ? `/tax-payments/${encodeURIComponent(paymentId)}` : '/tax-payments', { method: existing ? 'PATCH' : 'POST', body }), 'Menyimpan pembayaran…');
             flash(existing ? 'Pembayaran berhasil dikonfirmasi.' : 'Pembayaran berhasil disimpan.');
             location.assign(`/tax-recaps/${period}`);
-        } catch (error) {
-            if (!existing && error.code === 'DUPLICATE_BILLING_ID') {
-                billingError.id = 'billingId-error';
-                billingError.textContent = error.message;
-                billingError.hidden = false;
-                billingInput.setAttribute('aria-invalid', 'true');
-                billingInput.setAttribute('aria-describedby', billingError.id);
-                billingInput.focus();
-                return;
-            }
-            notice(error.message);
-        }
+        } catch (error) { notice(error.message); }
     };
 }
 
