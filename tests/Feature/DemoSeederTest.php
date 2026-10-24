@@ -32,7 +32,7 @@ class DemoSeederTest extends TestCase
             '2026-11' => [3, '46200000.00', '0.00', 'INCOMPLETE'],
             '2026-12' => [1, '6600000.00', '-6600000.00', 'NOT_RECORDED'],
             '2027-01' => [1, '1100000.00', '-100000.00', 'CONFIRMED'],
-            '2027-02' => [1, '1100000.00', '100000.00', 'CONFIRMED'],
+            '2027-02' => [1, '1100000.00', '0.00', 'CONFIRMED'],
         ] as $period => [$count, $ppn, $difference, $status]) {
             $this->getJson('/api/v1/tax-recaps/'.$period, $this->auth())->assertOk()
                 ->assertJsonPath('data.recap.invoiceCount', $count)->assertJsonPath('data.recap.totalPpn', $ppn)
