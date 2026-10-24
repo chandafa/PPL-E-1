@@ -55,7 +55,7 @@ mengikuti katalog, bukan jam komputer. Sampel 2027 memakai tahun NSFP 27.
 | 2026-11 | 3 | Rp 46.200.000 | Rp 46.200.000 | Rp 0 | Draft / Belum Konfirmasi |
 | 2026-12 | 1 | Rp 6.600.000 | Rp 0 | -Rp 6.600.000 | Belum dicatat |
 | 2027-01 | 1 | Rp 1.100.000 | Rp 1.000.000 | -Rp 100.000 | Terkonfirmasi, kurang setor |
-| 2027-02 | 1 | Rp 1.100.000 | Rp 1.200.000 | Rp 100.000 | Terkonfirmasi, lebih setor |
+| 2027-02 | 1 | Rp 1.100.000 | Rp 1.100.000 | Rp 0 | Terkonfirmasi, setor pas (lebih setor ditolak sistem) |
 
 Oktober berisi 24 faktur agar pagination bisa dicoba pada periode yang sama. Faktur
 `inv-demo-010` juga memiliki dua item, potongan, dan uang muka. PPnBM untuk contoh

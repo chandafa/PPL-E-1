@@ -15,7 +15,8 @@ use Throwable;
  *
  * Aturan (Q-10): CONFIRMED hanya bila NTPN dan bukti pembayaran ada; selain itu
  * INCOMPLETE (Draft/Belum Konfirmasi). Selisih jumlah setor terhadap total PPN
- * tetap tersimpan dan ditampilkan (tidak menolak; kompensasi menunggu Q-24).
+ * boleh nol atau minus (kurang setor), tetapi pembayaran yang membuat selisih
+ * plus (lebih setor) ditolak karena berisiko kerugian.
  */
 class TaxPaymentService
 {
@@ -50,6 +51,9 @@ class TaxPaymentService
             throw ApiException::notFound('TAX_RECAP_NOT_FOUND', 'Masa pajak belum memiliki rekap');
         }
 
+        // Cek awal agar berkas tidak diunggah bila pasti ditolak.
+        $this->assertNotOverpaid($taxPeriod, $amountPaid);
+
         $id = (string) Str::uuid7();
         $eBillingUri = null;
         $proofUri = null;
@@ -59,6 +63,10 @@ class TaxPaymentService
             $proofUri = $proof !== null ? $this->files->put('payment-proof', $id, $proof) : null;
 
             return DB::transaction(function () use ($id, $taxPeriod, $taxYear, $amountPaid, $billingId, $ntpn, $eBillingUri, $proofUri, $actor): array {
+                // Kunci baris rekap lalu cek ulang agar dua penyimpanan bersamaan tidak lolos lebih setor.
+                DB::table('rekap_pajak_bulanan')->where('tax_period', $taxPeriod)->lockForUpdate()->first();
+                $this->assertNotOverpaid($taxPeriod, $amountPaid);
+
                 $payment = new PembayaranPajak;
                 $payment->forceFill([
                     'tax_payment_id' => $id,
@@ -145,6 +153,27 @@ class TaxPaymentService
         }
 
         return $year;
+    }
+
+    /**
+     * Tolak bila jumlah setor tercatat + jumlah baru melebihi total PPN masa pajak.
+     *
+     * @throws ApiException 400 INVALID_PAYMENT
+     */
+    private function assertNotOverpaid(string $taxPeriod, string $amountPaid): void
+    {
+        $current = $this->recap->compute($taxPeriod);
+        $difference = Money::sub(Money::add($current->amountPaid, $amountPaid), $current->totalPpn);
+
+        if (bccomp($difference, '0', 2) > 0) {
+            $remaining = Money::sub($current->totalPpn, $current->amountPaid);
+            $remaining = bccomp($remaining, '0', 2) < 0 ? '0.00' : $remaining;
+
+            throw $this->invalid(
+                'Jumlah setor melebihi total PPN (lebih setor Rp '.Money::display($difference).'). '
+                .'Sisa yang boleh disetor: Rp '.Money::display($remaining).'.'
+            );
+        }
     }
 
     private function amount(mixed $value): string

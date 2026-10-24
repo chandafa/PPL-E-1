@@ -72,17 +72,39 @@ class TaxPaymentTest extends TestCase
         $this->assertSame('NTPN-ABC123', PembayaranPajak::query()->findOrFail($response->json('data.taxPaymentId'))->ntpn);
     }
 
-    public function test_jumlah_setor_berbeda_dari_total_ppn_tetap_tersimpan_dengan_selisih(): void
+    public function test_jumlah_setor_kurang_dari_total_ppn_tetap_tersimpan_dengan_selisih_minus(): void
     {
         $this->post(self::URI, $this->payload(['amountPaid' => '10000000']), $this->auth())
             ->assertOk()
             ->assertJsonPath('data.paymentDifference', '-1000000.00');
 
-        $this->post(self::URI, $this->payload(['amountPaid' => '2500000.50', 'billingId' => 'BILL-202611-002']), $this->auth())
+        $this->post(self::URI, $this->payload(['amountPaid' => '1000000.00', 'billingId' => 'BILL-202611-002']), $this->auth())
             ->assertOk()
-            ->assertJsonPath('data.paymentDifference', '1500000.50');   // 10.000.000 + 2.500.000,50 - 11.000.000
+            ->assertJsonPath('data.paymentDifference', '0.00');
 
         $this->assertSame(2, PembayaranPajak::query()->where('tax_period', '2026-11')->count());
+    }
+
+    public function test_jumlah_setor_yang_membuat_selisih_plus_ditolak(): void
+    {
+        $before = Storage::disk('local')->allFiles();
+
+        // Satu pembayaran langsung melebihi total PPN.
+        $this->post(self::URI, $this->payload(['amountPaid' => '11000000.01']), $this->auth())
+            ->assertStatus(400)
+            ->assertJsonPath('errorCode', 'INVALID_PAYMENT')
+            ->assertJsonPath('message', 'Jumlah setor melebihi total PPN (lebih setor Rp 0,01). Sisa yang boleh disetor: Rp 11.000.000,00.');
+
+        // Gabungan dengan pembayaran sebelumnya melebihi total PPN.
+        $this->post(self::URI, $this->payload(['amountPaid' => '10000000']), $this->auth())->assertOk();
+        $this->post(self::URI, $this->payload(['amountPaid' => '2500000.50', 'billingId' => 'BILL-202611-002']), $this->auth())
+            ->assertStatus(400)
+            ->assertJsonPath('errorCode', 'INVALID_PAYMENT')
+            ->assertJsonPath('message', 'Jumlah setor melebihi total PPN (lebih setor Rp 1.500.000,50). Sisa yang boleh disetor: Rp 1.000.000,00.');
+
+        $this->assertSame(1, PembayaranPajak::query()->where('tax_period', '2026-11')->count());
+        $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'amount_paid' => '10000000.00', 'payment_difference' => '-1000000.00']);
+        $this->assertCount(count($before) + 1, Storage::disk('local')->allFiles());   // hanya e-Billing pembayaran yang sah
     }
 
     public function test_masa_pajak_tanpa_rekap_404(): void
@@ -160,7 +182,7 @@ class TaxPaymentTest extends TestCase
 
     public function test_status_rekap_tetap_incomplete_selama_masih_ada_catatan_draft(): void
     {
-        $first = $this->draft();
+        $first = $this->createPayment('2026-11', '10500000.00')['taxPaymentId'];
         $this->createPayment('2026-11', '500000.00', ['billingId' => 'BILL-202611-002']); // tetap draft
 
         $this->patchMultipart(self::URI.'/'.$first, ['ntpn' => 'NTPN-1'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])
