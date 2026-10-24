@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const source = readFileSync(new URL('../../resources/js/lib.js', import.meta.url), 'utf8');
-const { cents, money, decimal, escapeHtml, safeNext, dateLabel, taxPeriodLabel } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const { cents, money, decimal, escapeHtml, safeNext, dateLabel, taxPeriodLabel, statusBadge } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
 
 test('nominal maksimum dan selisih tetap presisi tanpa floating point', () => {
     assert.equal(money('9999999999999999.99'), 'Rp 9.999.999.999.999.999,99');
@@ -27,4 +27,9 @@ test('tanggal Indonesia memakai bulan lengkap dan konversi WIB melewati perganti
     assert.equal(dateLabel('2026-01-10T03:15:00Z'), '10 Januari 2026, 10.15 WIB');
     assert.equal(dateLabel(null), 'Belum tersedia');
     assert.equal(dateLabel('bukan-tanggal'), 'bukan-tanggal');
+});
+
+test('status pembayaran menampilkan label Confirmed dan Incompleted', () => {
+    assert.match(statusBadge('CONFIRMED'), />Confirmed</);
+    assert.match(statusBadge('INCOMPLETE'), />Incompleted</);
 });
