@@ -1298,15 +1298,7 @@ async function paymentPage() {
         $("#save-payment").innerHTML = `${icon("check")}Konfirmasi Pembayaran`;
     }
     const billingInput = $("#billingId");
-    const billingError = $('[data-error-for="billingId"]');
-    function clearBillingError() {
-        billingInput.removeAttribute("aria-invalid");
-        billingInput.removeAttribute("aria-describedby");
-        billingError.hidden = true;
-        billingError.textContent = "";
-        clearNotice();
-    }
-    billingInput.addEventListener("input", clearBillingError);
+    billingInput.addEventListener("input", clearNotice);
     const ntpnInput = $("#ntpn");
     function clearNtpnError() {
         if (!ntpnInput) return;
@@ -1324,7 +1316,6 @@ async function paymentPage() {
     form.onsubmit = async (event) => {
         event.preventDefault();
         clearNotice();
-        clearBillingError();
         clearNtpnError();
         try {
             if (!existing && newDifference() > 0n)
@@ -1359,15 +1350,6 @@ async function paymentPage() {
             location.assign(`/tax-recaps/${period}`);
         } catch (error) {
             notice(error.message);
-            if (!existing && error.code === "DUPLICATE_BILLING_ID") {
-                billingError.id = "billingId-error";
-                billingError.textContent = error.message;
-                billingError.hidden = false;
-                billingInput.setAttribute("aria-invalid", "true");
-                billingInput.setAttribute("aria-describedby", billingError.id);
-                billingInput.focus();
-                return;
-            }
             if (error.code === "DUPLICATE_NTPN") {
                 if (ntpnInput) {
                     ntpnInput.setAttribute("aria-invalid", "true");
