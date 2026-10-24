@@ -976,6 +976,19 @@ ID tidak ditemukan: masa pajak belum memiliki rekap
 }
 ```
 
+### HTTP 409
+
+**DUPLICATE_BILLING_ID**: ID / kode billing sudah pernah digunakan
+
+```json
+{
+    "code": "409",
+    "message": "ID / kode billing sudah pernah digunakan",
+    "data": null,
+    "errorCode": "DUPLICATE_BILLING_ID"
+}
+```
+
 ## API-KE01-09: Ekspor rekap ke Excel atau PDF
 
 `GET /api/v1/tax-recaps/{taxPeriod}/export`
@@ -1215,4 +1228,3 @@ ID tidak ditemukan: taxPaymentId tidak dikenal
     "errorCode": "TAX_PAYMENT_NOT_FOUND"
 }
 ```
-

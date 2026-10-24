@@ -64,6 +64,24 @@ class TaxPaymentTest extends TestCase
         $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'payment_status' => 'CONFIRMED']);
     }
 
+    public function test_id_billing_duplikat_ditolak_dengan_409(): void
+    {
+        $this->post(self::URI, $this->payload(), $this->auth())->assertOk();
+        $storedFiles = Storage::disk('local')->allFiles();
+
+        $this->post(self::URI, $this->payload(['amountPaid' => '1.00']), $this->auth())
+            ->assertStatus(409)
+            ->assertExactJson([
+                'code' => '409',
+                'message' => 'ID / kode billing sudah pernah digunakan',
+                'data' => null,
+                'errorCode' => 'DUPLICATE_BILLING_ID',
+            ]);
+
+        $this->assertSame(1, PembayaranPajak::query()->count());
+        $this->assertSame($storedFiles, Storage::disk('local')->allFiles());
+    }
+
     public function test_hanya_ntpn_tanpa_bukti_tetap_incomplete(): void
     {
         $response = $this->post(self::URI, $this->payload(['ntpn' => 'NTPN-ABC123']), $this->auth());

@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Models\PembayaranPajak;
 use App\Services\Auth\F1Identity;
 use App\Support\Money;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
@@ -41,6 +42,7 @@ class TaxPaymentService
         $amountPaid = $this->amount($input['amountPaid'] ?? null);
         $billingId = $this->requiredText($input['billingId'] ?? null, 'billingId', 100);
         $ntpn = $this->optionalText($input['ntpn'] ?? null, 'ntpn', 100);
+        $this->assertBillingIdFree($billingId);
 
         $eBilling = $this->files->readPdf($eBillingFile, 'INVALID_PAYMENT', 'PDF e-Billing wajib diunggah dan harus berformat PDF');
         $proof = $proofFile === null
@@ -65,6 +67,7 @@ class TaxPaymentService
             return DB::transaction(function () use ($id, $taxPeriod, $taxYear, $amountPaid, $billingId, $ntpn, $eBillingUri, $proofUri, $actor): array {
                 // Kunci baris rekap lalu cek ulang agar dua penyimpanan bersamaan tidak lolos lebih setor.
                 DB::table('rekap_pajak_bulanan')->where('tax_period', $taxPeriod)->lockForUpdate()->first();
+                $this->assertBillingIdFree($billingId);
                 $this->assertNotOverpaid($taxPeriod, $amountPaid);
 
                 $payment = new PembayaranPajak;
@@ -93,6 +96,9 @@ class TaxPaymentService
             }
             if ($proofUri !== null) {
                 $this->files->delete($proofUri);
+            }
+            if ($e instanceof QueryException && str_contains($e->getMessage(), 'pembayaran_pajak_billing_id_unique')) {
+                throw $this->duplicateBillingId();
             }
             throw $e;
         }
@@ -174,6 +180,18 @@ class TaxPaymentService
                 .'Sisa yang boleh disetor: Rp '.Money::display($remaining).'.'
             );
         }
+    }
+
+    private function assertBillingIdFree(string $billingId): void
+    {
+        if (PembayaranPajak::query()->where('billing_id', $billingId)->exists()) {
+            throw $this->duplicateBillingId();
+        }
+    }
+
+    private function duplicateBillingId(): ApiException
+    {
+        return ApiException::conflict('DUPLICATE_BILLING_ID', 'ID / kode billing sudah pernah digunakan');
     }
 
     private function amount(mixed $value): string

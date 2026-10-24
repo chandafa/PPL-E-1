@@ -121,9 +121,27 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
     await page.locator('#amountPaid').fill('1000000.00');
     await page.locator('#billingId').fill('BILL-UI-DRAFT');
     await page.locator('#eBillingFile').setInputFiles(resolve('storage/framework/testing/e1-browser-samples/e-billing.pdf'));
+    await page.route('**/api/v1/tax-payments', async (route) => {
+        if (route.request().method() !== 'POST') return route.continue();
+        await route.fulfill({
+            status: 409,
+            json: {
+                code: '409',
+                message: 'ID / kode billing sudah pernah digunakan',
+                data: null,
+                errorCode: 'DUPLICATE_BILLING_ID',
+            },
+        });
+    });
+    await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
+    await expect(page.locator('#billingId')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#billingId-error')).toHaveText('ID / kode billing sudah pernah digunakan');
+    await page.locator('#billingId').fill('BILL-UI-DRAFT-UNIQUE');
+    await expect(page.locator('#billingId-error')).toBeHidden();
+    await page.unroute('**/api/v1/tax-payments');
     await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
     await expect(page).toHaveURL(/\/tax-recaps\/2026-12$/);
-    await expect(page.locator('#recap-payments')).toContainText('BILL-UI-DRAFT');
+    await expect(page.locator('#recap-payments')).toContainText('BILL-UI-DRAFT-UNIQUE');
     await expect(page.locator('#recap-payments')).toContainText('Incompleted');
 });
 
