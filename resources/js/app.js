@@ -560,11 +560,30 @@ async function paymentPage() {
     $('#payment-projects').innerHTML = projects.length ? `<ul class="space-y-3">${projects.map((project) => `<li class="break-all">${e(project)}</li>`).join('')}</ul>` : '<p>Belum ada proyek pada periode ini.</p>';
     $('#payment-upload-limit').textContent = `Berkas PDF, maksimal ${config.uploadMaxKb / 1024} MB per berkas.`;
     const form = $('#payment-form');
+    function newDifference() {
+        const amount = existing ? 0n : cents($('#amountPaid').value || '0');
+        return cents(data.recap.amountPaid) + amount - cents(data.recap.totalPpn);
+    }
     function updateDifference() {
+        const output = $('#payment-difference');
+        const warning = $('#payment-overpaid');
         try {
-            const amount = existing ? 0n : cents($('#amountPaid').value || '0');
-            $('#payment-difference').textContent = money(decimal(cents(data.recap.amountPaid) + amount - cents(data.recap.totalPpn)));
-        } catch { $('#payment-difference').textContent = 'Periksa format jumlah setor'; }
+            const difference = newDifference();
+            const overpaid = !existing && difference > 0n;
+            output.textContent = money(decimal(difference));
+            output.classList.toggle('text-[#942722]', overpaid);
+            warning.hidden = !overpaid;
+            if (overpaid) {
+                const remaining = cents(data.recap.totalPpn) - cents(data.recap.amountPaid);
+                warning.textContent = `Jumlah setor melebihi total PPN. Maksimal yang boleh disetor: ${money(decimal(remaining > 0n ? remaining : 0n))}.`;
+            }
+            $('#save-payment').disabled = overpaid;
+        } catch {
+            output.textContent = 'Periksa format jumlah setor';
+            output.classList.remove('text-[#942722]');
+            warning.hidden = true;
+            $('#save-payment').disabled = false;
+        }
     }
     $('#amountPaid').oninput = updateDifference;
     if (existing) {
@@ -583,6 +602,7 @@ async function paymentPage() {
     form.onsubmit = async (event) => {
         event.preventDefault(); clearNotice();
         try {
+            if (!existing && newDifference() > 0n) throw new Error('Pembayaran tidak dapat disimpan karena jumlah setor melebihi total PPN (selisih plus). Sesuaikan jumlah setor agar selisih menjadi 0 atau minus.');
             if (!existing) validateFile($('#eBillingFile'));
             validateFile($('#paymentProofFile'), !!existing);
             const body = existing ? new FormData() : new FormData(form);

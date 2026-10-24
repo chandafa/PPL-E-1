@@ -138,7 +138,7 @@ final class DemoDataset
             ['taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '1000000.00', 'billingId' => 'BILL-DEMO-202610-001', 'ntpn' => 'NTPN-DEMO-202610-001'],
             ['taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '4940000.00', 'billingId' => 'BILL-DEMO-202610-002', 'ntpn' => 'NTPN-DEMO-202610-002'],
             ['taxPeriod' => '2027-01', 'taxYear' => 2027, 'amountPaid' => '1000000.00', 'billingId' => 'BILL-DEMO-202701-001', 'ntpn' => 'NTPN-DEMO-202701-001'],
-            ['taxPeriod' => '2027-02', 'taxYear' => 2027, 'amountPaid' => '1200000.00', 'billingId' => 'BILL-DEMO-202702-001', 'ntpn' => 'NTPN-DEMO-202702-001'],
+            ['taxPeriod' => '2027-02', 'taxYear' => 2027, 'amountPaid' => '1100000.00', 'billingId' => 'BILL-DEMO-202702-001', 'ntpn' => 'NTPN-DEMO-202702-001'],
         ];
     }
 
