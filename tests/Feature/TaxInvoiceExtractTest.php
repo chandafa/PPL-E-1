@@ -11,6 +11,12 @@ class TaxInvoiceExtractTest extends TestCase
 {
     private const URI = '/api/v1/tax-invoices/extractions';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
+    }
+
     public function test_ekstraksi_berhasil_dan_tidak_menyimpan_apa_pun(): void
     {
         $response = $this->post(self::URI, [

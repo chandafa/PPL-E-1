@@ -28,7 +28,11 @@ class GenerateSamplePdfs extends Command
         try {
             $manifest = $binaries = $attachments = [];
             $numbers = [];
-            foreach (DemoDataset::samples() as $name => $fixture) {
+            $samples = DemoDataset::samples();
+            if ($samples === []) {
+                throw new RuntimeException('Katalog D-2 belum berisi invoice untuk dibuatkan sampel.');
+            }
+            foreach ($samples as $name => $fixture) {
                 $binary = FakeEFakturPdf::make($fixture['pdf']);
                 $result = $validator->validate($binary, $fixture);
                 if (isset($numbers[$result['taxInvoiceNumber']])) {
@@ -79,7 +83,7 @@ class GenerateSamplePdfs extends Command
             $this->line('Tanggal invoice, tanggal e-Faktur, masa pajak, tahun NSFP, nominal, dan seluruh item: SESUAI.');
             $this->line('Folder: '.$dir);
             $this->line('Pemetaan berkas: manifest.json; hasil pemeriksaan: validation.json.');
-            $this->line('Invoice 006/007 dan invoice manual tersedia untuk pencatatan baru setelah db:seed. Panduan: docs/panduan/DEMO_SEEDER.md.');
+            $this->line('Pilih invoice yang tersedia di katalog D-2 untuk pencatatan. Panduan: docs/panduan/DEMO_SEEDER.md.');
         } catch (Throwable $exception) {
             $this->error('Pembuatan/pemeriksaan sampel gagal: '.$exception->getMessage());
 

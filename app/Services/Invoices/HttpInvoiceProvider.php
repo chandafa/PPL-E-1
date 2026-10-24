@@ -67,6 +67,18 @@ class HttpInvoiceProvider implements InvoiceProvider
         );
     }
 
+    /**
+     * D-2 tidak menyediakan endpoint daftar invoice (hanya detail per ID), sehingga
+     * Katalog tidak dapat diisi melalui layanan langsung tanpa mengubah D-2.
+     * Kembalikan daftar kosong; pemanggil bertanggung jawab menampilkan keterbatasan ini.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function catalog(): array
+    {
+        return [];
+    }
+
     // D-2 belum menyediakan pencarian proyek/klien; filter nama berdasar ID persis.
     public function projectIdsMatching(string $term): array
     {

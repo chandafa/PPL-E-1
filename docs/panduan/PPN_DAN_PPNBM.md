@@ -18,47 +18,27 @@ menyatakan klasifikasi hukum setiap produk secara otomatis. Nominal PDF dan
 koreksi petugas tetap menjadi sumber pencatatan. Kode barang pada contoh adalah
 identitas item demo, bukan bukti klasifikasi HS atau penetapan objek pajak.
 
-## Dataset yang diperbaiki
+## Invoice D-2 yang tersedia
 
-| Contoh | Produk/jasa | Proyek | PPN pada PDF | PPnBM pada PDF |
-|---|---|---|---:|---:|
-| `inv-demo-010` | Jasa konfigurasi dan pendampingan | Administrasi demo | Rp 121.000 | Rp 0 |
-| `inv-manual-ppnbm-001` | Penyerahan yacht privat produksi sendiri, bukan untuk negara, angkutan umum, atau usaha pariwisata | Simulasi Produksi Yacht Privat | Rp 120.000.000 | Rp 750.000.000 |
-| `inv-manual-jasa-001` | Jasa konfigurasi sistem inventaris yacht | Simulasi Produksi Yacht Privat | Rp 1.100.000 | Rp 0 |
+E-1 menanam tabel referensi D-2 melalui seeder modul D-2. Database sumber saat ini
+memiliki satu invoice, `inv-demo-sample`, dengan DPP Rp 100.000.000 dan PPN
+Rp 11.000.000. Skema D-2 belum menyediakan kolom PPnBM atau klien; PPnBM yang
+tidak tercantum pada PDF e-Faktur dicatat sebagai nol. Katalog D-2 tidak berisi
+invoice yacht sintetis atau invoice unggah manual.
 
-Contoh yacht memakai harga/DPP simulasi Rp 1.000.000.000, PPN 12%, dan PPnBM
-75%. Penggunaan yacht untuk usaha pariwisata memiliki perlakuan berbeda;
-contoh ini sengaja menggunakan rekreasi privat. Acuan:
-[penjelasan DJP tentang pengecualian yacht](https://www.pajak.go.id/en/node/69120)
-dan [siaran DJP mengenai PPN 2025](https://pajak.go.id/sites/default/files/2025-01/SP%201%202025.pdf).
-
-Dua invoice manual tersebut tidak ditanam oleh seeder standar agar data jasa TI
-mitra tidak berubah menjadi usaha produsen yacht. Keduanya adalah skenario uji
-fiktif terpisah, tersedia di dropdown invoice setelah kode diperbarui. Produk
-barang dan jasa sengaja memakai proyek yang sama untuk memastikan PPnBM tidak
-diterapkan ke seluruh invoice proyek secara otomatis.
-
-Angka contoh jasa yang berasal dari tugas/D-2 dipertahankan sebagai data uji
-pencatatan; pengujian E-1 bukan validasi tarif legal semua transaksi tahun 2026.
 Tarif dan dasar pengenaan transaksi nyata harus mengikuti dokumen penerbit dan
-parameter D-2 yang telah ditetapkan.
+parameter pajak yang ditetapkan D-2. Tes E-1 memakai data fixture terpisah hanya
+untuk menguji perhitungan pajak dan pelaporan E-1.
 
 ## Mencoba dari website
 
 1. Jalankan `php artisan db:seed` dan `php artisan demo:samples`.
 2. Buka halaman Catat e-Faktur Keluaran.
-3. Pilih `inv-manual-ppnbm-001`, unggah
-   `docs/postman/samples/efaktur-inv-manual-ppnbm-001.pdf`, lalu Periksa PDF.
-4. Pastikan item `YACHT-01`, PPN Rp 120.000.000, dan PPnBM Rp 750.000.000.
-5. Simpan; ulangi dengan `inv-manual-jasa-001` dan PDF bernama sesuai ID tersebut.
-   Item `JASA-01` mempunyai PPnBM nol meskipun proyeknya sama.
-6. Rekap Oktober bertambah PPN Rp 121.100.000 dan PPnBM Rp 750.000.000.
-   Ringkasan proyek `prj-simulasi-yacht-001` harus menampilkan dua faktur tersebut.
+3. Pilih invoice D-2 yang tersedia dan unggah PDF e-Faktur sesuai dengan invoice.
+4. Periksa PPN dan PPnBM yang diekstrak dari PDF, lalu simpan.
 
-Seeder bersifat aditif dan mempertahankan koreksi pengguna. Jika database lama
-masih mempunyai contoh jasa 010 dengan PPnBM Rp 100.000, koreksi melalui detail
-faktur menjadi `0.00` dengan catatan perbaikan data demo. Riwayat dan PDF lama
-tetap menjadi bukti kondisi sebelumnya. PDF baru dari generator sudah bernilai nol.
+Seeder E-1 bersifat aditif dan mempertahankan koreksi pengguna. Katalog sumber
+D-2 tidak ditambah dengan invoice sintetis.
 
 ## Aturan yang diperiksa
 

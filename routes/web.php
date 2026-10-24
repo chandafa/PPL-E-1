@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/tax-invoices');
 Route::view('/login', 'pages.login', ['page' => 'login'])->name('ui.login');
 Route::view('/tax-invoices', 'pages.invoices', ['page' => 'invoices'])->name('ui.invoices');
+Route::view('/d2-invoices', 'pages.d2-invoices', ['page' => 'd2-invoices'])->name('ui.d2-invoices');
 Route::view('/tax-invoices/create', 'pages.create', ['page' => 'create'])->name('ui.invoices.create');
 Route::get('/tax-invoices/{taxInvoiceId}', fn (string $taxInvoiceId) => view('pages.detail', [
     'page' => 'detail', 'taxInvoiceId' => $taxInvoiceId,

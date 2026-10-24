@@ -33,6 +33,7 @@ class OpenApiContractTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
         $this->contract = new OpenApiContract;
     }
 

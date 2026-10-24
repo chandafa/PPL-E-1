@@ -12,6 +12,7 @@ class TaxExportAndSummaryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
 
         $this->createFaktur('inv-demo-001', ['nsfp' => '010.000-26.00000601']);                                                               // prj-demo-001
         $this->createFaktur('inv-demo-002', ['nsfp' => '010.000-26.00000602', 'dpp' => '250000000.00', 'ppn' => '27500000.00']);            // prj-demo-002

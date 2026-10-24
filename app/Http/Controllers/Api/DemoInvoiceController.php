@@ -17,7 +17,7 @@ class DemoInvoiceController extends Controller
             throw ApiException::notFound('NOT_FOUND', 'Pilihan invoice dummy hanya tersedia untuk sumber D-2 mock');
         }
 
-        $provider = new MockInvoiceProvider((string) config('e1.d2.mock_file'));
+        $provider = new MockInvoiceProvider;
         $active = FakturPajak::query()->active()
             ->where('type', FakturPajak::TYPE_OUTGOING)
             ->pluck('invoice_id')->flip();
