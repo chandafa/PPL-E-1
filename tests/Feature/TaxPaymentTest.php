@@ -251,4 +251,59 @@ class TaxPaymentTest extends TestCase
         $this->assertSame('NTPN-2', $payment->ntpn);
         Storage::disk('local')->assertExists(ltrim(substr($old, strlen('/files/')), '/'));
     }
+
+    public function test_ntpn_duplikat_saat_catat_pembayaran_ditolak_409(): void
+    {
+        $this->post(self::URI, $this->payload([
+            'ntpn' => 'NTPN-TEST-001',
+            'paymentProofFile' => $this->pdfUpload($this->simplePdf(), 'bukti1.pdf'),
+        ]), $this->auth())->assertOk();
+
+        $storedFiles = Storage::disk('local')->allFiles();
+
+        $this->post(self::URI, $this->payload([
+            'billingId' => 'BILL-202611-999',
+            'ntpn' => 'NTPN-TEST-001',
+            'paymentProofFile' => $this->pdfUpload($this->simplePdf(), 'bukti2.pdf'),
+        ]), $this->auth())
+            ->assertStatus(409)
+            ->assertExactJson([
+                'code' => '409',
+                'message' => 'NTPN sudah pernah digunakan',
+                'data' => null,
+                'errorCode' => 'DUPLICATE_NTPN',
+            ]);
+
+        $this->assertSame(1, PembayaranPajak::query()->count());
+        $this->assertSame($storedFiles, Storage::disk('local')->allFiles());
+    }
+
+    public function test_ntpn_duplikat_saat_lengkapi_pembayaran_ditolak_409(): void
+    {
+        $first = $this->createPayment('2026-11', '5000000.00', ['billingId' => 'BILL-1'])['taxPaymentId'];
+        $second = $this->createPayment('2026-11', '5000000.00', ['billingId' => 'BILL-2'])['taxPaymentId'];
+
+        $this->patchMultipart(self::URI.'/'.$first, ['ntpn' => 'NTPN-SHARED'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])
+            ->assertOk();
+
+        $this->patchMultipart(self::URI.'/'.$second, ['ntpn' => 'NTPN-SHARED'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])
+            ->assertStatus(409)
+            ->assertExactJson([
+                'code' => '409',
+                'message' => 'NTPN sudah pernah digunakan',
+                'data' => null,
+                'errorCode' => 'DUPLICATE_NTPN',
+            ]);
+    }
+
+    public function test_lengkapi_pembayaran_dengan_ntpn_milik_sendiri_diizinkan(): void
+    {
+        $id = $this->createPayment('2026-11', '5000000.00', ['billingId' => 'BILL-SELF'])['taxPaymentId'];
+
+        $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-SAME'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])
+            ->assertOk();
+
+        $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-SAME'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])
+            ->assertOk();
+    }
 }

@@ -885,7 +885,7 @@ paths:
                     data: null
                     errorCode: TAX_RECAP_NOT_FOUND
         "409":
-          description: ID / kode billing sudah pernah digunakan
+          description: Data unik sudah pernah digunakan (billingId atau NTPN)
           content:
             application/json:
               schema:
@@ -898,6 +898,13 @@ paths:
                     message: "ID / kode billing sudah pernah digunakan"
                     data: null
                     errorCode: DUPLICATE_BILLING_ID
+                DUPLICATE_NTPN:
+                  summary: NTPN sudah pernah digunakan
+                  value:
+                    code: "409"
+                    message: "NTPN sudah pernah digunakan"
+                    data: null
+                    errorCode: DUPLICATE_NTPN
   /api/v1/tax-recaps/{taxPeriod}/export:
     get:
       operationId: exportTaxRecap
@@ -1133,6 +1140,20 @@ paths:
                     message: "Catatan pembayaran tidak ditemukan"
                     data: null
                     errorCode: TAX_PAYMENT_NOT_FOUND
+        "409":
+          description: "Konflik: NTPN sudah pernah digunakan oleh catatan pembayaran lain"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                DUPLICATE_NTPN:
+                  summary: NTPN sudah pernah digunakan
+                  value:
+                    code: "409"
+                    message: "NTPN sudah pernah digunakan"
+                    data: null
+                    errorCode: DUPLICATE_NTPN
 components:
   securitySchemes:
     bearerAuth:
@@ -2083,6 +2104,7 @@ components:
             - INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE
             - DUPLICATE_NSFP
             - DUPLICATE_BILLING_ID
+            - DUPLICATE_NTPN
             - REPLACEMENT_INVOICE_MISMATCH
             - TAX_INVOICE_NOT_FOUND
             - INVALID_FILTER
