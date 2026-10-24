@@ -16,6 +16,7 @@ class TaxPaymentTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
         $this->createFaktur('inv-demo-001'); // masa pajak 2026-11, PPN 11.000.000,00
     }
 

@@ -8,7 +8,7 @@
 </head>
 <body data-page="{{ $page }}" @isset($taxInvoiceId) data-invoice-id="{{ $taxInvoiceId }}" @endisset @isset($taxPeriod) data-period="{{ $taxPeriod }}" @endisset>
     <div hidden aria-hidden="true">{!! file_get_contents(resource_path('icons/solar.svg')) !!}</div>
-    <script type="application/json" id="e1-config">{!! json_encode(['demoLogin' => config('e1.dev_login.enabled') && !app()->isProduction(), 'uploadMaxKb' => config('e1.upload.max_kb'), 'month' => now('Asia/Jakarta')->format('Y-m'), 'claimAccount' => config('e1.f1.claim_akun_id'), 'claimRole' => config('e1.f1.claim_role')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+    <script type="application/json" id="e1-config">{!! json_encode(['demoLogin' => config('e1.dev_login.enabled') && !app()->isProduction(), 'uploadMaxKb' => config('e1.upload.max_kb'), 'month' => now('Asia/Jakarta')->format('Y-m'), 'claimAccount' => config('e1.f1.claim_akun_id'), 'claimRole' => config('e1.f1.claim_role'), 'd2Driver' => config('e1.d2.driver')], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:p-4">Lewati ke konten</a>
     @if($page !== 'login')
     <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-slate-900/40 lg:hidden" hidden></div>
@@ -17,6 +17,7 @@
         <div class="flex items-center justify-between px-6 pb-2 pt-7"><p class="text-xs font-medium text-muted">Pencatatan pajak</p><button class="btn btn-ghost lg:hidden" id="close-menu" aria-label="Tutup menu"><x-icon name="close" /></button></div>
         <nav class="space-y-1 px-3">
             <a class="nav-link" href="{{ route('ui.invoices') }}" @if(in_array($page, ['invoices','create','detail'])) aria-current="page" @endif><x-icon name="document" />Faktur Pajak</a>
+            <a class="nav-link" href="{{ route('ui.d2-invoices') }}" @if($page === 'd2-invoices') aria-current="page" @endif><x-icon name="document" />Invoice D-2</a>
             <a class="nav-link" href="{{ route('ui.recaps') }}" @if($page === 'recap') aria-current="page" @endif><x-icon name="calendar" />Rekap Masa Pajak</a>
             <a class="nav-link" href="{{ route('ui.payments', ['taxPeriod' => $taxPeriod ?? now('Asia/Jakarta')->format('Y-m')]) }}" @if($page === 'payment') aria-current="page" @endif><x-icon name="wallet" />Pembayaran Pajak</a>
         </nav>

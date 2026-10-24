@@ -75,7 +75,8 @@ styling renderer PDF yang sudah ada.
 
 ## Batasan integrasi
 
-- Saat `D2_DRIVER=mock`, form pencatatan memuat dropdown dari data dummy D-2 melalui
+- Saat `D2_DRIVER=mock`, form pencatatan memuat dropdown dari snapshot tabel D-2 di
+  database E-1 melalui
   `GET /api/ui/d2/invoices` (memerlukan token F-1). Ringkasan nomor, tanggal, proyek,
   klien, status, DPP, dan PPN mengikuti pilihan invoice. Pencarian nomor/ID invoice,
   proyek, dan klien menyatu dengan dropdown dan mendukung tombol panah, Enter,
@@ -86,10 +87,10 @@ styling renderer PDF yang sudah ada.
   faktur asal; invoice baru muncul kembali bila tidak ada faktur aktif tersisa.
   Endpoint pendukung UI ini
   berada di luar 11 API kontrak E-1; driver HTTP tetap memakai ID invoice manual.
-- Proyek dan klien tampil sebagai ID; nilai kosong diberi label Belum tersedia.
-- Ringkasan berasal dari `database/data/d2-invoices.json` dan ditandai sebagai data
-  dummy. Data yang kosong ditampilkan sebagai belum tersedia. Nilai faktur tetap
-  dibaca dari PDF, bukan disalin dari nilai invoice D-2.
+- Proyek ditampilkan sebagai ID. D-2 saat ini tidak menyediakan nama proyek atau
+  data klien; nilai yang tidak tersedia diberi label Belum tersedia.
+- Ringkasan berasal dari tabel invoice D-2 yang di-seed di database E-1. Nilai
+  faktur pajak tetap dibaca dari PDF, bukan disalin dari nilai invoice D-2.
 - Pengganti langsung memakai penyimpanan karena ekstraksi menolak invoice dengan faktur aktif.
 - Referensi PDF tersimpan ditampilkan sebagai teks; API akses berkas belum tersedia.
 - Periode tanpa faktur menampilkan total nol dan menonaktifkan pencatatan pembayaran.

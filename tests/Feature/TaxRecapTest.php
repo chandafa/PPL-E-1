@@ -9,6 +9,12 @@ use Tests\TestCase;
 /** API-KE01-07: rekap per masa pajak. */
 class TaxRecapTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
+    }
+
     public function test_dropdown_periods_only_lists_months_with_invoices_newest_first(): void
     {
         $this->getJson('/api/ui/tax-recap-periods', $this->auth())

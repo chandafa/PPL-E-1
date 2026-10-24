@@ -1,10 +1,12 @@
-# Data demo lengkap E-1
+# Data demo E-1
 
-Diperbarui 20 Oktober 2026. Jalankan perintah dari akar repositori PPL-E-1 pada
+Diperbarui 24 Oktober 2026. Jalankan perintah dari akar repositori PPL-E-1 pada
 setiap laptop setelah dependensi dan PostgreSQL siap sesuai [README](../../README.md).
 
-Semua invoice, klien, akun, NTPN, dan PDF di paket ini adalah contoh fiktif.
-Seeder hanya berjalan di luar production dengan `D2_DRIVER=mock`.
+Snapshot invoice D-2 berasal dari tabel dan seeder modul D-2. Seeder E-1 tidak
+membuat invoice atau termin D-2 tambahan. Dokumen e-Faktur, pembayaran, NTPN, dan
+PDF keluaran generator tetap merupakan data demo E-1. Seeder demo hanya berjalan
+di luar production dengan `D2_DRIVER=mock`.
 
 ## Mengisi data
 
@@ -27,13 +29,16 @@ koreksi, pembatalan, riwayat, dan pembayaran yang sudah diubah melalui UI. Tidak
 TRUNCATE atau penghapusan data. Jika satu tahap gagal, penambahan dibatalkan dan
 berkas baru milik proses tersebut dibersihkan.
 
-Pada database kosong, hasilnya 32 faktur, 34 item, 34 riwayat, 5 pembayaran, dan
-5 rekap masa pajak. Pada database yang sudah berisi data, jumlah akhir dapat berbeda
-karena seeder mempertahankan kondisi yang ada.
+Pada database kosong, `php artisan db:seed` menghasilkan 3 kontrak, 4 termin,
+1 parameter pajak, 1 invoice D-2 beserta 1 riwayat status. `DatabaseSeeder` tidak
+menjalankan `DemoSeeder` otomatis agar invoice sumber tetap tersedia di katalog E-1.
+`DemoSeeder` dapat dijalankan terpisah untuk membuat 1 faktur pajak dan 1 pembayaran
+demo dari invoice D-2 tersebut; setelah itu, invoice tidak lagi tersedia untuk
+pencatatan baru karena sudah memiliki faktur aktif.
 
-PDF berada di `docs/postman/samples/`: 48 e-Faktur dan 14 lampiran pembayaran,
-satu berkas bukan PDF, `manifest.json`, serta `validation.json`. Jumlah mengikuti
-katalog mock yang disertakan; menambah invoice manual akan menambah sampelnya.
+PDF contoh berada di `docs/postman/samples/`, bersama `manifest.json` dan
+`validation.json`. Sampel e-Faktur dan lampiran dibuat berdasarkan invoice D-2
+yang tersedia di database saat generator dijalankan.
 
 `demo:samples` tidak menambah transaksi database. Perintah membaca kembali setiap
 e-Faktur dengan parser tombol **Periksa PDF**, lalu mencocokkan tanggal invoice dan
@@ -43,61 +48,26 @@ validasi lulus; kegagalan validasi menghasilkan exit code gagal.
 
 Manifest memuat invoiceId, invoiceNumber, invoiceDate, taxInvoiceDate, taxPeriod,
 NSFP, nominal, jumlah item, alur, dan SHA-256 PDF. `validation.json` memuat hasil
-pemeriksaan serta metadata lampiran. Seed dan generator memakai katalog
-`database/data/d2-invoices.json` melalui konfigurasi mock yang sama. Tanggal tetap
-mengikuti katalog, bukan jam komputer. Sampel 2027 memakai tahun NSFP 27.
+pemeriksaan serta metadata lampiran. Seed dan generator membaca invoice dari tabel D-2 lokal; tanggal mengikuti tanggal
+invoice D-2, bukan jam komputer.
 
 ## Skenario rekap awal
 
 | Masa pajak | Faktur dihitung | Total PPN | Jumlah setor | Selisih | Status |
 |---|---:|---:|---:|---:|---|
-| 2026-10 | 24 | Rp 5.940.000 | Rp 5.940.000 | Rp 0 | Terkonfirmasi, gabungan dua pembayaran |
-| 2026-11 | 3 | Rp 46.200.000 | Rp 46.200.000 | Rp 0 | Draft / Belum Konfirmasi |
-| 2026-12 | 1 | Rp 6.600.000 | Rp 0 | -Rp 6.600.000 | Belum dicatat |
-| 2027-01 | 1 | Rp 1.100.000 | Rp 1.000.000 | -Rp 100.000 | Terkonfirmasi, kurang setor |
-| 2027-02 | 1 | Rp 1.100.000 | Rp 1.200.000 | Rp 100.000 | Terkonfirmasi, lebih setor |
-
-Oktober berisi 24 faktur agar pagination bisa dicoba pada periode yang sama. Faktur
-`inv-demo-010` juga memiliki dua item, potongan, dan uang muka. PPnBM untuk contoh
-jasa ini diperbaiki menjadi nol. Dua invoice manual tambahan menyediakan skenario
-barang mewah dan jasa pada proyek simulasi yang sama; lihat
-[panduan PPN dan PPnBM](PPN_DAN_PPNBM.md). Keduanya tidak ditanam seeder standar.
-November memuat faktur asal, Pengganti, dan pembayaran Draft. Koreksi dapat dicoba
-melalui detail faktur. Seeder tidak lagi menanam tanggal salah untuk simulasi
-koreksi: PDF tersimpan, tanggal e-Faktur, dan invoice pada instalasi baru sesuai.
-Desember mempertahankan faktur Dibatalkan. Januari 2026 tetap kosong untuk empty state.
-Periode bersifat tetap, bukan mengikuti bulan komputer; pilih periode di atas jika bulan
-berjalan sudah berubah.
+| 2026-10 | 1 | Rp 11.000.000 | Rp 11.000.000 | Rp 0 | Terkonfirmasi |
 
 ## Mencoba pencatatan baru dari UI
 
-Gunakan `demo:samples` untuk menyiapkan PDF. Pembuat batch lama telah dihapus.
-Referensi invoice manual yang sudah ada tetap tersedia dan tidak dicatat otomatis
-oleh seeder.
+Gunakan `demo:samples` untuk menyiapkan PDF berdasarkan invoice D-2 yang ada.
 
 1. Masuk melalui `/login` dengan akun demo Admin, CEO, atau COO.
 2. Buka Faktur Pajak, lalu Catat e-Faktur Keluaran.
-3. Masukkan `inv-demo-006` dan unggah `efaktur-inv-demo-006.pdf`.
+3. Pilih invoice D-2 yang tersedia dan unggah PDF e-Faktur yang sesuai.
 4. Klik Periksa PDF, periksa hasilnya, lalu Simpan Faktur.
-5. Dari detail, klik Catat Pengganti dan unggah `efaktur-inv-demo-006-pengganti.pdf`.
-
-Invoice 006 dan 007 ada dalam mock D-2 tetapi sengaja tidak dicatat oleh seeder.
-
-| Tujuan | ID invoice | PDF |
-|---|---|---|
-| Pencatatan baru utama | `inv-demo-006` | `efaktur-inv-demo-006.pdf` |
-| Pencatatan baru tambahan | `inv-demo-007` | `efaktur-inv-demo-007.pdf` |
-| Pencatatan manual | `inv-manual-001` | `efaktur-inv-manual-001.pdf` |
-| Barang mewah, PPnBM nonnol | `inv-manual-ppnbm-001` | `efaktur-inv-manual-ppnbm-001.pdf` |
-| Jasa tanpa PPnBM, proyek simulasi yang sama | `inv-manual-jasa-001` | `efaktur-inv-manual-jasa-001.pdf` |
-| Mengganti faktur 006 sesudah dicatat | `inv-demo-006` | `efaktur-inv-demo-006-pengganti.pdf` |
-| Mengganti faktur 001 yang sudah ada | `inv-demo-001` | `efaktur-inv-demo-001-pengganti-baru.pdf` |
-| Mencatat ulang invoice 004 setelah pembatalan | `inv-demo-004` | `efaktur-inv-demo-004-baru.pdf` |
-
-Setiap PDF memakai NSFP unik. Setelah suatu PDF berhasil disimpan, penggunaan ulang
-NSFP yang sama memang ditolak. Seeder aditif tidak menghapus hasil percobaan tersebut.
-Pada manifest, `seededByDefault=false` berarti berkas tidak digunakan oleh seeder,
-bukan jaminan bahwa pengguna belum pernah memakainya.
+Untuk menguji penggantian, gunakan alur Catat Pengganti dari halaman detail faktur.
+Setiap PDF memakai NSFP unik. Seeder aditif tidak menghapus data yang sudah diubah
+melalui UI.
 
 ## Mencoba pembayaran dan ekspor
 

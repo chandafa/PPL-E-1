@@ -8,6 +8,9 @@ namespace App\Services\Invoices;
  */
 interface InvoiceProvider
 {
+    /** Daftar semua invoice yang diketahui D-2 (katalog referensi). */
+    public function catalog(): array;
+
     /** Invoice D-2 atau null bila ID tidak dikenal. */
     public function find(string $invoiceId): ?InvoiceData;
 

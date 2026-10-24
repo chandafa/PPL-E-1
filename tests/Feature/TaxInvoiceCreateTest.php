@@ -12,6 +12,12 @@ class TaxInvoiceCreateTest extends TestCase
 {
     private const URI = '/api/v1/tax-invoices/outgoing';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
+    }
+
     public function test_faktur_keluaran_tersimpan_dengan_riwayat_dan_rekap(): void
     {
         $response = $this->post(self::URI, [

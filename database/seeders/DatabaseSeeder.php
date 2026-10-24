@@ -7,11 +7,10 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Data awal E-1: hanya data demo fiktif (bukan data mitra).
-     * Master akun/peran milik F-1 dan invoice milik D-2 tidak diisi di sini.
+     * Seed the current D-2 reference snapshot into the shared E-1 database.
      */
     public function run(): void
     {
-        $this->call(DemoSeeder::class);
+        $this->call(ModulD2Seeder::class);
     }
 }

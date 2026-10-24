@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
                 );
             }
 
-            return new MockInvoiceProvider((string) $config['mock_file']);
+            return new MockInvoiceProvider;
         });
     }
 

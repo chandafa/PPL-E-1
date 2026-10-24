@@ -39,10 +39,6 @@ class DemoSeeder extends Seeder
                 $validator->validate($binary, $fixture);
                 $prepared[$id] = $this->upload($binary);
             }
-            $replacementFixture = DemoDataset::originalReplacement();
-            $replacementBinary = FakeEFakturPdf::make($replacementFixture['pdf']);
-            $validator->validate($replacementBinary, $replacementFixture);
-            $replacement = $this->upload($replacementBinary);
             $attachments = [];
             foreach (DemoDataset::payments() as $payment) {
                 $attachments[$payment['billingId']] = [
@@ -50,8 +46,10 @@ class DemoSeeder extends Seeder
                     isset($payment['ntpn']) ? $this->upload(FakeEFakturPdf::attachment('Bukti Pembayaran Demo', DemoDataset::paymentDocumentFields($payment, proof: true))) : null,
                 ];
             }
-            $counts = DB::transaction(function () use ($invoices, $payments, $prepared, $replacement, $attachments): array {
-                DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['e1.demo-seeder']);
+            $counts = DB::transaction(function () use ($invoices, $payments, $prepared, $attachments): array {
+                if (DB::connection()->getDriverName() === 'pgsql') {
+                    DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['e1.demo-seeder']);
+                }
                 $admin = new F1Identity('AKN-0002', 'Admin');
                 $counts = ['invoices' => 0, 'payments' => 0];
                 foreach (DemoDataset::seededInvoices() as $id => $fixture) {
@@ -61,11 +59,6 @@ class DemoSeeder extends Seeder
                     $faktur = $invoices->createOutgoing($id, $prepared[$id], null, $admin);
                     $this->createdUris[] = $faktur->pdf_uri;
                     $counts['invoices']++;
-                    if ($id === 'inv-demo-003') {
-                        $new = $invoices->createOutgoing($id, $replacement, $faktur->tax_invoice_id, $admin);
-                        $this->createdUris[] = $new->pdf_uri;
-                        $counts['invoices']++;
-                    }
                     if ($fixture['cancel'] ?? false) {
                         $invoices->update($faktur->tax_invoice_id, ['status' => 'CANCELLED'], 'Faktur demo dibatalkan; tersedia PDF baru untuk pencatatan ulang', $admin);
                     }
@@ -86,7 +79,7 @@ class DemoSeeder extends Seeder
                 return $counts;
             });
             $this->command?->info("Demo E-1: {$counts['invoices']} faktur dan {$counts['payments']} pembayaran ditambahkan; data yang sudah ada dipertahankan.");
-            $this->command?->info('Dataset awal: 32 faktur, 5 pembayaran, 5 masa pajak. Invoice 006/007 disisakan untuk UI. PDF: php artisan demo:samples');
+            $this->command?->info('Data demo dibuat dari invoice D-2 yang tersedia. PDF contoh: php artisan demo:samples');
         } catch (Throwable $exception) {
             foreach ($this->createdUris as $uri) {
                 $files->delete($uri);

@@ -17,16 +17,22 @@ use Tests\TestCase;
 
 class OperationalIntegrityTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Tests\Support\InvoiceScenarioSeeder::class);
+    }
+
     public function test_pengganti_aktif_dihitung_dan_tetap_mengunci_invoice(): void
     {
         $original = $this->createFaktur();
-        $replacement = $this->createFaktur('inv-demo-001', [], $original['taxInvoiceId']);
+        $replacement = $this->createFaktur('inv-demo-sample', [], $original['taxInvoiceId']);
         $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()
             ->assertJsonPath('data.recap.invoiceCount', 1)
             ->assertJsonPath('data.recap.totalPpn', '11000000.00');
 
         $this->post('/api/v1/tax-invoices/outgoing', [
-            'invoiceId' => 'inv-demo-001', 'eFakturFile' => $this->pdfUpload($this->efakturPdf()),
+            'invoiceId' => 'inv-demo-sample', 'eFakturFile' => $this->pdfUpload($this->efakturPdf()),
         ], $this->auth())->assertStatus(409)->assertJsonPath('errorCode', 'INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE');
 
         $this->getJson('/api/v1/tax-invoices/'.$replacement['taxInvoiceId'], $this->auth())
