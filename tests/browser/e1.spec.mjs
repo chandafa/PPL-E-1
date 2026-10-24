@@ -97,7 +97,7 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
     await page.locator('#paymentProofFile').setInputFiles(resolve('storage/framework/testing/e1-browser-samples/bukti-pembayaran.pdf'));
     await page.getByRole('button', { name: 'Konfirmasi Pembayaran' }).click();
     await expect(page).toHaveURL(/\/tax-recaps\/2026-11$/);
-    await expect(page.locator('#recap-payments')).toContainText('Terkonfirmasi');
+    await expect(page.locator('#recap-payments')).toContainText('Confirmed');
     await page.locator('#recap-invoices').getByRole('link', { name: 'Detail', exact: true }).first().click();
     await expect(page.locator('#invoice-history')).toContainText('Pencatatan faktur');
     await page.getByRole('button', { name: 'Koreksi Faktur', exact: true }).click();
@@ -106,18 +106,43 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
     await page.getByRole('button', { name: 'Simpan Koreksi', exact: true }).click();
     await expect(page.locator('#correction-dialog')).not.toBeVisible();
     await expect(page.locator('#invoice-history')).toContainText('Pemeriksaan koreksi melalui UI');
-    await page.getByText('Lihat nilai sebelum dan sesudah', { exact: true }).last().click();
-    await expect(page.locator('#invoice-history pre').last()).toBeVisible();
+    const latestHistory = page.locator('#invoice-history details').last();
+    await expect(latestHistory).not.toHaveAttribute('open');
+    await latestHistory.locator('summary').click();
+    await expect(latestHistory).toHaveAttribute('open', '');
+    await expect(latestHistory).toContainText('Sebelum');
+    await expect(latestHistory).toContainText('Sesudah');
+    await expect(page.locator('#invoice-history pre')).toHaveCount(0);
+    await latestHistory.locator('summary').click();
+    await expect(latestHistory).not.toHaveAttribute('open');
     await page.goto('/tax-recaps/2026-12/payments/create');
     await expect(page.locator('#taxPeriod')).toHaveValue('Desember 2026');
     await expect(page.locator('#payment-fields')).not.toHaveAttribute('disabled');
     await page.locator('#amountPaid').fill('1000000.00');
     await page.locator('#billingId').fill('BILL-UI-DRAFT');
     await page.locator('#eBillingFile').setInputFiles(resolve('storage/framework/testing/e1-browser-samples/e-billing.pdf'));
+    await page.route('**/api/v1/tax-payments', async (route) => {
+        if (route.request().method() !== 'POST') return route.continue();
+        await route.fulfill({
+            status: 409,
+            json: {
+                code: '409',
+                message: 'ID / kode billing sudah pernah digunakan',
+                data: null,
+                errorCode: 'DUPLICATE_BILLING_ID',
+            },
+        });
+    });
+    await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
+    await expect(page.locator('#billingId')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#billingId-error')).toHaveText('ID / kode billing sudah pernah digunakan');
+    await page.locator('#billingId').fill('BILL-UI-DRAFT-UNIQUE');
+    await expect(page.locator('#billingId-error')).toBeHidden();
+    await page.unroute('**/api/v1/tax-payments');
     await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
     await expect(page).toHaveURL(/\/tax-recaps\/2026-12$/);
-    await expect(page.locator('#recap-payments')).toContainText('BILL-UI-DRAFT');
-    await expect(page.locator('#recap-payments')).toContainText('Draft / Belum Konfirmasi');
+    await expect(page.locator('#recap-payments')).toContainText('BILL-UI-DRAFT-UNIQUE');
+    await expect(page.locator('#recap-payments')).toContainText('Incompleted');
 });
 
 test('pencatatan PDF, konflik, pembatalan, dan faktur pengganti', async ({ page }) => {

@@ -29,14 +29,14 @@ final class DemoDataset
                     'invoiceDate' => $date->format('Y-m-d'),
                     'taxPeriod' => $date->format('Y-m'),
                     'manualUploadOnly' => false,
-                    'file' => 'efaktur-'.$id.'.pdf',
+                    'file' => 'efaktur-' . $id . '.pdf',
                     'pdf' => [
                         'nsfp' => sprintf('010.000-%s.%08d', $date->format('y'), $serial),
                         'date' => $date->locale('id')->translatedFormat('j F Y'),
                         'invoiceNumber' => $number,
                         'items' => [[
                             'code' => '620100',
-                            'name' => 'Jasa demo '.$number,
+                            'name' => 'Jasa demo ' . $number,
                             'amount' => $dpp,
                         ]],
                         'dpp' => $dpp,
@@ -69,7 +69,7 @@ final class DemoDataset
 
     private static function replacementFor(array $fixture): array
     {
-        $fixture['file'] = 'efaktur-'.$fixture['invoiceId'].'-pengganti.pdf';
+        $fixture['file'] = 'efaktur-' . $fixture['invoiceId'] . '-pengganti.pdf';
         $fixture['pdf']['nsfp'] = sprintf(
             '010.001-%s.%08d',
             substr($fixture['invoiceDate'], 2, 2),
@@ -93,24 +93,13 @@ final class DemoDataset
 
     public static function payments(): array
     {
-        $byPeriod = [];
-        foreach (self::invoices() as $invoice) {
-            $byPeriod[$invoice['taxPeriod']][] = $invoice['pdf']['ppn'];
-        }
-
-        $payments = [];
-        foreach ($byPeriod as $period => $amounts) {
-            $periodId = str_replace('-', '', $period);
-            $payments[] = [
-                'taxPeriod' => $period,
-                'taxYear' => (int) substr($period, 0, 4),
-                'amountPaid' => Money::sum($amounts),
-                'billingId' => 'BILL-DEMO-'.$periodId.'-001',
-                'ntpn' => 'NTPN-DEMO-'.$periodId.'-001',
-            ];
-        }
-
-        return $payments;
+        return [
+            ['taxPeriod' => '2026-11', 'taxYear' => 2026, 'amountPaid' => '46200000.00', 'billingId' => 'BILL-202611-001'],
+            ['taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '1000000.00', 'billingId' => 'BILL-DEMO-202610-001', 'ntpn' => 'NTPN-DEMO-202610-001'],
+            ['taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '4940000.00', 'billingId' => 'BILL-DEMO-202610-002', 'ntpn' => 'NTPN-DEMO-202610-002'],
+            ['taxPeriod' => '2027-01', 'taxYear' => 2027, 'amountPaid' => '1000000.00', 'billingId' => 'BILL-DEMO-202701-001', 'ntpn' => 'NTPN-DEMO-202701-001'],
+            ['taxPeriod' => '2027-02', 'taxYear' => 2027, 'amountPaid' => '1100000.00', 'billingId' => 'BILL-DEMO-202702-001', 'ntpn' => 'NTPN-DEMO-202702-001'],
+        ];
     }
 
     /** Lampiran sesuai Q-09: pembayaran contoh pada tanggal 10 bulan berikutnya. */
@@ -122,7 +111,7 @@ final class DemoDataset
             'Masa pajak' => $payment['taxPeriod'],
             'Tahun pajak' => (string) $payment['taxYear'],
             'ID Billing' => $payment['billingId'],
-            'Jumlah setor' => 'Rp '.Money::display($payment['amountPaid']),
+            'Jumlah setor' => 'Rp ' . Money::display($payment['amountPaid']),
         ];
         if ($proof) {
             $fields['NTPN'] = $payment['ntpn'];

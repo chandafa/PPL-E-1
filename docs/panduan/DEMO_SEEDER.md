@@ -53,9 +53,26 @@ invoice D-2, bukan jam komputer.
 
 ## Skenario rekap awal
 
-| Masa pajak | Faktur dihitung | Total PPN | Jumlah setor | Selisih | Status |
-|---|---:|---:|---:|---:|---|
-| 2026-10 | 1 | Rp 11.000.000 | Rp 11.000.000 | Rp 0 | Terkonfirmasi |
+| Masa pajak | Faktur dihitung |     Total PPN |  Jumlah setor |       Selisih | Status                                                |
+| ---------- | --------------: | ------------: | ------------: | ------------: | ----------------------------------------------------- |
+| 2026-10    |               1 | Rp 11.000.000 | Rp 11.000.000 |          Rp 0 | Terkonfirmasi                                         |
+| 2026-10    |              24 |  Rp 5.940.000 |  Rp 5.940.000 |          Rp 0 | Terkonfirmasi, gabungan dua pembayaran                |
+| 2026-11    |               3 | Rp 46.200.000 | Rp 46.200.000 |          Rp 0 | Draft / Belum Konfirmasi                              |
+| 2026-12    |               1 |  Rp 6.600.000 |          Rp 0 | -Rp 6.600.000 | Belum dicatat                                         |
+| 2027-01    |               1 |  Rp 1.100.000 |  Rp 1.000.000 |   -Rp 100.000 | Terkonfirmasi, kurang setor                           |
+| 2027-02    |               1 |  Rp 1.100.000 |  Rp 1.100.000 |          Rp 0 | Terkonfirmasi, setor pas (lebih setor ditolak sistem) |
+
+Oktober berisi 24 faktur agar pagination bisa dicoba pada periode yang sama. Faktur
+`inv-demo-010` juga memiliki dua item, potongan, dan uang muka. PPnBM untuk contoh
+jasa ini diperbaiki menjadi nol. Dua invoice manual tambahan menyediakan skenario
+barang mewah dan jasa pada proyek simulasi yang sama; lihat
+[panduan PPN dan PPnBM](PPN_DAN_PPNBM.md). Keduanya tidak ditanam seeder standar.
+November memuat faktur asal, Pengganti, dan pembayaran Draft. Koreksi dapat dicoba
+melalui detail faktur. Seeder tidak lagi menanam tanggal salah untuk simulasi
+koreksi: PDF tersimpan, tanggal e-Faktur, dan invoice pada instalasi baru sesuai.
+Desember mempertahankan faktur Dibatalkan. Januari 2026 tetap kosong untuk empty state.
+Periode bersifat tetap, bukan mengikuti bulan komputer; pilih periode di atas jika bulan
+berjalan sudah berubah.
 
 ## Mencoba pencatatan baru dari UI
 
@@ -65,9 +82,9 @@ Gunakan `demo:samples` untuk menyiapkan PDF berdasarkan invoice D-2 yang ada.
 2. Buka Faktur Pajak, lalu Catat e-Faktur Keluaran.
 3. Pilih invoice D-2 yang tersedia dan unggah PDF e-Faktur yang sesuai.
 4. Klik Periksa PDF, periksa hasilnya, lalu Simpan Faktur.
-Untuk menguji penggantian, gunakan alur Catat Pengganti dari halaman detail faktur.
-Setiap PDF memakai NSFP unik. Seeder aditif tidak menghapus data yang sudah diubah
-melalui UI.
+   Untuk menguji penggantian, gunakan alur Catat Pengganti dari halaman detail faktur.
+   Setiap PDF memakai NSFP unik. Seeder aditif tidak menghapus data yang sudah diubah
+   melalui UI.
 
 ## Mencoba pembayaran dan ekspor
 

@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Models\PembayaranPajak;
 use App\Services\Auth\F1Identity;
 use App\Support\Money;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
@@ -15,7 +16,8 @@ use Throwable;
  *
  * Aturan (Q-10): CONFIRMED hanya bila NTPN dan bukti pembayaran ada; selain itu
  * INCOMPLETE (Draft/Belum Konfirmasi). Selisih jumlah setor terhadap total PPN
- * tetap tersimpan dan ditampilkan (tidak menolak; kompensasi menunggu Q-24).
+ * boleh nol atau minus (kurang setor), tetapi pembayaran yang membuat selisih
+ * plus (lebih setor) ditolak karena berisiko kerugian.
  */
 class TaxPaymentService
 {
@@ -40,6 +42,10 @@ class TaxPaymentService
         $amountPaid = $this->amount($input['amountPaid'] ?? null);
         $billingId = $this->requiredText($input['billingId'] ?? null, 'billingId', 100);
         $ntpn = $this->optionalText($input['ntpn'] ?? null, 'ntpn', 100);
+        $this->assertBillingIdFree($billingId);
+        if ($ntpn !== null) {
+            $this->assertNtpnFree($ntpn);
+        }
 
         $eBilling = $this->files->readPdf($eBillingFile, 'INVALID_PAYMENT', 'PDF e-Billing wajib diunggah dan harus berformat PDF');
         $proof = $proofFile === null
@@ -50,6 +56,9 @@ class TaxPaymentService
             throw ApiException::notFound('TAX_RECAP_NOT_FOUND', 'Masa pajak belum memiliki rekap');
         }
 
+        // Cek awal agar berkas tidak diunggah bila pasti ditolak.
+        $this->assertNotOverpaid($taxPeriod, $amountPaid);
+
         $id = (string) Str::uuid7();
         $eBillingUri = null;
         $proofUri = null;
@@ -59,6 +68,14 @@ class TaxPaymentService
             $proofUri = $proof !== null ? $this->files->put('payment-proof', $id, $proof) : null;
 
             return DB::transaction(function () use ($id, $taxPeriod, $taxYear, $amountPaid, $billingId, $ntpn, $eBillingUri, $proofUri, $actor): array {
+                // Kunci baris rekap lalu cek ulang agar dua penyimpanan bersamaan tidak lolos lebih setor.
+                DB::table('rekap_pajak_bulanan')->where('tax_period', $taxPeriod)->lockForUpdate()->first();
+                $this->assertBillingIdFree($billingId);
+                if ($ntpn !== null) {
+                    $this->assertNtpnFree($ntpn);
+                }
+                $this->assertNotOverpaid($taxPeriod, $amountPaid);
+
                 $payment = new PembayaranPajak;
                 $payment->forceFill([
                     'tax_payment_id' => $id,
@@ -86,6 +103,14 @@ class TaxPaymentService
             if ($proofUri !== null) {
                 $this->files->delete($proofUri);
             }
+            if ($e instanceof QueryException) {
+                if (str_contains($e->getMessage(), 'pembayaran_pajak_billing_id_unique')) {
+                    throw $this->duplicateBillingId();
+                }
+                if (str_contains($e->getMessage(), 'pembayaran_pajak_ntpn_unique')) {
+                    throw $this->duplicateNtpn();
+                }
+            }
             throw $e;
         }
     }
@@ -110,11 +135,15 @@ class TaxPaymentService
             throw $this->invalid('NTPN dan bukti pembayaran wajib diisi untuk Terkonfirmasi');
         }
 
+        $this->assertNtpnFree($ntpn, $payment->tax_payment_id);
+
         $proof = $this->files->readPdf($proofFile, 'INVALID_PAYMENT', 'Bukti pembayaran harus berformat PDF');
         $proofUri = $this->files->put('payment-proof', $payment->tax_payment_id.'-'.Str::lower(Str::random(8)), $proof);
 
         try {
             return DB::transaction(function () use ($payment, $ntpn, $proofUri): array {
+                $this->assertNtpnFree($ntpn, $payment->tax_payment_id);
+
                 // Berkas bukti lama tidak dihapus saat diganti (jejak audit).
                 $payment->forceFill([
                     'ntpn' => $ntpn,
@@ -128,6 +157,9 @@ class TaxPaymentService
             });
         } catch (Throwable $e) {
             $this->files->delete($proofUri);
+            if ($e instanceof QueryException && str_contains($e->getMessage(), 'pembayaran_pajak_ntpn_unique')) {
+                throw $this->duplicateNtpn();
+            }
             throw $e;
         }
     }
@@ -145,6 +177,55 @@ class TaxPaymentService
         }
 
         return $year;
+    }
+
+    /**
+     * Tolak bila jumlah setor tercatat + jumlah baru melebihi total PPN masa pajak.
+     *
+     * @throws ApiException 400 INVALID_PAYMENT
+     */
+    private function assertNotOverpaid(string $taxPeriod, string $amountPaid): void
+    {
+        $current = $this->recap->compute($taxPeriod);
+        $difference = Money::sub(Money::add($current->amountPaid, $amountPaid), $current->totalPpn);
+
+        if (bccomp($difference, '0', 2) > 0) {
+            $remaining = Money::sub($current->totalPpn, $current->amountPaid);
+            $remaining = bccomp($remaining, '0', 2) < 0 ? '0.00' : $remaining;
+
+            throw $this->invalid(
+                'Jumlah setor melebihi total PPN (lebih setor Rp '.Money::display($difference).'). '
+                .'Sisa yang boleh disetor: Rp '.Money::display($remaining).'.'
+            );
+        }
+    }
+
+    private function assertBillingIdFree(string $billingId): void
+    {
+        if (PembayaranPajak::query()->where('billing_id', $billingId)->exists()) {
+            throw $this->duplicateBillingId();
+        }
+    }
+
+    private function duplicateBillingId(): ApiException
+    {
+        return ApiException::conflict('DUPLICATE_BILLING_ID', 'ID / kode billing sudah pernah digunakan');
+    }
+
+    private function assertNtpnFree(string $ntpn, ?string $exceptTaxPaymentId = null): void
+    {
+        $query = PembayaranPajak::query()->where('ntpn', $ntpn);
+        if ($exceptTaxPaymentId !== null) {
+            $query->where('tax_payment_id', '!=', $exceptTaxPaymentId);
+        }
+        if ($query->exists()) {
+            throw $this->duplicateNtpn();
+        }
+    }
+
+    private function duplicateNtpn(): ApiException
+    {
+        return ApiException::conflict('DUPLICATE_NTPN', 'NTPN sudah pernah digunakan');
     }
 
     private function amount(mixed $value): string
