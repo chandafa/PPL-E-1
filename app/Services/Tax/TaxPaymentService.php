@@ -43,6 +43,9 @@ class TaxPaymentService
         $billingId = $this->requiredText($input['billingId'] ?? null, 'billingId', 100);
         $ntpn = $this->optionalText($input['ntpn'] ?? null, 'ntpn', 100);
         $this->assertBillingIdFree($billingId);
+        if ($ntpn !== null) {
+            $this->assertNtpnFree($ntpn);
+        }
 
         $eBilling = $this->files->readPdf($eBillingFile, 'INVALID_PAYMENT', 'PDF e-Billing wajib diunggah dan harus berformat PDF');
         $proof = $proofFile === null
@@ -68,6 +71,9 @@ class TaxPaymentService
                 // Kunci baris rekap lalu cek ulang agar dua penyimpanan bersamaan tidak lolos lebih setor.
                 DB::table('rekap_pajak_bulanan')->where('tax_period', $taxPeriod)->lockForUpdate()->first();
                 $this->assertBillingIdFree($billingId);
+                if ($ntpn !== null) {
+                    $this->assertNtpnFree($ntpn);
+                }
                 $this->assertNotOverpaid($taxPeriod, $amountPaid);
 
                 $payment = new PembayaranPajak;
@@ -97,8 +103,13 @@ class TaxPaymentService
             if ($proofUri !== null) {
                 $this->files->delete($proofUri);
             }
-            if ($e instanceof QueryException && str_contains($e->getMessage(), 'pembayaran_pajak_billing_id_unique')) {
-                throw $this->duplicateBillingId();
+            if ($e instanceof QueryException) {
+                if (str_contains($e->getMessage(), 'pembayaran_pajak_billing_id_unique')) {
+                    throw $this->duplicateBillingId();
+                }
+                if (str_contains($e->getMessage(), 'pembayaran_pajak_ntpn_unique')) {
+                    throw $this->duplicateNtpn();
+                }
             }
             throw $e;
         }
@@ -124,11 +135,15 @@ class TaxPaymentService
             throw $this->invalid('NTPN dan bukti pembayaran wajib diisi untuk Terkonfirmasi');
         }
 
+        $this->assertNtpnFree($ntpn, $payment->tax_payment_id);
+
         $proof = $this->files->readPdf($proofFile, 'INVALID_PAYMENT', 'Bukti pembayaran harus berformat PDF');
         $proofUri = $this->files->put('payment-proof', $payment->tax_payment_id.'-'.Str::lower(Str::random(8)), $proof);
 
         try {
             return DB::transaction(function () use ($payment, $ntpn, $proofUri): array {
+                $this->assertNtpnFree($ntpn, $payment->tax_payment_id);
+
                 // Berkas bukti lama tidak dihapus saat diganti (jejak audit).
                 $payment->forceFill([
                     'ntpn' => $ntpn,
@@ -142,6 +157,9 @@ class TaxPaymentService
             });
         } catch (Throwable $e) {
             $this->files->delete($proofUri);
+            if ($e instanceof QueryException && str_contains($e->getMessage(), 'pembayaran_pajak_ntpn_unique')) {
+                throw $this->duplicateNtpn();
+            }
             throw $e;
         }
     }
@@ -192,6 +210,22 @@ class TaxPaymentService
     private function duplicateBillingId(): ApiException
     {
         return ApiException::conflict('DUPLICATE_BILLING_ID', 'ID / kode billing sudah pernah digunakan');
+    }
+
+    private function assertNtpnFree(string $ntpn, ?string $exceptTaxPaymentId = null): void
+    {
+        $query = PembayaranPajak::query()->where('ntpn', $ntpn);
+        if ($exceptTaxPaymentId !== null) {
+            $query->where('tax_payment_id', '!=', $exceptTaxPaymentId);
+        }
+        if ($query->exists()) {
+            throw $this->duplicateNtpn();
+        }
+    }
+
+    private function duplicateNtpn(): ApiException
+    {
+        return ApiException::conflict('DUPLICATE_NTPN', 'NTPN sudah pernah digunakan');
     }
 
     private function amount(mixed $value): string

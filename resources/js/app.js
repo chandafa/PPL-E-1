@@ -603,14 +603,23 @@ async function paymentPage() {
         billingInput.removeAttribute('aria-describedby');
         billingError.hidden = true;
         billingError.textContent = '';
+        clearNotice();
     }
     billingInput.addEventListener('input', clearBillingError);
+    const ntpnInput = $('#ntpn');
+    function clearNtpnError() {
+        if (!ntpnInput) return;
+        ntpnInput.removeAttribute('aria-invalid');
+        clearNotice();
+    }
+    if (ntpnInput) ntpnInput.addEventListener('input', clearNtpnError);
     $('#payment-fields').disabled = !data.invoices.length;
     if (!data.invoices.length) notice('Belum ada faktur pada masa pajak ini. Catat faktur atau pilih periode lain melalui rekap.', 'info');
     updateDifference();
     form.onsubmit = async (event) => {
         event.preventDefault(); clearNotice();
         clearBillingError();
+        clearNtpnError();
         try {
             if (!existing && newDifference() > 0n) throw new Error('Pembayaran tidak dapat disimpan karena jumlah setor melebihi total PPN (selisih plus). Sesuaikan jumlah setor agar selisih menjadi 0 atau minus.');
             if (!existing) validateFile($('#eBillingFile'));
@@ -623,6 +632,7 @@ async function paymentPage() {
             flash(existing ? 'Pembayaran berhasil dikonfirmasi.' : 'Pembayaran berhasil disimpan.');
             location.assign(`/tax-recaps/${period}`);
         } catch (error) {
+            notice(error.message);
             if (!existing && error.code === 'DUPLICATE_BILLING_ID') {
                 billingError.id = 'billingId-error';
                 billingError.textContent = error.message;
@@ -632,7 +642,13 @@ async function paymentPage() {
                 billingInput.focus();
                 return;
             }
-            notice(error.message);
+            if (error.code === 'DUPLICATE_NTPN') {
+                if (ntpnInput) {
+                    ntpnInput.setAttribute('aria-invalid', 'true');
+                    ntpnInput.focus();
+                }
+                return;
+            }
         }
     };
 }
