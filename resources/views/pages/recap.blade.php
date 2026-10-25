@@ -2,7 +2,7 @@
 @section('title', 'Rekap Masa Pajak')
 @section('breadcrumb', 'Rekap Masa Pajak')
 @section('content')
-<div class="page-header"><div><h1 class="page-title">Rekap Masa Pajak</h1><p class="page-description">Periksa faktur aktif, jumlah pajak, dan pembayaran per bulan.</p></div><div class="flex flex-wrap gap-2"><x-ui.button variant="secondary" id="open-export" icon="download" disabled>Ekspor</x-ui.button><x-ui.button :href="route('ui.payments', ['taxPeriod' => $taxPeriod])" icon="wallet">Catat Pembayaran</x-ui.button></div></div>
+<div class="page-header"><div><h1 class="page-title">Rekap Masa Pajak</h1><p class="page-description">Periksa faktur aktif, jumlah pajak, dan pembayaran per bulan.</p></div><div class="flex flex-wrap gap-2"><x-ui.button variant="secondary" id="open-export" icon="download" disabled>Ekspor</x-ui.button><x-ui.button id="btn-catat-pembayaran" :href="route('ui.payments', ['taxPeriod' => $taxPeriod])" icon="wallet">Catat Pembayaran</x-ui.button></div></div>
 <form id="period-form" class="mb-6 flex flex-wrap items-end gap-3"><div class="w-full sm:w-56"><x-ui.select label="Masa pajak" name="selectedPeriod" required disabled><option value="">Memuat masa pajak…</option></x-ui.select></div><x-ui.button type="submit" variant="secondary" disabled>Tampilkan Rekap</x-ui.button><p class="pb-3 text-xs text-muted">Normal dan Pengganti aktif dihitung; semua status tetap terlihat.</p></form>
 <div id="recap-summary"><x-ui.skeleton /></div>
 <section class="panel mt-6"><div class="panel-heading"><h2 class="panel-title">Faktur keluaran periode <span>{{ \App\Support\DateDisplay::period($taxPeriod) }}</span></h2><span id="recap-count" class="text-xs text-muted"></span></div><div id="recap-invoices"><x-ui.skeleton /></div></section>
