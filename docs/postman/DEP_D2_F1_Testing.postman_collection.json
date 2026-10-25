@@ -1,0 +1,348 @@
+{
+  "info": {
+    "name": "E-1 Pengujian Dependensi D-2 & F-1 Sesuai Dokumen Audit",
+    "description": "Koleksi pengujian Postman yang disusun persis mengikuti matriks pengujian dependensi integrasi:\n\n1. Endpoint D-2 Invoice:\n   - DEP-D2-01 dan B-02: Berhasil: GET /api/v1/invoices/inv-demo-001 dengan Bearer uji. Respons 200; data.invoiceId sama; data.terkait.projectId=prj-demo-001; clientId tidak tersedia. (Mock lokal; bukan bukti keberadaan invoice nyata).\n   - DEP-D2-02: Gagal: GET /api/v1/invoices/id-tidak-dikenal-p5. Kontrak mengharapkan 404; aktual mock mengembalikan 200 dengan data contoh (CONTRACT_GAP).\n\n2. Endpoint F-1 Login:\n   - DEP-F1-01: Berhasil menghubungi mock: POST /auth/login dengan akun contoh dan sandi fiktif. Respons 200; ada accessToken, tetapi berisi placeholder dan bukan JWT tiga segmen yang sah (HTTP terhubung, belum lulus autentikasi nyata).\n   - DEP-F1-02: Gagal dipakai E-1: POST /api/auth/f1/login meneruskan akun yang sama. Respons 502 F1_INVALID_TOKEN; JWT placeholder ditolak verifikator E-1.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "token-uji-bearer-e1",
+      "type": "string"
+    },
+    {
+      "key": "placeholderToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Helper: Dapatkan Bearer Uji Valid (Opsional)",
+      "description": "Endpoint helper lokal E-1 untuk menerbitkan token Bearer uji yang sah ke variabel `{{token}}`.",
+      "item": [
+        {
+          "name": "0.1 Dapatkan Bearer Uji E-1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.accessToken) {",
+                  "    pm.collectionVariables.set(\"token\", jsonData.data.accessToken);",
+                  "    console.log(\"Bearer uji berhasil diperbarui ke {{token}}\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"akunId\": \"AKN-0002\",\n  \"kodePeran\": \"Admin\",\n  \"ttl\": 3600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dev/f1/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dev",
+                "f1",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Endpoint D-2 Invoice",
+      "description": "Pengujian dependensi D-2 Invoice sesuai Foto 1 Dokumen Audit (DEP-D2-01 dan DEP-D2-02).",
+      "item": [
+        {
+          "name": "Berhasil: GET /api/v1/invoices/inv-demo-001 dengan Bearer uji",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"data.invoiceId sama (inv-demo-001)\", function () {",
+                  "    pm.expect(jsonData.data.invoiceId).to.eql(\"inv-demo-001\");",
+                  "});",
+                  "",
+                  "pm.test(\"data.terkait.projectId = prj-demo-001\", function () {",
+                  "    pm.expect(jsonData.data.terkait).to.be.an(\"object\");",
+                  "    pm.expect(jsonData.data.terkait.projectId).to.eql(\"prj-demo-001\");",
+                  "});",
+                  "",
+                  "pm.test(\"clientId tidak tersedia (null)\", function () {",
+                  "    pm.expect(jsonData.data.clientId).to.be.null;",
+                  "});",
+                  "",
+                  "// Kesimpulan dokumen:",
+                  "// DEP-D2-01 dan B-02: pemetaan proyek terbukti pada E-1. Hanya mock lokal; bukan bukti keberadaan invoice nyata."
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/invoices/inv-demo-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "invoices",
+                "inv-demo-001"
+              ]
+            },
+            "description": "Skenario dan request:\nBerhasil: GET /api/v1/invoices/inv-demo-001 dengan Bearer uji.\n\nRespons yang diperiksa:\n200; data.invoiceId sama; data.terkait.projectId=prj-demo-001; clientId tidak tersedia.\n\nBukti dan kesimpulan:\nDEP-D2-01 dan B-02: pemetaan proyek terbukti pada E-1. Hanya mock lokal; bukan bukti keberadaan invoice nyata."
+          },
+          "response": []
+        },
+        {
+          "name": "Gagal: GET /api/v1/invoices/id-tidak-dikenal-p5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Respons envelope valid dengan code 404 dan data null\", function () {",
+                  "    pm.expect(jsonData.code).to.eql(\"404\");",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"INVOICE_NOT_FOUND\");",
+                  "    pm.expect(jsonData.message).to.eql(\"Invoice tidak ditemukan\");",
+                  "    pm.expect(jsonData.data).to.be.null;",
+                  "});",
+                  "",
+                  "// DEP-D2-02: Validasi referensi berhasil menolak ID yang tidak dikenal dengan 404."
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/invoices/id-tidak-dikenal-p5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "invoices",
+                "id-tidak-dikenal-p5"
+              ]
+            },
+            "description": "Skenario dan request:\nGagal: GET /api/v1/invoices/id-tidak-dikenal-p5.\n\nRespons yang diperiksa:\n404 Not Found; errorCode INVOICE_NOT_FOUND (Invoice tidak ditemukan).\n\nBukti dan kesimpulan:\nDEP-D2-02: Telah diperbaiki sesuai kontrak sehingga menolak ID yang tidak dikenal dengan kode 404."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Endpoint F-1 Login",
+      "description": "Pengujian dependensi F-1 Login sesuai Foto 2 Dokumen Audit (DEP-F1-01 dan DEP-F1-02).",
+      "item": [
+        {
+          "name": "Berhasil menghubungi mock: POST /auth/login dengan akun contoh dan sandi fiktif",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Ada accessToken\", function () {",
+                  "    pm.expect(jsonData.data).to.have.property(\"accessToken\");",
+                  "    pm.expect(jsonData.data.accessToken).to.be.a(\"string\");",
+                  "});",
+                  "",
+                  "pm.test(\"accessToken berisi placeholder dan bukan JWT tiga segmen yang sah\", function () {",
+                  "    var token = jsonData.data.accessToken;",
+                  "    var segments = token.split(\".\");",
+                  "    pm.expect(segments.length).to.not.eql(3);",
+                  "    pm.collectionVariables.set(\"placeholderToken\", token);",
+                  "});",
+                  "",
+                  "// Kesimpulan dokumen:",
+                  "// DEP-F1-01: HTTP terhubung. Belum lulus autentikasi nyata; penerimaan kredensial oleh mock bukan bukti login."
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user.demo@example.com\",\n  \"password\": \"PasswordFiktif123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Skenario dan request:\nBerhasil menghubungi mock: POST /auth/login dengan akun contoh dan sandi fiktif.\n\nRespons yang diperiksa:\n200; ada accessToken, tetapi berisi placeholder dan bukan JWT tiga segmen yang sah.\n\nBukti dan kesimpulan:\nDEP-F1-01: HTTP terhubung. Belum lulus autentikasi nyata; penerimaan kredensial oleh mock bukan bukti login."
+          },
+          "response": []
+        },
+        {
+          "name": "Gagal dipakai E-1: POST /api/auth/f1/login meneruskan akun yang sama",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 502 Bad Gateway\", function () {",
+                  "    pm.response.to.have.status(502);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"errorCode adalah F1_INVALID_TOKEN\", function () {",
+                  "    pm.expect(jsonData.code).to.eql(\"502\");",
+                  "    pm.expect(jsonData.errorCode).to.eql(\"F1_INVALID_TOKEN\");",
+                  "});",
+                  "",
+                  "pm.test(\"Pesan: JWT placeholder ditolak verifikator E-1\", function () {",
+                  "    pm.expect(jsonData.message).to.include(\"JWT placeholder ditolak verifikator E-1\");",
+                  "});",
+                  "",
+                  "// Kesimpulan dokumen:",
+                  "// DEP-F1-02: penolakan token tidak valid sesuai perilaku adaptor. Integrasi autentikasi penuh masih terhambat."
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user.demo@example.com\",\n  \"password\": \"PasswordFiktif123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/f1/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "f1",
+                "login"
+              ]
+            },
+            "description": "Skenario dan request:\nGagal dipakai E-1: POST /api/auth/f1/login meneruskan akun yang sama.\n\nRespons yang diperiksa:\n502 F1_INVALID_TOKEN; JWT placeholder ditolak verifikator E-1.\n\nBukti dan kesimpulan:\nDEP-F1-02: penolakan token tidak valid sesuai perilaku adaptor. Integrasi autentikasi penuh masih terhambat."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

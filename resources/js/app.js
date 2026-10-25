@@ -34,7 +34,18 @@ const empty = (title, message) =>
 
 function notice(message, variant = "error", target = "#app-alert") {
     const element = $(target);
+    if (!element) return;
     element.textContent = message;
+    element.className = `notice ${variant === "error" ? "notice-error" : variant === "success" ? "notice-success" : ""} ${target === "#app-alert" ? "mb-5" : ""}`;
+    element.hidden = false;
+    element.setAttribute("tabindex", "-1");
+    if (variant === "error") element.focus({ preventScroll: true });
+}
+
+function noticeHtml(html, variant = "info", target = "#app-alert") {
+    const element = $(target);
+    if (!element) return;
+    element.innerHTML = html;
     element.className = `notice ${variant === "error" ? "notice-error" : variant === "success" ? "notice-success" : ""} ${target === "#app-alert" ? "mb-5" : ""}`;
     element.hidden = false;
     element.setAttribute("tabindex", "-1");
@@ -1120,20 +1131,41 @@ async function recapPage() {
               "Pembayaran belum dicatat",
               "Catat pembayaran setelah faktur periode ini tersedia. NTPN dan bukti pembayaran dapat dilengkapi kemudian.",
           );
+    if (!data.invoices.length) {
+        noticeHtml(
+            `<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <strong class="font-semibold block sm:inline">Data rekap periode ${e(taxPeriodLabel(period))} belum tersedia.</strong>
+                    <span> Silakan catat atau unggah e-Faktur terlebih dahulu melalui menu <strong>Faktur Pajak</strong> agar data rekap dan perhitungan pajak otomatis terisi di sini.</span>
+                </div>
+                <a href="/tax-invoices/create" class="btn btn-secondary whitespace-nowrap text-xs">Catat Faktur Baru</a>
+            </div>`,
+            "info",
+        );
+    } else {
+        clearNotice();
+    }
+
     const paymentLink = $(
-        `a[href="/tax-recaps/${period}/payments/create"]`,
+        "#btn-catat-pembayaran, a[href$='/payments/create']",
         $("#page-content"),
     );
-    if (!data.invoices.length) {
-        paymentLink.setAttribute("aria-disabled", "true");
-        paymentLink.classList.add("opacity-60");
-        paymentLink.onclick = (event) => {
-            event.preventDefault();
-            notice(
-                "Catat faktur untuk periode ini sebelum mencatat pembayaran.",
-                "info",
-            );
-        };
+    if (paymentLink) {
+        if (!data.invoices.length) {
+            paymentLink.setAttribute("aria-disabled", "true");
+            paymentLink.classList.add("opacity-60");
+            paymentLink.onclick = (event) => {
+                event.preventDefault();
+                notice(
+                    "Catat faktur untuk periode ini terlebih dahulu sebelum mencatat pembayaran.",
+                    "info",
+                );
+            };
+        } else {
+            paymentLink.removeAttribute("aria-disabled");
+            paymentLink.classList.remove("opacity-60");
+            paymentLink.onclick = null;
+        }
     }
     $("#open-export").disabled = false;
     $("#open-export").onclick = () => {

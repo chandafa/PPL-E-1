@@ -31,6 +31,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'f1.auth' => AuthenticateF1Token::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            '/auth/login',
+        ]);
+
         // PATCH multipart/form-data (API-KE01-11) tidak diurai PHP secara bawaan.
         $middleware->api(prepend: [ParseMultipartBody::class]);
     })
