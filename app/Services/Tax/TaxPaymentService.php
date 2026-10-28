@@ -4,6 +4,7 @@ namespace App\Services\Tax;
 
 use App\Exceptions\ApiException;
 use App\Models\PembayaranPajak;
+use App\Models\RiwayatPerubahanPembayaran;
 use App\Services\Auth\F1Identity;
 use App\Support\Money;
 use Illuminate\Database\QueryException;
@@ -24,6 +25,7 @@ class TaxPaymentService
     public function __construct(
         private readonly RecapService $recap,
         private readonly FileStore $files,
+        private readonly PaymentHistoryRecorder $history,
     ) {}
 
     /**
@@ -92,6 +94,8 @@ class TaxPaymentService
                     'created_by_akun_id' => $actor->akunId,
                 ])->save();
 
+                $this->history->record($payment, RiwayatPerubahanPembayaran::ACTION_CREATE, $actor->akunId, null);
+
                 $recap = $this->recap->refresh($taxPeriod);
 
                 return ['payment' => $payment->fresh(), 'paymentDifference' => $recap->payment_difference];
@@ -141,15 +145,27 @@ class TaxPaymentService
         $proofUri = $this->files->put('payment-proof', $payment->tax_payment_id.'-'.Str::lower(Str::random(8)), $proof);
 
         try {
-            return DB::transaction(function () use ($payment, $ntpn, $proofUri): array {
+            return DB::transaction(function () use ($payment, $ntpn, $proofUri, $actor): array {
+                // Urutan kunci sama dengan create(): rekap, lalu pembayaran.
+                DB::table('rekap_pajak_bulanan')->where('tax_period', $payment->tax_period)->lockForUpdate()->first();
+                $payment = PembayaranPajak::query()->whereKey($payment->tax_payment_id)->lockForUpdate()->first();
+                if ($payment === null) {
+                    throw ApiException::notFound('TAX_PAYMENT_NOT_FOUND', 'Catatan pembayaran tidak ditemukan');
+                }
                 $this->assertNtpnFree($ntpn, $payment->tax_payment_id);
 
-                // Berkas bukti lama tidak dihapus saat diganti (jejak audit).
+                $before = $this->history->snapshot($payment);
+                $action = $payment->status === PembayaranPajak::STATUS_CONFIRMED
+                    ? RiwayatPerubahanPembayaran::ACTION_CORRECT
+                    : RiwayatPerubahanPembayaran::ACTION_COMPLETE;
+                // Bukti lama tetap tertaut melalui before_snapshot dalam riwayat.
                 $payment->forceFill([
                     'ntpn' => $ntpn,
                     'payment_proof_uri' => $proofUri,
                     'status' => PembayaranPajak::STATUS_CONFIRMED,
                 ])->save();
+
+                $this->history->record($payment, $action, $actor->akunId, $before);
 
                 $recap = $this->recap->refresh($payment->tax_period);
 

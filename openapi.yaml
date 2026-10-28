@@ -1062,7 +1062,7 @@ paths:
         - name: taxPaymentId
           in: path
           required: true
-          description: ID catatan pembayaran; Draft dilengkapi atau bukti/NTPN catatan terkonfirmasi diperbarui. Berkas bukti lama tetap disimpan.
+          description: ID catatan pembayaran; Draft dilengkapi atau bukti/NTPN catatan terkonfirmasi diperbarui. Setiap perubahan dicatat secara atomik dalam riwayat append-only beserta aktor, waktu, dan snapshot sebelum/sesudah. Berkas bukti lama tetap disimpan dan tertaut melalui snapshot riwayat.
           schema:
             type: string
             format: uuid

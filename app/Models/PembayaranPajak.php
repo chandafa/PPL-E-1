@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * ENT-KE01-04 PembayaranPajak: jumlah setor, billing, NTPN, e-Billing, dan
@@ -26,6 +27,12 @@ class PembayaranPajak extends Model
     protected $keyType = 'string';
 
     protected $guarded = [];
+
+    public function history(): HasMany
+    {
+        return $this->hasMany(RiwayatPerubahanPembayaran::class, 'tax_payment_id', 'tax_payment_id')
+            ->orderBy('changed_at')->orderBy('audit_id');
+    }
 
     protected function casts(): array
     {

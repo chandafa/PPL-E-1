@@ -1,0 +1,49 @@
+{
+    "database_profile": "local_test_disposable_schema",
+    "rounds": [
+        {
+            "round": 1,
+            "snapshot_before": "11000000.00",
+            "stored_after": "11000000.00",
+            "live_after": "22000000.00",
+            "stale_write_proven": true
+        },
+        {
+            "round": 2,
+            "snapshot_before": "22000000.00",
+            "stored_after": "22000000.00",
+            "live_after": "33000000.00",
+            "stale_write_proven": true
+        },
+        {
+            "round": 3,
+            "snapshot_before": "33000000.00",
+            "stored_after": "33000000.00",
+            "live_after": "44000000.00",
+            "stale_write_proven": true
+        },
+        {
+            "round": 4,
+            "snapshot_before": "44000000.00",
+            "stored_after": "44000000.00",
+            "live_after": "55000000.00",
+            "stale_write_proven": true
+        },
+        {
+            "round": 5,
+            "snapshot_before": "55000000.00",
+            "stored_after": "55000000.00",
+            "live_after": "66000000.00",
+            "stale_write_proven": true
+        }
+    ],
+    "parallel_payment_guard": {
+        "loser": {
+            "status": 400,
+            "errorCode": "INVALID_PAYMENT"
+        },
+        "stored_payment_count": 1,
+        "amount_paid": "66000000.00",
+        "guard_held": true
+    }
+}

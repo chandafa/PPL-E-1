@@ -3,8 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\PembayaranPajak;
+use App\Models\RiwayatPerubahanPembayaran;
+use App\Services\Tax\PaymentHistoryRecorder;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use RuntimeException;
 use Tests\TestCase;
 
 /** API-KE01-08 (catat pembayaran) dan API-KE01-11 (lengkapi menjadi Terkonfirmasi). */
@@ -48,6 +54,11 @@ class TaxPaymentTest extends TestCase
         $this->assertNull($payment->ntpn);
         $this->assertNull($payment->payment_proof_uri);
         $this->assertSame('AKN-0002', $payment->created_by_akun_id);
+        $history = $payment->history()->sole();
+        $this->assertSame('CREATE', $history->action);
+        $this->assertSame('AKN-0002', $history->actor_akun_id);
+        $this->assertNull($history->before_snapshot);
+        $this->assertSame('INCOMPLETE', $history->after_snapshot['status']);
         Storage::disk('local')->assertExists(ltrim(substr($payment->e_billing_uri, strlen('/files/')), '/'));
 
         $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'payment_status' => 'INCOMPLETE', 'amount_paid' => '11000000.00']);
@@ -63,6 +74,10 @@ class TaxPaymentTest extends TestCase
         $response->assertOk()->assertJsonPath('data.status', 'CONFIRMED');
 
         $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'payment_status' => 'CONFIRMED']);
+        $history = RiwayatPerubahanPembayaran::query()->sole();
+        $this->assertSame('CREATE', $history->action);
+        $this->assertSame('NTPN-ABC123', $history->after_snapshot['ntpn']);
+        $this->assertSame('CONFIRMED', $history->after_snapshot['status']);
     }
 
     public function test_id_billing_duplikat_ditolak_dengan_409(): void
@@ -239,18 +254,107 @@ class TaxPaymentTest extends TestCase
         }
     }
 
-    public function test_mengganti_bukti_tidak_menghapus_berkas_lama(): void
+    public function test_koreksi_lintas_aktor_menyimpan_rantai_snapshot_dan_bukti_lama(): void
     {
         $id = $this->draft();
         $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-1'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])->assertOk();
         $old = PembayaranPajak::query()->findOrFail($id)->payment_proof_uri;
 
-        $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-2'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())])->assertOk();
+        $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-2'], ['paymentProofFile' => $this->pdfUpload($this->simplePdf())], $this->auth('CEO', 'AKN-0001'))->assertOk();
 
         $payment = PembayaranPajak::query()->findOrFail($id);
         $this->assertNotSame($old, $payment->payment_proof_uri);
         $this->assertSame('NTPN-2', $payment->ntpn);
         Storage::disk('local')->assertExists(ltrim(substr($old, strlen('/files/')), '/'));
+        $history = $payment->history()->get();
+        $this->assertSame(['CREATE', 'COMPLETE', 'CORRECT'], $history->pluck('action')->all());
+        $this->assertSame($history[0]->after_snapshot, $history[1]->before_snapshot);
+        $this->assertSame($history[1]->after_snapshot, $history[2]->before_snapshot);
+        $this->assertSame('AKN-0001', $history[2]->actor_akun_id);
+        $this->assertSame('AKN-0002', $payment->created_by_akun_id);
+        $this->assertSame('NTPN-1', $history[2]->before_snapshot['ntpn']);
+        $this->assertSame($old, $history[2]->before_snapshot['paymentProofUri']);
+        $this->assertSame('NTPN-2', $history[2]->after_snapshot['ntpn']);
+        $this->assertSame($payment->payment_proof_uri, $history[2]->after_snapshot['paymentProofUri']);
+        $this->assertSame('11000000.00', $history[2]->after_snapshot['amountPaid']);
+        $this->assertNotNull($history[2]->changed_at);
+    }
+
+    public function test_koreksi_pembayaran_lama_tanpa_riwayat_mencatat_snapshot_awal(): void
+    {
+        $draft = PembayaranPajak::query()->findOrFail($this->draft());
+        // Simulasikan pembayaran periode lampau yang sudah ada sebelum migrasi audit.
+        $legacy = $draft->replicate()->forceFill([
+            'amount_paid' => '0.00', 'billing_id' => 'BILL-LEGACY', 'ntpn' => 'NTPN-LEGACY',
+            'payment_proof_uri' => '/files/tax/payment-proof/legacy.pdf', 'status' => 'CONFIRMED',
+        ]);
+        $legacy->save();
+        $id = $legacy->tax_payment_id;
+        $this->assertCount(0, $legacy->history);
+        $this->travelTo(now()->addMonths(2));
+        $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-CORRECTED'], [
+            'paymentProofFile' => $this->pdfUpload($this->simplePdf()),
+        ], $this->auth('COO', 'AKN-0003'))->assertOk();
+
+        $history = RiwayatPerubahanPembayaran::query()->where('action', 'CORRECT')->sole();
+        $this->assertSame('AKN-0003', $history->actor_akun_id);
+        $this->assertSame('NTPN-LEGACY', $history->before_snapshot['ntpn']);
+        $this->assertSame('/files/tax/payment-proof/legacy.pdf', $history->before_snapshot['paymentProofUri']);
+    }
+
+    public function test_gagal_audit_membatalkan_pembayaran_rekap_dan_berkas_baru(): void
+    {
+        $id = $this->draft();
+        $paymentBefore = PembayaranPajak::query()->findOrFail($id)->getAttributes();
+        $filesBefore = Storage::disk('local')->allFiles();
+        $recapBefore = DB::table('rekap_pajak_bulanan')->where('tax_period', '2026-11')->first();
+        $mock = Mockery::mock(PaymentHistoryRecorder::class)->makePartial();
+        $mock->shouldReceive('record')->andThrow(new RuntimeException('Audit gagal'));
+        $this->app->instance(PaymentHistoryRecorder::class, $mock);
+
+        $this->patchMultipart(self::URI.'/'.$id, ['ntpn' => 'NTPN-FAIL'], [
+            'paymentProofFile' => $this->pdfUpload($this->simplePdf()),
+        ])->assertStatus(500);
+        $this->assertSame($paymentBefore, PembayaranPajak::query()->findOrFail($id)->getAttributes());
+        $this->assertEquals($recapBefore, DB::table('rekap_pajak_bulanan')->where('tax_period', '2026-11')->first());
+        $this->assertSame($filesBefore, Storage::disk('local')->allFiles());
+        $this->assertDatabaseCount('riwayat_perubahan_pembayaran', 1);
+    }
+
+    public function test_gagal_audit_create_tidak_menyisakan_pembayaran_atau_berkas(): void
+    {
+        $filesBefore = Storage::disk('local')->allFiles();
+        $mock = Mockery::mock(PaymentHistoryRecorder::class);
+        $mock->shouldReceive('record')->once()->andThrow(new RuntimeException('Audit gagal'));
+        $this->app->instance(PaymentHistoryRecorder::class, $mock);
+        $this->post(self::URI, $this->payload([
+            'ntpn' => 'NTPN-FAIL', 'paymentProofFile' => $this->pdfUpload($this->simplePdf()),
+        ]), $this->auth())->assertStatus(500);
+        $this->assertDatabaseCount('pembayaran_pajak', 0);
+        $this->assertDatabaseCount('riwayat_perubahan_pembayaran', 0);
+        $this->assertSame($filesBefore, Storage::disk('local')->allFiles());
+        $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'payment_status' => 'NOT_RECORDED']);
+    }
+
+    public function test_riwayat_dilindungi_dari_update_dan_delete_di_database(): void
+    {
+        $id = $this->draft();
+        foreach (['update', 'delete'] as $operation) {
+            try {
+                DB::transaction(function () use ($id, $operation): void {
+                    $query = DB::table('riwayat_perubahan_pembayaran')->where('tax_payment_id', $id);
+                    if ($operation === 'update') {
+                        $query->update(['actor_akun_id' => 'AKN-TAMPERED']);
+                    } else {
+                        $query->delete();
+                    }
+                });
+                $this->fail('Riwayat harus append-only');
+            } catch (QueryException $e) {
+                $this->assertStringContainsString('append-only', $e->getMessage());
+            }
+        }
+        $this->assertDatabaseHas('riwayat_perubahan_pembayaran', ['tax_payment_id' => $id, 'actor_akun_id' => 'AKN-0002']);
     }
 
     public function test_ntpn_duplikat_saat_catat_pembayaran_ditolak_409(): void
