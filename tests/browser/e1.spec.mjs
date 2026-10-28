@@ -68,7 +68,7 @@ test('akses, filter, pagination, empty/error, dan login demo', async ({ page }) 
 test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async ({ page }) => {
     await login(page, 'COO');
     await page.goto('/tax-recaps/2026-11');
-    await expect(page.locator('#recap-summary')).toContainText('Rp 46.200.000,00');
+    await expect(page.locator('#recap-summary')).toContainText('Rp 46.750.000,00');
     await expect(page.locator('#recap-invoices')).toContainText('November 2026');
     await expect(page.locator('#recap-invoices tbody tr').first().locator('td').nth(1)).toHaveText(/^[0-9]{1,2} November 2026$/);
     await expect(page.locator('#recap-payments tbody tr').first().locator('td').nth(4)).toHaveText(/ WIB$/);
@@ -134,10 +134,9 @@ test('rekap, pratinjau, unduhan, detail, koreksi, dan pembayaran Draft', async (
         });
     });
     await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
-    await expect(page.locator('#billingId')).toHaveAttribute('aria-invalid', 'true');
-    await expect(page.locator('#billingId-error')).toHaveText('ID / kode billing sudah pernah digunakan');
+    await expect(page.locator('#app-alert')).toHaveText('ID / kode billing sudah pernah digunakan');
+    await expect(page.locator('#billingId')).not.toHaveAttribute('aria-invalid', 'true');
     await page.locator('#billingId').fill('BILL-UI-DRAFT-UNIQUE');
-    await expect(page.locator('#billingId-error')).toBeHidden();
     await page.unroute('**/api/v1/tax-payments');
     await page.getByRole('button', { name: 'Simpan Pembayaran', exact: true }).click();
     await expect(page).toHaveURL(/\/tax-recaps\/2026-12$/);

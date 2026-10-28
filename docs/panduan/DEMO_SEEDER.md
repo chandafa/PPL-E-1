@@ -29,12 +29,12 @@ koreksi, pembatalan, riwayat, dan pembayaran yang sudah diubah melalui UI. Tidak
 TRUNCATE atau penghapusan data. Jika satu tahap gagal, penambahan dibatalkan dan
 berkas baru milik proses tersebut dibersihkan.
 
-Pada database kosong, `php artisan db:seed` menghasilkan 3 kontrak, 4 termin,
-1 parameter pajak, 1 invoice D-2 beserta 1 riwayat status. `DatabaseSeeder` tidak
-menjalankan `DemoSeeder` otomatis agar invoice sumber tetap tersedia di katalog E-1.
-`DemoSeeder` dapat dijalankan terpisah untuk membuat 1 faktur pajak dan 1 pembayaran
-demo dari invoice D-2 tersebut; setelah itu, invoice tidak lagi tersedia untuk
-pencatatan baru karena sudah memiliki faktur aktif.
+Pada database kosong, `php artisan db:seed` menghasilkan data referensi D-2 dasar:
+3 kontrak, 4 termin, 1 parameter pajak, dan 1 invoice. `DatabaseSeeder` tidak
+menjalankan `DemoSeeder` otomatis. Saat `DemoSeeder` dijalankan terpisah, seeder
+tambahan `ModulD2DemoSeeder` lebih dulu mengisi 31 invoice D-2 yang diperlukan oleh
+dataset E-1; invoice 006 dan 007 sengaja tetap tersedia untuk skenario UI. Setelah itu,
+`DemoSeeder` mencatat 32 faktur pajak dan 5 pembayaran demo.
 
 PDF contoh berada di `docs/postman/samples/`, bersama `manifest.json` dan
 `validation.json`. Sampel e-Faktur dan lampiran dibuat berdasarkan invoice D-2
@@ -55,14 +55,14 @@ invoice D-2, bukan jam komputer.
 
 | Masa pajak | Faktur dihitung |     Total PPN |  Jumlah setor |       Selisih | Status                                                |
 | ---------- | --------------: | ------------: | ------------: | ------------: | ----------------------------------------------------- |
-| 2026-10    |               1 | Rp 11.000.000 | Rp 11.000.000 |          Rp 0 | Terkonfirmasi                                         |
-| 2026-10    |              24 |  Rp 5.940.000 |  Rp 5.940.000 |          Rp 0 | Terkonfirmasi, gabungan dua pembayaran                |
-| 2026-11    |               3 | Rp 46.200.000 | Rp 46.200.000 |          Rp 0 | Draft / Belum Konfirmasi                              |
-| 2026-12    |               1 |  Rp 6.600.000 |          Rp 0 | -Rp 6.600.000 | Belum dicatat                                         |
+| 2026-10    |              25 | Rp 16.940.000 |  Rp 5.940.000 | -Rp 11.000.000 | Terkonfirmasi, kurang setor                        |
+| 2026-11    |               3 | Rp 46.750.000 | Rp 46.750.000 |          Rp 0 | Draft / Belum Konfirmasi                              |
+| 2026-12    |               2 | Rp 19.800.000 |          Rp 0 | -Rp 19.800.000 | Belum dicatat                                       |
 | 2027-01    |               1 |  Rp 1.100.000 |  Rp 1.000.000 |   -Rp 100.000 | Terkonfirmasi, kurang setor                           |
 | 2027-02    |               1 |  Rp 1.100.000 |  Rp 1.100.000 |          Rp 0 | Terkonfirmasi, setor pas (lebih setor ditolak sistem) |
 
-Oktober berisi 24 faktur agar pagination bisa dicoba pada periode yang sama. Faktur
+Oktober berisi 24 invoice dari katalog D-2 ditambah invoice sampel dasar agar pagination
+bisa dicoba pada periode yang sama. Totalnya 25 faktur pajak. Faktur
 `inv-demo-010` juga memiliki dua item, potongan, dan uang muka. PPnBM untuk contoh
 jasa ini diperbaiki menjadi nol. Dua invoice manual tambahan menyediakan skenario
 barang mewah dan jasa pada proyek simulasi yang sama; lihat

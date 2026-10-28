@@ -115,6 +115,7 @@ php artisan key:generate
 php artisan config:clear
 php artisan migrate
 php artisan db:seed
+php artisan db:seed --class=DemoSeeder
 php artisan demo:samples
 ```
 
@@ -123,7 +124,8 @@ php artisan demo:samples
 | `php artisan key:generate` | Mengisi `APP_KEY` pada `.env` |
 | `php artisan config:clear` | Memuat konfigurasi `.env` terbaru |
 | `php artisan migrate` | Membuat tabel yang diperlukan aplikasi |
-| `php artisan db:seed` | Mengisi data demo fiktif; pada database kosong tersedia 32 faktur, 5 pembayaran, dan 5 masa pajak |
+| `php artisan db:seed --class=ModulD2DemoSeeder` | Menambahkan 31 invoice sumber D-2 yang diperlukan oleh dataset demo E-1; invoice UI 006/007 tetap tersedia |
+| `php artisan db:seed --class=DemoSeeder` | Membuat 32 faktur pajak, 5 pembayaran, dan 5 masa pajak demo |
 | `php artisan demo:samples` | Membuat PDF contoh dan memeriksa kembali hasil ekstraksinya |
 
 PDF tersedia di **`docs/postman/samples/`**. Gunakan `manifest.json` untuk mencocokkan PDF dengan invoice, tanggal, dan masa pajak. Hasil pemeriksaannya tercatat di `validation.json`.

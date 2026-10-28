@@ -93,13 +93,29 @@ final class DemoDataset
 
     public static function payments(): array
     {
-        return [
-            ['taxPeriod' => '2026-11', 'taxYear' => 2026, 'amountPaid' => '46200000.00', 'billingId' => 'BILL-202611-001'],
-            ['taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '1000000.00', 'billingId' => 'BILL-DEMO-202610-001', 'ntpn' => 'NTPN-DEMO-202610-001'],
-            ['taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '4940000.00', 'billingId' => 'BILL-DEMO-202610-002', 'ntpn' => 'NTPN-DEMO-202610-002'],
-            ['taxPeriod' => '2027-01', 'taxYear' => 2027, 'amountPaid' => '1000000.00', 'billingId' => 'BILL-DEMO-202701-001', 'ntpn' => 'NTPN-DEMO-202701-001'],
-            ['taxPeriod' => '2027-02', 'taxYear' => 2027, 'amountPaid' => '1100000.00', 'billingId' => 'BILL-DEMO-202702-001', 'ntpn' => 'NTPN-DEMO-202702-001'],
-        ];
+        $totals = [];
+        foreach (self::invoices() as $invoice) {
+            $period = $invoice['taxPeriod'];
+            $totals[$period] = isset($totals[$period])
+                ? Money::add($totals[$period], $invoice['pdf']['ppn'])
+                : Money::normalize($invoice['pdf']['ppn']);
+        }
+        ksort($totals);
+
+        $payments = [];
+        foreach (array_values(array_keys($totals)) as $index => $period) {
+            $suffix = str_replace('-', '', $period);
+            $sequence = sprintf('%03d', $index + 1);
+            $payments[] = [
+                'taxPeriod' => $period,
+                'taxYear' => (int) substr($period, 0, 4),
+                'amountPaid' => $totals[$period],
+                'billingId' => "BILL-DEMO-{$suffix}-{$sequence}",
+                'ntpn' => "NTPN-DEMO-{$suffix}-{$sequence}",
+            ];
+        }
+
+        return $payments;
     }
 
     /** Lampiran sesuai Q-09: pembayaran contoh pada tanggal 10 bulan berikutnya. */
@@ -127,7 +143,11 @@ final class DemoDataset
     {
         $documents = [];
         foreach (self::payments() as $sequence => $payment) {
-            foreach (['e-billing' => 'e-Billing Demo', 'bukti-pembayaran' => 'Bukti Pembayaran Demo'] as $prefix => $title) {
+            $types = ['e-billing' => 'e-Billing Demo'];
+            if (isset($payment['ntpn'])) {
+                $types['bukti-pembayaran'] = 'Bukti Pembayaran Demo';
+            }
+            foreach ($types as $prefix => $title) {
                 $fields = self::paymentDocumentFields($payment, proof: $prefix === 'bukti-pembayaran');
                 $name = sprintf('%s-%s-%03d.pdf', $prefix, $payment['taxPeriod'], $sequence + 1);
                 $documents[$name] = compact('title', 'fields');

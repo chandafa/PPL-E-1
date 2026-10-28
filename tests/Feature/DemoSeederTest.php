@@ -21,7 +21,7 @@ class DemoSeederTest extends TestCase
     public function test_dataset_lengkap_pagination_nyata_dan_pengisian_ulang_mempertahankan_edit(): void
     {
         $this->seed(DemoSeeder::class);
-        foreach (['faktur_pajak' => 1, 'item_faktur' => 1, 'riwayat_perubahan_faktur' => 1, 'pembayaran_pajak' => 1, 'rekap_pajak_bulanan' => 1] as $table => $count) {
+        foreach (['faktur_pajak' => 32, 'item_faktur' => 32, 'riwayat_perubahan_faktur' => 32, 'pembayaran_pajak' => 5, 'rekap_pajak_bulanan' => 5] as $table => $count) {
             $this->assertDatabaseCount($table, $count);
         }
         $first = $this->getJson('/api/v1/tax-invoices?pageSize=20&page=1', $this->auth())->assertOk()->assertJsonCount(20, 'data.items')->assertJsonPath('data.pagination.totalItems', 32);
@@ -29,9 +29,9 @@ class DemoSeederTest extends TestCase
         $this->assertSame([], array_intersect(array_column($first->json('data.items'), 'taxInvoiceId'), array_column($second->json('data.items'), 'taxInvoiceId')));
         foreach (
             [
-                '2026-10' => [24, '5940000.00', '0.00', 'CONFIRMED'],
-                '2026-11' => [3, '46200000.00', '0.00', 'INCOMPLETE'],
-                '2026-12' => [1, '6600000.00', '-6600000.00', 'NOT_RECORDED'],
+                '2026-10' => [25, '16940000.00', '-11000000.00', 'CONFIRMED'],
+                '2026-11' => [3, '46750000.00', '0.00', 'INCOMPLETE'],
+                '2026-12' => [2, '19800000.00', '-19800000.00', 'NOT_RECORDED'],
                 '2027-01' => [1, '1100000.00', '-100000.00', 'CONFIRMED'],
                 '2027-02' => [1, '1100000.00', '0.00', 'CONFIRMED'],
             ] as $period => [$count, $ppn, $difference, $status]
@@ -77,13 +77,13 @@ class DemoSeederTest extends TestCase
         $directory = base_path($relative);
         try {
             $this->artisan('demo:samples', ['--path' => $relative])->assertSuccessful();
-            $this->assertCount(4, glob($directory . '/*.pdf'));
+            $this->assertCount(11, glob($directory . '/*.pdf'));
             $manifest = json_decode(file_get_contents($directory . '/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertCount(2, $manifest);
             $this->assertCount(2, array_unique(array_column($manifest, 'nsfp')));
             $validation = json_decode(file_get_contents($directory . '/validation.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertSame('PASSED', $validation['result']);
-            $this->assertSame(2, $validation['attachmentCount']);
+            $this->assertSame(9, $validation['attachmentCount']);
             $invoiceId = 'inv-demo-sample';
             $original = $this->post('/api/v1/tax-invoices/outgoing', [
                 'invoiceId' => $invoiceId,
