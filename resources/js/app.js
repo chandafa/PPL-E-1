@@ -17,6 +17,7 @@ const $$ = (selector, scope = document) => [
 const config = JSON.parse($("#e1-config").textContent);
 const page = document.body.dataset.page;
 const tokenKey = "e1.accessToken";
+const accountNameKey = "e1.accountName";
 const period = document.body.dataset.period;
 const invoiceId = document.body.dataset.invoiceId;
 const icon = (name) =>
@@ -87,6 +88,7 @@ async function api(path, options = {}) {
     }
     if (response.status === 401) {
         sessionStorage.removeItem(tokenKey);
+        sessionStorage.removeItem(accountNameKey);
         if (page !== "login")
             location.assign(
                 `/login?next=${encodeURIComponent(location.pathname + location.search)}`,
@@ -233,6 +235,7 @@ function configureMenu() {
     });
     $("#logout").onclick = () => {
         sessionStorage.removeItem(tokenKey);
+        sessionStorage.removeItem(accountNameKey);
         location.assign("/login");
     };
 }
@@ -254,7 +257,11 @@ function tokenIdentity(token) {
             ),
         );
         return {
-            account: data[config.claimAccount] || data.sub || "Pengguna F-1",
+            account:
+                data.nama ||
+                data[config.claimAccount] ||
+                data.sub ||
+                "Pengguna F-1",
             role:
                 data[config.claimRole] ||
                 data.role ||
@@ -267,23 +274,25 @@ function tokenIdentity(token) {
 }
 
 async function loginPage() {
-    async function enter(token) {
+    async function enter(token, username) {
         sessionStorage.setItem(
             tokenKey,
             token.trim().replace(/^Bearer\s+/i, ""),
         );
+        sessionStorage.setItem(accountNameKey, username.trim());
         try {
             await api("/tax-invoices?pageSize=1");
         } catch (error) {
             sessionStorage.removeItem(tokenKey);
+            sessionStorage.removeItem(accountNameKey);
             throw error;
         }
         location.assign(
             safeNext(new URLSearchParams(location.search).get("next")),
         );
     }
-    if (config.demoLogin && $("#demo-login"))
-        $("#demo-login").onsubmit = async (event) => {
+    if ($("#f1-login"))
+        $("#f1-login").onsubmit = async (event) => {
             event.preventDefault();
             clearNotice();
             try {
@@ -291,13 +300,13 @@ async function loginPage() {
                     event.currentTarget,
                     async () => {
                         const payload = Object.fromEntries(
-                            new FormData($("#demo-login")),
+                            new FormData($("#f1-login")),
                         );
-                        const data = await api("/api/dev/f1/login", {
+                        const data = await api("/api/auth/login", {
                             method: "POST",
                             body: payload,
                         });
-                        await enter(data.accessToken);
+                        await enter(data.accessToken, payload.emailAtauUsername);
                     },
                     "Memeriksa akses…",
                 );
@@ -1427,7 +1436,8 @@ async function start() {
     try {
         await api("/tax-invoices?pageSize=1");
         const identity = tokenIdentity(token);
-        $("[data-account]").textContent = identity.account;
+        $("[data-account]").textContent =
+            sessionStorage.getItem(accountNameKey) || identity.account;
         $("[data-role]").textContent = identity.role;
         $("#page-content").hidden = false;
         const message = sessionStorage.getItem("e1.flash");

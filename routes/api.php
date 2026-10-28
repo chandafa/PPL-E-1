@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\D2InvoiceController;
 use App\Http\Controllers\Api\DemoInvoiceController;
 use App\Http\Controllers\Api\DevLoginController;
+use App\Http\Controllers\Api\F1LoginController;
 use App\Http\Controllers\Api\V1\TaxInvoiceController;
 use App\Http\Controllers\Api\V1\TaxPaymentController;
 use App\Http\Controllers\Api\V1\TaxRecapController;
@@ -21,22 +22,7 @@ Route::get('ui/d2/invoices', DemoInvoiceController::class)->middleware('f1.auth'
 Route::get('ui/d2/invoices/all', D2InvoiceController::class)->middleware('f1.auth');
 Route::get('ui/tax-recap-periods', [TaxRecapController::class, 'periods'])->middleware('f1.auth');
 
-// Endpoint uji dependensi F-1 & D-2 (DEP-F1-01, DEP-F1-02, DEP-D2-01, DEP-D2-02)
-Route::post('auth/login', function () {
-    return response()->json([
-        'code' => '200',
-        'message' => 'Login mock F-1 berhasil',
-        'data' => [
-            'accessToken' => 'placeholder-token-mock-f1-bukan-jwt-tiga-segmen',
-            'tokenType' => 'Bearer',
-            'expiresIn' => 3600,
-        ],
-    ]);
-});
-
-Route::post('auth/f1/login', function () {
-    throw \App\Exceptions\ApiException::make(502, 'F1_INVALID_TOKEN', 'JWT placeholder ditolak verifikator E-1');
-});
+Route::post('auth/login', F1LoginController::class);
 
 Route::get('v1/invoices/{invoiceId}', function (string $invoiceId) {
     if ($invoiceId === 'inv-demo-001') {

@@ -23,25 +23,20 @@ class BladeInterfaceTest extends TestCase
         $this->get('/')->assertRedirect('/tax-invoices');
     }
 
-    public function test_login_demo_tidak_ditampilkan_di_production_atau_saat_nonaktif(): void
-    {
-        $this->withoutVite();
-        config(['e1.dev_login.enabled' => false]);
-        $this->get('/login')->assertOk()->assertDontSee('id="demo-login"', false);
-        config(['e1.dev_login.enabled' => true]);
-        $this->app['env'] = 'production';
-        $this->get('/login')->assertOk()->assertDontSee('id="demo-login"', false);
-    }
-
-    public function test_login_hanya_menampilkan_form_akun_demo(): void
+    public function test_login_meminta_kredensial_f1_tanpa_mengizinkan_pemilihan_peran(): void
     {
         $this->withoutVite();
         config(['e1.dev_login.enabled' => true]);
         $this->get('/login')->assertOk()
-            ->assertSee('id="demo-login"', false)
-            ->assertDontSee('id="token-login"', false)
-            ->assertDontSee('Token akses F-1')
-            ->assertDontSee('<details', false);
+            ->assertSee('id="f1-login"', false)
+            ->assertSee('Login')
+            ->assertDontSee('Login F-1')
+            ->assertSee('name="emailAtauUsername"', false)
+            ->assertSee('name="password"', false)
+            ->assertSee('placeholder="Masukkan username"', false)
+            ->assertSee('placeholder="Masukkan password"', false)
+            ->assertDontSee('name="kodePeran"', false)
+            ->assertDontSee('Akun Demo');
     }
 
     public function test_rebuild_memperbaiki_rekap_lama_dan_idempoten(): void

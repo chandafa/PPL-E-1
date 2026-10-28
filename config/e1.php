@@ -27,8 +27,11 @@ return [
     | dikonfigurasi lewat environment.
     */
     'f1' => [
+        'base_url' => env('F1_BASE_URL'),
+        'login_path' => env('F1_LOGIN_PATH', '/auth/login'),
+        'timeout' => (int) env('F1_TIMEOUT', 5),
         'algo' => env('F1_JWT_ALGO', 'HS256'),
-        'secret' => env('F1_JWT_SECRET'),
+        'secret' => env('F1_JWT_SECRET') ?: env('JWT_SECRET'),
         'public_key_path' => env('F1_JWT_PUBLIC_KEY_PATH'),
         'issuer' => env('F1_JWT_ISSUER'),
         'audience' => env('F1_JWT_AUDIENCE'),

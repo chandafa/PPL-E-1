@@ -6,20 +6,32 @@ import { chooseInvoice } from './helpers.mjs';
 
 async function login(page, role = 'Admin') {
     await page.goto('/login');
-    await page.locator('#kodePeran').selectOption(role);
-    await page.getByRole('button', { name: 'Masuk Akun Demo' }).click();
+    const tokenResponse = await page.context().request.post(
+        new URL('/api/dev/f1/login', page.url()).toString(),
+        { data: { akunId: 'AKN-UI-LOGIN', kodePeran: role } },
+    );
+    const { data } = await tokenResponse.json();
+    await page.route('**/api/auth/login', (route) => route.fulfill({
+        json: { data: { accessToken: data.accessToken } },
+    }));
+    await page.locator('#emailAtauUsername').fill('yuril.salsabila');
+    await page.locator('#password').fill('kata-sandi-uji');
+    await page.getByRole('button', { name: 'Masuk', exact: true }).click();
+    await page.unroute('**/api/auth/login');
     await expect(page).toHaveURL(/\/tax-invoices/);
     await expect(page.locator('#invoice-list tbody tr').first()).toBeVisible();
+    await expect(page.locator('[data-account]')).toHaveText('yuril.salsabila');
+    await expect(page.locator('[data-role]')).toHaveText(role);
 }
 
 test.beforeEach(async ({ page }) => {
     page.on('pageerror', (error) => { throw error; });
 });
 
-test('akses, filter, pagination, empty/error, dan login demo', async ({ page }) => {
+test('akses, filter, pagination, empty/error, dan login F-1', async ({ page }) => {
     await page.goto('/tax-invoices');
     await expect(page).toHaveURL(/\/login\?next=/);
-    await expect(page.locator('#demo-login')).toBeVisible();
+    await expect(page.locator('#f1-login')).toBeVisible();
     await expect(page.locator('#token-login')).toHaveCount(0);
     await expect(page.locator('#accessToken')).toHaveCount(0);
     await login(page);
@@ -61,7 +73,7 @@ test('akses, filter, pagination, empty/error, dan login demo', async ({ page }) 
     await page.getByRole('button', { name: 'Keluar', exact: true }).click();
     await expect(page).toHaveURL(/\/login$/);
     expect(await page.evaluate(() => sessionStorage.getItem('e1.accessToken'))).toBeNull();
-    await page.getByRole('button', { name: 'Masuk Akun Demo' }).click();
+    await login(page);
     await expect(page.locator('#invoice-list tbody tr')).toHaveCount(20);
 });
 
@@ -268,8 +280,12 @@ test('token tidak sah dan peran tanpa akses ditolak oleh API sebenarnya', async 
     const response = await request.post('/api/dev/f1/login', { data: { akunId: 'AKN-UI-PM', kodePeran: 'PM' } });
     const { data } = await response.json();
     await page.goto('/login');
-    await page.route('**/api/dev/f1/login', (route) => route.fulfill({ json: { data } }));
-    await page.getByRole('button', { name: 'Masuk Akun Demo' }).click();
+    await page.route('**/api/auth/login', (route) => route.fulfill({
+        json: { data: { accessToken: data.accessToken } },
+    }));
+    await page.locator('#emailAtauUsername').fill('pengguna@f1.test');
+    await page.locator('#password').fill('kata-sandi-uji');
+    await page.getByRole('button', { name: 'Masuk', exact: true }).click();
     await expect(page.locator('#app-alert')).toContainText('akses tidak cukup');
     expect(await page.evaluate(() => sessionStorage.getItem('e1.accessToken'))).toBeNull();
     await page.evaluate(() => sessionStorage.setItem('e1.accessToken', 'token-tidak-sah'));
