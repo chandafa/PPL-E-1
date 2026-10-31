@@ -150,9 +150,13 @@ Biarkan terminal tersebut berjalan, lalu buka:
 
 ## Integrasi dengan repo F-1 dan D-2
 
+Untuk anggota yang baru memasang proyek, ikuti [setup tiga repo di laptop masing-masing](docs/integrasi/SETUP_ANGGOTA.md), termasuk clone F-1/D-2, instalasi dependensi, database, dan .env.
+
 Setelah dependensi ketiga repo dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8080/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada .env utama dan menjalankan ketiga layanan. Untuk berhenti, gunakan **composer integration:stop**.
 
 [Langkah uji kelompok dan PDF siap pakai](docs/integrasi/UJI_KELOMPOK.md) tersedia agar tim langsung mencoba alurnya. [Panduan lengkap dan hasil pengujian](docs/integrasi/README.md) menjelaskan profil utama serta suite terpisah. [Temuan F-1/D-2](docs/integrasi/TEMUAN_F1_D2.md) dicatat tanpa mengubah kode kedua kelompok.
+
+`composer integration` boleh dipanggil ulang: jika layanan sudah aktif, perintah menampilkan status berhasil dan mempertahankan prosesnya. Jika hanya sebagian layanan berhenti, bagian tersebut dinyalakan kembali. Tidak perlu menjalankan `composer serve` bersamaan pada port 8080.
 
 ## Alur proses
 
@@ -221,4 +225,4 @@ Buka **Swagger UI** untuk melihat parameter, mengunggah PDF, dan mencoba API. Be
 | Ismail Abdul Fathan |
 | Raihan Azzani |
 
-Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. Demo lokal memakai mock F-1 dan D-2.
+Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. `composer integration` memakai layanan repo resmi melalui HTTP; mode mandiri `D2_DRIVER=mock` memakai snapshot lokal.
