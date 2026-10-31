@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CurrentUserController;
 use App\Http\Controllers\Api\D2InvoiceController;
 use App\Http\Controllers\Api\DemoInvoiceController;
 use App\Http\Controllers\Api\DevLoginController;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 // Login tiruan F-1 untuk Postman/demo lokal; mati kecuali E1_DEV_LOGIN=true (di luar kontrak openapi.yaml)
 Route::post('dev/f1/login', DevLoginController::class);
 Route::post('auth/f1/login', F1LoginController::class)->middleware('throttle:10,1');
+Route::get('ui/profile', CurrentUserController::class)->middleware('f1.auth');
 Route::get('ui/d2/invoices', DemoInvoiceController::class)->middleware('f1.auth');
 Route::get('ui/d2/invoices/all', D2InvoiceController::class)->middleware('f1.auth');
 Route::get('ui/tax-recap-periods', [TaxRecapController::class, 'periods'])->middleware('f1.auth');

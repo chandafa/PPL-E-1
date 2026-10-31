@@ -16,13 +16,15 @@ Hasil **31 Oktober 2026, diperiksa ulang pada konfigurasi utama**: E-1 Laravel b
 
 Konfigurasi .env utama sekarang memakai login/cek akun F-1 dan HttpInvoiceProvider D-2; E1_DEV_LOGIN=false. Empat migrasi E-1 yang tertinggal sudah diterapkan pada laptop ini tanpa mengubah seluruh baris transaksi, rekap, audit, atau berkas lama. Composer serve juga membaca konfigurasi HTTP yang sama, tetapi hanya menjalankan E-1.
 
-Untuk menjalankan ketiga layanan pada Windows dari folder PPL-E-1:
+Untuk menjalankan ketiga layanan pada Windows atau Linux dari folder PPL-E-1:
 
 ```powershell
-composer integration
+php artisan integration
 ```
 
-Buka http://127.0.0.1:8080/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah composer integration boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan composer integration:stop untuk berhenti. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
+Buka http://127.0.0.1:8080/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah `php artisan integration` boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan `php artisan integration:stop` untuk berhenti. Alias Composer `composer integration` dan `composer integration:stop` tetap tersedia. Windows memakai PowerShell; Linux memakai Bash/nvm, `setsid`, `nohup`, PHP `posix`, dan `/proc`. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
+
+Di Linux, pasang nvm pada akun pengguna dan siapkan versi `default` (`nvm alias default <versi-terpasang>`). Launcher memuat `$NVM_DIR/nvm.sh` atau `~/.nvm/nvm.sh`, mengikuti `.nvmrc` F-1/E-1 jika tersedia. Checkout `../PPL_F1` dan `../PPL-D-2` diprioritaskan jika ada; jika tidak, dipakai `../_integrasi/F1` dan `../_integrasi/D2` (di-clone bila belum ada). Gunakan `F1_PATH=/lokasi/F1 D2_PATH=/lokasi/D2 php artisan integration` untuk lokasi lain. Log dan PID tersimpan pada direktori runtime privat yang sama. Penghentian memeriksa identitas PID dari `/proc`, sehingga PID yang telah dipakai ulang tidak dihentikan. Instruksi PowerShell di bawah tetap khusus Windows; profil utama Linux menggunakan perintah Artisan di atas.
 
 Persiapan awal E-1/dependensi/PostgreSQL tetap diperlukan pada laptop baru sebagaimana bagian Menyiapkan laptop di bawah. Launcher otomatis mengunduh checkout F-1/D-2 yang telah diuji ke `../_integrasi`, memasang dependensinya bila belum ada, lalu menjalankan ketiga layanan. enable-integration.php otomatis menyiapkan runtime bila belum ada, mengaktifkan hanya kunci F1_*/D2_*/E1_DEV_LOGIN pada .env, membuat cadangan privat, serta mempertahankan APP_ENV, APP_KEY, database, dan storage utama. Aktivasi demo ini ditolak di production. Jalankan php artisan migrate pada instalasi E-1 yang belum memiliki schema terbaru.
 
