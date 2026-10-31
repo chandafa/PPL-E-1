@@ -150,9 +150,9 @@ Biarkan terminal tersebut berjalan, lalu buka:
 
 ## Integrasi dengan repo F-1 dan D-2
 
-Untuk anggota yang baru memasang proyek, ikuti [setup tiga repo di laptop masing-masing](docs/integrasi/SETUP_ANGGOTA.md), termasuk clone F-1/D-2, instalasi dependensi, database, dan .env.
+Untuk anggota yang baru memasang proyek, ikuti [setup integrasi di laptop masing-masing](docs/integrasi/SETUP_ANGGOTA.md). Perintah `composer integration` otomatis mengambil F-1/D-2 ke folder `../_integrasi`, memasang dependensi keduanya, lalu menjalankan tiga layanan.
 
-Setelah dependensi ketiga repo dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8080/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada .env utama dan menjalankan ketiga layanan. Untuk berhenti, gunakan **composer integration:stop**.
+Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8080/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada `.env` utama, mengambil serta memasang F-1/D-2 jika belum ada di `../_integrasi`, dan menjalankan ketiga layanan. Untuk berhenti, gunakan **composer integration:stop**.
 
 [Langkah uji kelompok dan PDF siap pakai](docs/integrasi/UJI_KELOMPOK.md) tersedia agar tim langsung mencoba alurnya. [Panduan lengkap dan hasil pengujian](docs/integrasi/README.md) menjelaskan profil utama serta suite terpisah. [Temuan F-1/D-2](docs/integrasi/TEMUAN_F1_D2.md) dicatat tanpa mengubah kode kedua kelompok.
 

@@ -1,6 +1,6 @@
 # Menjalankan E-1, F-1, dan D-2 di laptop anggota
 
-Satu perintah **composer integration** menyalakan ketiga layanan. Instalasi awal tetap perlu dilakukan sekali pada setiap laptop. Panduan ini untuk Windows/PowerShell; versi PHP, Composer, Node/npm, dan PostgreSQL mengikuti [kebutuhan proyek](../../README.md#kebutuhan-sebelum-instalasi).
+Satu perintah **composer integration** menyiapkan F-1 dan D-2 bila belum ada, memasang dependensi keduanya, lalu menyalakan ketiga layanan. Instalasi E-1 dan konfigurasi PostgreSQL tetap dilakukan sekali pada setiap laptop. Panduan ini untuk Windows/PowerShell; versi PHP, Composer, Node/npm, Git, dan PostgreSQL mengikuti [kebutuhan proyek](../../README.md#kebutuhan-sebelum-instalasi).
 
 ## Siapkan kode terbaru
 
@@ -10,20 +10,11 @@ Gunakan E-1 yang sudah memuat perbaikan ini. Periksa dari folder PPL-E-1:
 composer run-script --list
 ```
 
-Daftarnya harus memuat **integration** dan **integration:stop**. Perbaikan pada sesi ini masih lokal dan belum di-push; clone GitHub saja belum membawa perubahan ini. Untuk mencoba sekarang, anggota dapat memakai paket **PPL-E-1-untuk-anggota.zip** yang dibagikan bersama panduan ini. Ekstrak sehingga terbentuk folder PPL-E-1. Paket tidak menyertakan .env, vendor, node_modules, atau runtime pribadi.
+Daftarnya harus memuat **integration** dan **integration:stop**. Ambil commit E-1 yang memuat launcher otomatis ini sebelum mencoba. Jika sudah mempunyai folder berisi pekerjaan sendiri, simpan pekerjaan itu sebelum mengganti kode; jangan menimpa `.env` yang sudah dikonfigurasi.
 
-Setelah perbaikan tersedia di GitHub, E-1 juga dapat diambil dari branch dev. Jika sudah mempunyai folder berisi pekerjaan sendiri, simpan pekerjaan itu sebelum mengganti kode; jangan menimpa .env yang sudah dikonfigurasi.
+## Repo pendukung disiapkan otomatis
 
-## Clone repo pendukung
-
-Dari folder yang menampung PPL-E-1, jalankan:
-
-```powershell
-git clone https://github.com/Izra29/PPL_F1.git _integrasi/F1
-git clone https://github.com/eldyfg/PPL-D-2.git _integrasi/D2
-```
-
-Jika kedua folder sudah ada, tidak perlu clone ulang. Struktur akhirnya:
+Saat pertama kali `composer integration` dijalankan, launcher otomatis membuat struktur berikut di samping folder E-1:
 
 ```text
 folder-kerja/
@@ -33,20 +24,15 @@ folder-kerja/
     D2/
 ```
 
-Versi yang diuji: F-1 **0feb37a**, D-2 **b93fc4d**. Repo F-1 menyediakan server demo Node/JWT, sedangkan D-2 backend Laravel/database. Launcher memakai implementasi resmi tersebut; kode/kontrak/seed kedua kelompok tidak ditambal.
+Launcher mengambil F-1 **0feb37a** dan D-2 **b93fc4d**, lalu menjalankan `npm ci --ignore-scripts` untuk F-1 dan `composer install` untuk D-2. Repo F-1 menyediakan server demo Node/JWT, sedangkan D-2 backend Laravel/database. Launcher memakai implementasi resmi tersebut; kode/kontrak/seed kedua kelompok tidak ditambal.
 
-## Pasang dependensi ketiganya
+Jika anggota telah memiliki folder `_integrasi/F1` atau `_integrasi/D2`, launcher memakainya apa adanya dan **tidak** melakukan clone, pull, checkout, atau menimpa pekerjaan lokal. Folder tersebut harus checkout repo yang benar dan memiliki `demo/local-server.js` (F-1) atau `artisan` (D-2).
 
-Mulai dari folder-kerja di atas, jalankan berurutan:
+## Pasang dependensi E-1
+
+Di folder `PPL-E-1`, pasang dependensi dan build aplikasi ini sekali:
 
 ```powershell
-cd _integrasi/F1
-npm ci --ignore-scripts
-
-cd ../D2
-composer install
-
-cd ../../PPL-E-1
 composer install
 npm ci
 npm run build
@@ -127,7 +113,7 @@ Data PostgreSQL tetap. F-1 mengembalikan data memorinya ke seed saat prosesnya b
 |---|---|
 | Integrasi sudah berjalan | Status berhasil. Langsung buka alamat E-1; tidak perlu start lagi. |
 | Composer tidak mengenali integration | Kode E-1 belum memuat perbaikan terbaru; gunakan paket terbaru atau branch dev setelah perubahan tersedia. |
-| Folder F-1/D-2 atau dependensi belum ada | Periksa struktur folder dan langkah clone/install di atas. |
+| Clone/pemasangan F-1 atau D-2 gagal | Pastikan Git, Node/npm, Composer, dan koneksi internet tersedia. Jalankan ulang `composer integration`; folder checkout yang valid tidak akan diunduh ulang. |
 | Port dipakai proses di luar runtime | Hentikan sendiri server lama pada port tersebut, misalnya composer serve atau php artisan serve. Launcher tidak mematikan proses lain. |
 | Profil/port berbeda | Jalankan composer integration:stop, kemudian composer integration. |
 | Tidak dapat membuat database | Periksa PostgreSQL, DB_HOST/PORT/USERNAME/PASSWORD, dan hak CREATE DATABASE akun lokal. |

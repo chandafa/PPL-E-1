@@ -12,7 +12,7 @@ Hasil **31 Oktober 2026, diperiksa ulang pada konfigurasi utama**: E-1 Laravel b
 
 ## Siap diuji dari aplikasi utama
 
-[Panduan anggota baru](SETUP_ANGGOTA.md) menjelaskan clone ketiga repo, pemasangan dependensi, PostgreSQL, dan satu perintah untuk menjalankannya pada setiap laptop.
+[Panduan anggota baru](SETUP_ANGGOTA.md) menjelaskan pemasangan E-1, PostgreSQL, serta satu perintah yang otomatis menyiapkan F-1/D-2 dan menjalankan ketiga layanan pada setiap laptop.
 
 Konfigurasi .env utama sekarang memakai login/cek akun F-1 dan HttpInvoiceProvider D-2; E1_DEV_LOGIN=false. Empat migrasi E-1 yang tertinggal sudah diterapkan pada laptop ini tanpa mengubah seluruh baris transaksi, rekap, audit, atau berkas lama. Composer serve juga membaca konfigurasi HTTP yang sama, tetapi hanya menjalankan E-1.
 
@@ -24,7 +24,7 @@ composer integration
 
 Buka http://127.0.0.1:8080/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah composer integration boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan composer integration:stop untuk berhenti. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
 
-Persiapan awal repo/dependensi/PostgreSQL tetap diperlukan pada laptop baru sebagaimana bagian Menyiapkan laptop di bawah. enable-integration.php otomatis menyiapkan runtime bila belum ada, mengaktifkan hanya kunci F1_*/D2_*/E1_DEV_LOGIN pada .env, membuat cadangan privat, serta mempertahankan APP_ENV, APP_KEY, database, dan storage utama. Aktivasi demo ini ditolak di production. Jalankan php artisan migrate pada instalasi E-1 yang belum memiliki schema terbaru.
+Persiapan awal E-1/dependensi/PostgreSQL tetap diperlukan pada laptop baru sebagaimana bagian Menyiapkan laptop di bawah. Launcher otomatis mengunduh checkout F-1/D-2 yang telah diuji ke `../_integrasi`, memasang dependensinya bila belum ada, lalu menjalankan ketiga layanan. enable-integration.php otomatis menyiapkan runtime bila belum ada, mengaktifkan hanya kunci F1_*/D2_*/E1_DEV_LOGIN pada .env, membuat cadangan privat, serta mempertahankan APP_ENV, APP_KEY, database, dan storage utama. Aktivasi demo ini ditolak di production. Jalankan php artisan migrate pada instalasi E-1 yang belum memiliki schema terbaru.
 
 [Langkah uji kelompok](UJI_KELOMPOK.md) memuat invoice/PDF siap pakai di laptop ini. Bukti konfigurasi utama, login, dan pratinjau HTTP: [aktif-utama.json](bukti/2026-10-31T07-43-25-100Z/aktif-utama.json); pemulihan/restart tanpa seed ulang: [pemulihan.json](bukti/2026-10-31T07-43-25-100Z/pemulihan.json).
 
@@ -42,10 +42,9 @@ folder-kerja/
     D2/    # clone https://github.com/eldyfg/PPL-D-2
 ```
 
-1. Clone kedua repo melalui URL tersebut, pilih commit pada tabel untuk mengulang bukti ini atau main terbaru untuk mengevaluasi perubahan. Jangan menyalin source F-1/D-2 ke app E-1.
-2. Di F1, jalankan `npm ci --ignore-scripts`. Di D2, jalankan `composer install`. Konfigurasi proses lokal diberikan launcher E-1; tidak perlu mengedit kode atau membuat .env pada checkout upstream.
-3. Di E-1, jalankan `composer install`, `npm ci`, `npm run build`. Siapkan .env PostgreSQL dan APP_KEY sesuai README utama, lalu `php artisan config:clear`.
-4. Dari E-1, jalankan:
+1. Di E-1, jalankan `composer install`, `npm ci`, `npm run build`. Siapkan .env PostgreSQL dan APP_KEY sesuai README utama, lalu `php artisan config:clear`.
+2. Jalankan `composer integration` untuk aplikasi utama. Launcher otomatis clone F-1 dan D-2 ke struktur di atas (pada revisi pada tabel), memasang dependensi, lalu menjalankan ketiga layanan. Bila checkout tersebut sudah ada, launcher tidak mengubahnya. Jangan menyalin source F-1/D-2 ke app E-1.
+3. Untuk profil uji terpisah, dari E-1 jalankan:
 
 ```powershell
 php scripts/prepare-integration.php
