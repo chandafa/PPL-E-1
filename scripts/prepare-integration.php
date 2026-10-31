@@ -14,7 +14,7 @@ if ($app->configurationIsCached()) {
 if (! is_file($repo.'/.env')) {
     throw new RuntimeException('Siapkan .env PostgreSQL E-1 terlebih dahulu.');
 }
-foreach ([4100, 8026, 8087] as $port) {
+foreach ([4100, 8026, 8080, 8087] as $port) {
     $socket = @fsockopen('127.0.0.1', $port, $errorNumber, $errorMessage, 0.2);
     if ($socket !== false) {
         fclose($socket);

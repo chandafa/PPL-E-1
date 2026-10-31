@@ -7,6 +7,43 @@ use Symfony\Component\Process\Process;
 
 $repo = dirname(__DIR__);
 require $repo.'/vendor/autoload.php';
+
+/** @return list<int> */
+function occupiedIntegrationPorts(): array
+{
+    $occupied = [];
+    foreach ([4100, 8026, 8080, 8087] as $port) {
+        $socket = @fsockopen('127.0.0.1', $port, $errorNumber, $errorMessage, 0.2);
+        if ($socket !== false) {
+            fclose($socket);
+            $occupied[] = $port;
+        }
+    }
+
+    return $occupied;
+}
+
+function prepareRuntime(string $repo, string $reason): array
+{
+    $occupied = occupiedIntegrationPorts();
+    if ($occupied !== []) {
+        throw new RuntimeException(
+            $reason.' Port integrasi sedang dipakai ('.implode(', ', $occupied).'). '
+            .'Hentikan server lama yang memakai port tersebut sebelum menjalankan ulang.'
+        );
+    }
+
+    echo $reason.' Membuat runtime integrasi baru tanpa menghapus data/runtime lama.'.PHP_EOL;
+    $process = new Process([PHP_BINARY, $repo.'/scripts/prepare-integration.php'], $repo);
+    $process->mustRun();
+
+    return json_decode(
+        file_get_contents($repo.'/storage/app/private/integration/current.json'),
+        true,
+        flags: JSON_THROW_ON_ERROR,
+    );
+}
+
 if (! is_file($repo.'/.env')) {
     throw new RuntimeException('Siapkan .env PostgreSQL dan APP_KEY E-1 terlebih dahulu.');
 }
@@ -15,14 +52,30 @@ if (($main['APP_ENV'] ?? 'production') === 'production' || getenv('APP_ENV') ===
     throw new RuntimeException('Profil demo resmi F-1 ini hanya untuk lingkungan lokal, bukan production.');
 }
 $runtimeFile = $repo.'/storage/app/private/integration/current.json';
-if (! is_file($runtimeFile)) {
-    $process = new Process([PHP_BINARY, $repo.'/scripts/prepare-integration.php'], $repo);
-    $process->mustRun();
+$runtime = null;
+if (is_file($runtimeFile)) {
+    try {
+        $candidate = json_decode(file_get_contents($runtimeFile), true, flags: JSON_THROW_ON_ERROR);
+        if (is_array($candidate)
+            && is_string($candidate['jwtSecret'] ?? null)
+            && $candidate['jwtSecret'] !== ''
+            && is_string($candidate['directory'] ?? null)
+            && is_dir($candidate['directory'])) {
+            $runtime = $candidate;
+        }
+    } catch (JsonException) {
+        // Runtime parsial dapat terjadi jika terminal ditutup di tengah persiapan.
+    }
 }
-$runtime = json_decode(file_get_contents($runtimeFile), true, flags: JSON_THROW_ON_ERROR);
-$profile = Dotenv::parse(file_get_contents($repo.'/.env.integration'));
+if ($runtime === null) {
+    $runtime = prepareRuntime($repo, 'Runtime integrasi tidak ada atau tidak lengkap.');
+}
+$profile = is_file($repo.'/.env.integration')
+    ? Dotenv::parse(file_get_contents($repo.'/.env.integration'))
+    : [];
 if (($profile['F1_JWT_SECRET'] ?? null) !== $runtime['jwtSecret']) {
-    throw new RuntimeException('Profil dan runtime integrasi berbeda; siapkan ulang setelah semua proses uji dihentikan.');
+    $runtime = prepareRuntime($repo, 'Profil dan runtime integrasi lama berbeda.');
+    $profile = Dotenv::parse(file_get_contents($repo.'/.env.integration'));
 }
 $environment = file_get_contents($repo.'/.env');
 $keys = [
