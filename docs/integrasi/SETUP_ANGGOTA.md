@@ -114,6 +114,7 @@ Data PostgreSQL tetap. F-1 mengembalikan data memorinya ke seed saat prosesnya b
 | Integrasi sudah berjalan | Status berhasil. Langsung buka alamat E-1; tidak perlu start lagi. |
 | Composer tidak mengenali integration | Kode E-1 belum memuat perbaikan terbaru; gunakan paket terbaru atau branch dev setelah perubahan tersedia. |
 | Clone/pemasangan F-1 atau D-2 gagal | Pastikan Git, Node/npm, Composer, dan koneksi internet tersedia. Jalankan ulang `composer integration`; folder checkout yang valid tidak akan diunduh ulang. |
+| `processes.json` tidak ditemukan atau profil/runtime berbeda | Aman dijalankan ulang pada kode terbaru: `composer integration:stop`, kemudian `composer integration`. Stop akan berhasil tanpa proses yang dicatat; startup membuat runtime baru bila port 4100, 8026, 8080, dan 8087 kosong. |
 | Port dipakai proses di luar runtime | Hentikan sendiri server lama pada port tersebut, misalnya composer serve atau php artisan serve. Launcher tidak mematikan proses lain. |
 | Profil/port berbeda | Jalankan composer integration:stop, kemudian composer integration. |
 | Tidak dapat membuat database | Periksa PostgreSQL, DB_HOST/PORT/USERNAME/PASSWORD, dan hak CREATE DATABASE akun lokal. |
