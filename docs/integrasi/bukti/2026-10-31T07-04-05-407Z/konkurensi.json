@@ -1,0 +1,24 @@
+{
+    "observedAtUtc": "2026-10-31T07:03:34+00:00",
+    "result": "PASS",
+    "database": "e1_integrasi_20261031_064605_27c9b2_tests",
+    "staleRefresh": {
+        "workerBlockedBeforeCompute": true,
+        "latestTotalPpn": "9900000.00"
+    },
+    "simultaneousPayments": {
+        "requestedPerPayment": "6000000.00",
+        "responses": [
+            {
+                "status": 400,
+                "errorCode": "INVALID_PAYMENT"
+            },
+            {
+                "status": 200
+            }
+        ],
+        "storedPayments": 1,
+        "auditRows": 1
+    },
+    "scope": "Dua proses PHP nyata dengan koneksi PostgreSQL terpisah pada DB uji baru; bukan stress test beban produksi"
+}

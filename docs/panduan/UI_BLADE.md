@@ -14,14 +14,16 @@ composer serve
 ```
 
 Buka `http://127.0.0.1:8080/login`. Login demo lokal hanya muncul ketika
-`E1_DEV_LOGIN=true` dan lingkungan bukan production. Halaman masuk hanya menampilkan
-form akun demo dengan ID akun dan peran. Token hasil login disimpan di `sessionStorage`, dikirim melalui Bearer, dan dihapus
+`E1_DEV_LOGIN=true` dan lingkungan bukan production. Jika `F1_API_ENABLED=true`,
+halaman juga menyediakan form email/username dan kata sandi F-1. Profil integrasi
+mematikan akun demo E-1 dan memeriksa status/peran akun ke F-1 pada setiap request.
+Lihat [panduan integrasi](../integrasi/README.md). Token hasil login disimpan di `sessionStorage`, dikirim melalui Bearer, dan dihapus
 ketika keluar atau API menjawab 401. Otorisasi data tetap dilakukan oleh API.
 
 `npm run dev` menyediakan aset Vite selama pengembangan. `composer serve` menggunakan
 `server.php` agar aset statis dilayani langsung dengan batas unggah PDF yang sesuai.
 
-Untuk data demo lengkap, jalankan `php artisan db:seed` dan `php artisan demo:samples`.
+Untuk data demo lengkap, jalankan `php artisan db:seed`, `php artisan db:seed --class=DemoSeeder`, dan `php artisan demo:samples`.
 Seeder menambahkan data tanpa mereset perubahan pengguna. Dataset awal berisi 32 faktur,
 5 pembayaran, dan 5 masa pajak. Petunjuk PDF siap pakai dan skenario tersedia di
 [Panduan Seeder Demo](DEMO_SEEDER.md).

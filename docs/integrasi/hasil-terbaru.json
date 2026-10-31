@@ -1,0 +1,13 @@
+{
+  "directory": "docs/integrasi/bukti/2026-10-31T07-43-25-100Z",
+  "result": "PASS",
+  "steps": 42,
+  "assertions": 57,
+  "contractGaps": [
+    "D2-04",
+    "D2-05",
+    "D2-06",
+    "F1-GAP-01",
+    "F1-GAP-02"
+  ]
+}

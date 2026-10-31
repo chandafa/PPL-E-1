@@ -1,0 +1,1205 @@
+{
+  "observedAtUtc": "2026-10-31T08:18:00.619Z",
+  "e1": {
+    "branch": "dev",
+    "baseCommit": "ea57e0851a5d087d8b1da919eff74e0fa72b7164",
+    "workingTreeClean": false,
+    "committedOrPushedThisTask": false
+  },
+  "upstreams": {
+    "F1": {
+      "url": "https://github.com/Izra29/PPL_F1.git",
+      "commit": "0feb37aafe9df9e871aaba9a5457093696ce38a0",
+      "workingTreeClean": true,
+      "files": [
+        {
+          "file": ".env.example",
+          "sha256": "7bf3bacb851a3d4bcd5416b604e2c399f3ac65f8c6bafc5799713acd8b9b47e2"
+        },
+        {
+          "file": ".github/workflows/check.yml",
+          "sha256": "f55b97ac256e93087f1bcfc1b03fe80c7dc6a0d0a085929451013b1cd68cd8bd"
+        },
+        {
+          "file": ".gitignore",
+          "sha256": "4143ce57980b9b6ce453057af60af7ca9ba064d5a0434879ed15e3cdc2f26858"
+        },
+        {
+          "file": "README.md",
+          "sha256": "02754cea49d25b5400ba8d3694057dbc270c412b103f9f4922d88d19f3001980"
+        },
+        {
+          "file": "bukti-pertemuan5.txt",
+          "sha256": "a2b5d12e6ebddc20bb65fc77146d12143014e3a94ebd98f31d6be52b50d0e935"
+        },
+        {
+          "file": "demo-evidence.txt",
+          "sha256": "598901248d6a0b0d10f44ed266d692dfe1473db983ffadcd76186afc0701d4a4"
+        },
+        {
+          "file": "demo/local-server.js",
+          "sha256": "2653011f3c40f8a93234417d688a14e616bf65a1af7a9f86ff05e5a79d7c2d5c"
+        },
+        {
+          "file": "openapi/examples/account-identity-error.json",
+          "sha256": "cc9e521fc386ef196a8fba245446dae31b3f9ba0c148cb08b3031dd2518b22b7"
+        },
+        {
+          "file": "openapi/examples/account-identity-success.json",
+          "sha256": "e1f963a2cd3648b88dec5f9fc7490fef1ef90369f793375e4510176212108716"
+        },
+        {
+          "file": "openapi/examples/identitas-akun-error.json",
+          "sha256": "cc9e521fc386ef196a8fba245446dae31b3f9ba0c148cb08b3031dd2518b22b7"
+        },
+        {
+          "file": "openapi/examples/identitas-akun-success.json",
+          "sha256": "e588429d1cac557bd37b10dac2332d1b8800980cbd039c1d1f776a2bbc92d545"
+        },
+        {
+          "file": "openapi/examples/login-error.json",
+          "sha256": "a42f395cea7e9fa158775d4c0e405bc7712ad6f21931a329334b1276e2bfd8de"
+        },
+        {
+          "file": "openapi/examples/login-success.json",
+          "sha256": "9d8a69f269e6d79eafa18d12575f293529a37040353928941f7255eb7e3ae37f"
+        },
+        {
+          "file": "openapi/openapi.yaml",
+          "sha256": "2eb5307da13f6f88ab9e994b6c5fae807ffd6d96d3a91217c0dc615f0ef92a3f"
+        },
+        {
+          "file": "package-lock.json",
+          "sha256": "73b141126216263fbd24242ad3b32a14a3f5caf96dbd09344b22e1aab604380f"
+        },
+        {
+          "file": "package.json",
+          "sha256": "c399d06e1a802136c87310359563c7f9783ec7d02b3e8a79d8a72340d0131065"
+        },
+        {
+          "file": "seed/seed-accounts.json",
+          "sha256": "1e77754e3811781e226452dfcb782cf48c20dc2f103b21c5241a45c8d3029550"
+        },
+        {
+          "file": "seed/seed-akun.json",
+          "sha256": "91f7c65d991af74bdaaff6bfa8642477221d48797517b4b69b583b6adf1a08e7"
+        },
+        {
+          "file": "skema data awal F1.pdf",
+          "sha256": "16be98ed3bd3ee98a43cfc6b4a4221a59ee16f68cb76e50fb4dce6cf450a1ea7"
+        },
+        {
+          "file": "smoke-test-evidence.txt",
+          "sha256": "7039efbf8b235d68ebf9337a6ec8d825175ded857b71655283868f2cad773b2e"
+        },
+        {
+          "file": "test/smoke-test.js",
+          "sha256": "1e24a579b0698668fc05340fd20b9725e9b67b5fe83fbbc68eccf3b90adc0768"
+        }
+      ]
+    },
+    "D2": {
+      "url": "https://github.com/eldyfg/PPL-D-2.git",
+      "commit": "b93fc4dadcf7916995c9e6c2f981f95cc039dd97",
+      "workingTreeClean": true,
+      "files": [
+        {
+          "file": ".editorconfig",
+          "sha256": "fe39e0ad06edea8e256e44f1fc4f319a8acfa785a7470af5cf6b9ed12dc34406"
+        },
+        {
+          "file": ".env.example",
+          "sha256": "cc816d67d5b55939f8f282b56d46445c148fc96262eb6eb19ff8ae9d437676da"
+        },
+        {
+          "file": ".flyenv",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": ".gitattributes",
+          "sha256": "a40eb27ee0b545ca5b5542daaf99fec51f84f23b3766a6353864ef2a115bc51c"
+        },
+        {
+          "file": ".gitignore",
+          "sha256": "a2fed8faf5963045a859ed0bfd51f8aeaba1fa4c9f41b7bb41515e1c85f657ae"
+        },
+        {
+          "file": ".npmrc",
+          "sha256": "e968d1d336604e9986ea31306a4d9e1442f4312fca262f444384baf928d6560e"
+        },
+        {
+          "file": "README.md",
+          "sha256": "a5f5978dd9e4db8135305d35533636531766a7cb7640e1b9767d1cbc6100b0b5"
+        },
+        {
+          "file": "app/Http/Controllers/ContractController.php",
+          "sha256": "f8b51fa8bc621f4245fb05e8dffd4bc8072ec525b8ca8a58c21047a2554bb0a4"
+        },
+        {
+          "file": "app/Http/Controllers/Controller.php",
+          "sha256": "25d1c1ef8e6cc8a376553faacfba2b07d9dfaee9bdbb84f14f77517580e9deb1"
+        },
+        {
+          "file": "app/Http/Controllers/InvoiceController.php",
+          "sha256": "94da41843c0438a3eeb5c8d1b14d3b3a4af3f216faf777d81b0661beca810423"
+        },
+        {
+          "file": "app/Http/Controllers/TaxParameterController.php",
+          "sha256": "f801c2414e039431977997471868f91c0d3cf868b2a771caf8adf785e0b46577"
+        },
+        {
+          "file": "app/Http/Controllers/TerminController.php",
+          "sha256": "b11240390ab6a6cca184bab33bede0b79022c67ff6e0efe03bcad2c1111319f1"
+        },
+        {
+          "file": "app/Http/Middleware/ModulD2AuthMiddleware.php",
+          "sha256": "41db1e2ed379d9b9f1434261beba33ae640ba81fc3d6f0e7854b5db52ce1318f"
+        },
+        {
+          "file": "app/Http/Requests/BaseApiRequest.php",
+          "sha256": "ee38eb727bab40d2a5bc582acaeddc322d5f21f597523ea1cb3de21fec2fe63e"
+        },
+        {
+          "file": "app/Http/Requests/CreateContractRequest.php",
+          "sha256": "220dde883b130583dd2c5086e31217dae4794883a496fae32ae50b4a08675f64"
+        },
+        {
+          "file": "app/Http/Requests/CreateInvoiceRequest.php",
+          "sha256": "3d150560be0e569e088bf3a54e0bc89995bc5f68844d0b5a90cc53fc3812874b"
+        },
+        {
+          "file": "app/Http/Requests/GetTerminsRequest.php",
+          "sha256": "95b0c090b88fcef0379863774969b93aecee4fc2330f3998240d6a0fbb7cdd94"
+        },
+        {
+          "file": "app/Models/Contract.php",
+          "sha256": "3d9f361fb73aa24c375792419486f7fad785d1a64fd548db4a01c2c3507c7af0"
+        },
+        {
+          "file": "app/Models/Invoice.php",
+          "sha256": "366f55d4697a1584371c5a05efe4127c3bf0808c44f959c9909e51effb6c011e"
+        },
+        {
+          "file": "app/Models/InvoiceHistory.php",
+          "sha256": "65d13b6761abe97dea349b4f64ae932f88d927cf74855b9d2a81ce2e3c37487d"
+        },
+        {
+          "file": "app/Models/TaxParameter.php",
+          "sha256": "dda28b802f0f266ea9166425056078a0c3d363dbbec1f991ea5c0162ad9307ba"
+        },
+        {
+          "file": "app/Models/Termin.php",
+          "sha256": "57d68f208d01881ecfe78001041ad38a63824d1fc9704d33e6a10de24de28cf0"
+        },
+        {
+          "file": "app/Models/User.php",
+          "sha256": "1dca1344e88308fe405ae050f02bd65081a649de65ec86f2ee2beabbb4706afa"
+        },
+        {
+          "file": "app/Providers/AppServiceProvider.php",
+          "sha256": "caf306ef6a25a547bbb7edd5508a39b51c365083eb6dd58378cf2242018e94c7"
+        },
+        {
+          "file": "app/Services/D1ProjectServiceClient.php",
+          "sha256": "eb494d11700be0f0d99bfab18c432d584427ac572323cb2e4853d91eba8e7e19"
+        },
+        {
+          "file": "app/Services/TaxCalculationService.php",
+          "sha256": "e94cf71e8fc26edfe84e0e168a9a800e32a1bff823927e5002295222b829ccef"
+        },
+        {
+          "file": "artisan",
+          "sha256": "f91a517c0c5d3a904c3f390933964a5e08ec1fc68146882730daac4aca4ffcec"
+        },
+        {
+          "file": "bootstrap/app.php",
+          "sha256": "e295684fb0cb59f594b8b2c63da9ffe27d72677c6cb90e83f54a1689d5153b74"
+        },
+        {
+          "file": "bootstrap/cache/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "bootstrap/providers.php",
+          "sha256": "f720e185207a343d4c19fc99dbb317a4187efbcd7d38a303a695bbdd77ffb943"
+        },
+        {
+          "file": "composer.json",
+          "sha256": "dc30862e917de4ddf6866056c83eeabcac72c078e5ed604ddcecc73147a1ceaa"
+        },
+        {
+          "file": "composer.lock",
+          "sha256": "7c36f0599e365a547a9abb57704a101e198e9c762cbce1f2a21b52cb2f8662db"
+        },
+        {
+          "file": "config/app.php",
+          "sha256": "b4b25e15efa76846a7f2e19fd1044fec4945e4e928c4098126a2b0042b034383"
+        },
+        {
+          "file": "config/auth.php",
+          "sha256": "c7e204e9785c9f596d66fb884b493f658f2327f157646bdb4088efd6b3a7773f"
+        },
+        {
+          "file": "config/cache.php",
+          "sha256": "5030cdf171704e58b96f2cf17f1c6d5921b27d5c63c2cefb730eeb2da49a8240"
+        },
+        {
+          "file": "config/database.php",
+          "sha256": "02cd62f589b43d33f9ceac740705dac1dec9740eb2bb9e6e202d4b66a15244cf"
+        },
+        {
+          "file": "config/filesystems.php",
+          "sha256": "ba7060d7a23e490c3ce830656f6d24ad3ccf5b868e3293f2a12e411959dc5635"
+        },
+        {
+          "file": "config/logging.php",
+          "sha256": "beb1ffd0db910f6f0b4f75214c3d5aa385d692733ece8a450f4c169d2c99ce38"
+        },
+        {
+          "file": "config/mail.php",
+          "sha256": "c43ff49a31c5f32ce21eb7159f2a4b3cd2f4074eaed5838d265646dbfedd3474"
+        },
+        {
+          "file": "config/queue.php",
+          "sha256": "6101774da7c8b79af46d0028f2b8b31a484c3f7eda10b76e5b27b6093ad364a4"
+        },
+        {
+          "file": "config/services.php",
+          "sha256": "b7ee786ea1adbc92db9f229f479431c94503527c47051da3862eb0e4d7db70aa"
+        },
+        {
+          "file": "config/session.php",
+          "sha256": "64272cfbef6f47c65bf857f1c5b1e853700c0d0278de46b86663fd83ef4aeed8"
+        },
+        {
+          "file": "database/.gitignore",
+          "sha256": "e758642d95e83e907e010b6e46b07b3f953c7cef11fe5ebefc2a77b9d7b4d5f7"
+        },
+        {
+          "file": "database/factories/UserFactory.php",
+          "sha256": "50bdc543f1b09d1a57260be55ad0e1a68aee4b34f63e1109dc94d9bcd3080526"
+        },
+        {
+          "file": "database/migrations/0001_01_01_000000_create_users_table.php",
+          "sha256": "10d79883bc08ce46510f9ad8b1830b4d06d586dc56ae2c8bac3b3e491f69a90f"
+        },
+        {
+          "file": "database/migrations/0001_01_01_000001_create_cache_table.php",
+          "sha256": "fbb4665e5a977e71df4e74ec75b3c06ca4f17ad0de7138fe9786639189978e77"
+        },
+        {
+          "file": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+          "sha256": "df4910687180313a14a3f96a8bddd808ae145ed1b107cd772caf865c0dc2b746"
+        },
+        {
+          "file": "database/migrations/2026_10_21_000001_create_modul_d2_tables.php",
+          "sha256": "74d9ab9643bdff1c6924be0ee773f4acb670f7dcb2f58637cec570a51533f8c0"
+        },
+        {
+          "file": "database/seeders/DatabaseSeeder.php",
+          "sha256": "ca433ca517dd0b4072f815c46cb28b1ed6675f02753c2e74cadb93e6d2e2fa71"
+        },
+        {
+          "file": "database/seeders/ModulD2Seeder.php",
+          "sha256": "78db538d54258a1d8260a4e79f7a71477d7e104e874f0198c9851759a1445272"
+        },
+        {
+          "file": "docs/openapi.json",
+          "sha256": "b5d285aedc6e295d0af285c02c8433f95c41b05ac352ed3b92c2ebadd0508ffe"
+        },
+        {
+          "file": "docs/openapi.yaml",
+          "sha256": "e7538774de5c772e9f47d863760a22c43a2e522e110732c1b7c075f150c1a7d9"
+        },
+        {
+          "file": "examples/error_403_forbidden.json",
+          "sha256": "2dc4623188c36d91fdaaf01bc2892acb4150b24056f6e7add5ea365170912749"
+        },
+        {
+          "file": "examples/error_validation_400.json",
+          "sha256": "aeaa4532423789148a3ad489ff34d0a41170c11f8f0b3991bcee719d7e31f814"
+        },
+        {
+          "file": "examples/invoice_create_error_po_blocked.json",
+          "sha256": "84bd3fd3fdfc3b2b1c9ad273fd1aadbbc0a36e57efeea05f625c2d58612993b4"
+        },
+        {
+          "file": "examples/invoice_create_success.json",
+          "sha256": "6bfe3aedfc7d13899f715d5d8f5a8a4f33ae9b65017fa0ec0ccbc35e8a7b373b"
+        },
+        {
+          "file": "examples/invoice_get_detail_success.json",
+          "sha256": "280db7de481cca09ce73e56dbd1a7063be39ff4af27388655e3e15f46b173159"
+        },
+        {
+          "file": "examples/termins_get_success.json",
+          "sha256": "00a06e634f571d10c4cafedbdf6b8c033321c69e90f15feaa007f4c22fb9a0bd"
+        },
+        {
+          "file": "openapi.json",
+          "sha256": "b5d285aedc6e295d0af285c02c8433f95c41b05ac352ed3b92c2ebadd0508ffe"
+        },
+        {
+          "file": "openapi.yaml",
+          "sha256": "04894be9666cfcac48f264e15c4f0089da586f7f7884927ff5f98049b4c0ba3e"
+        },
+        {
+          "file": "package-lock.json",
+          "sha256": "786540bf69ec8be7edd6a2d691b93ed6eadc8ced1a281e1e36d031d282df2d89"
+        },
+        {
+          "file": "package.json",
+          "sha256": "023d511d768e05b69e8127e18ae0e3d4a2e91702e8dd82917c655e53e5908de5"
+        },
+        {
+          "file": "phpunit.xml",
+          "sha256": "493369cfb7feea104da4bec214c2cc6526ca2f1b9d937c50a2961fc59cb61aaf"
+        },
+        {
+          "file": "public/.htaccess",
+          "sha256": "b7e379c77639fd56144947dbae84c84eb466d9c686ea81f2f013ae85421da923"
+        },
+        {
+          "file": "public/favicon.ico",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "public/index.php",
+          "sha256": "eba77cba39695b6bd091fe5211d481f7ebb2ce2d8d26230b5a609465d0a4aff9"
+        },
+        {
+          "file": "public/robots.txt",
+          "sha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f"
+        },
+        {
+          "file": "resources/css/app.css",
+          "sha256": "5d05945d75cdc7a4994bf03a3846b989b61aa2087d4d0efec2463b0b59f055e0"
+        },
+        {
+          "file": "resources/js/api-client.js",
+          "sha256": "c25824ea3b546b7da4e2280e2e43e12e58ba847beffbe62b03c3687b4f1910c0"
+        },
+        {
+          "file": "resources/js/app.js",
+          "sha256": "7c9173474f60ce365613de78e316bd2ffdf1da540d51a81b2675982c12462978"
+        },
+        {
+          "file": "resources/js/invoice-create.js",
+          "sha256": "e6f9213b61b42e7ca06015d4141b35cb6babfa9c04dbc08491e9d913abf4fd4a"
+        },
+        {
+          "file": "resources/js/invoice-show.js",
+          "sha256": "7530918ac18628ae4c1328b8e09f4e9ceb4195108ba1392141f5fb568fb454bd"
+        },
+        {
+          "file": "resources/js/layout.js",
+          "sha256": "4aaa776c9c72e6f5fd21ad7d8e02e19ed63a4bb20f1e6491f33f628b155f0c1d"
+        },
+        {
+          "file": "resources/js/termins.js",
+          "sha256": "ef363a8529bafd74b5553abfe20e817afdb1b10c19d283d47296a49f0bf92007"
+        },
+        {
+          "file": "resources/views/components/sidebar.blade.php",
+          "sha256": "f86187fe5231718598b9ed92fa8d5dc75b2a160095843b51e847b963b7b00064"
+        },
+        {
+          "file": "resources/views/invoices/create.blade.php",
+          "sha256": "33fbf05db1b1d4b283a7a4689ee5fab41d31eab1c62ac57a02e0156511bb81ef"
+        },
+        {
+          "file": "resources/views/invoices/show.blade.php",
+          "sha256": "982792384859ce77bbf0f23e8e49d11ae5d9b27264a80adfe3049a6d8b43afec"
+        },
+        {
+          "file": "resources/views/layouts/app.blade.php",
+          "sha256": "2d855f2ec65e7ee4aa6f89133ca5c8a590fef1c08d27bff85545db67365b65e4"
+        },
+        {
+          "file": "resources/views/termins/index.blade.php",
+          "sha256": "6a10ac09a75d63619822e13ca7fef345ec84d2c91babfe571d4f48959163fe3f"
+        },
+        {
+          "file": "resources/views/welcome.blade.php",
+          "sha256": "36db84933f4b23462aeef40ac6c4b115f4f1f645c72701d1f4a7fc59eaaa77fc"
+        },
+        {
+          "file": "routes/api.php",
+          "sha256": "8c1d4323d8d96b4c94da07d479d746c5b31eaae3ccdb7527d4530898a5fc4431"
+        },
+        {
+          "file": "routes/console.php",
+          "sha256": "9adccc33e7dd400683e434774077c7fdb2f299c5712cedf16a43fdf56f2850fa"
+        },
+        {
+          "file": "routes/web.php",
+          "sha256": "9d71ec0dbce4748d64198a3ce78f23267b1d638c03115d3e9d5ce453c0abefce"
+        },
+        {
+          "file": "storage/app/.gitignore",
+          "sha256": "993b9e3709d7b5189da331725d1169d79e561a509db2490b722b525073d2d976"
+        },
+        {
+          "file": "storage/app/private/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/app/public/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/framework/.gitignore",
+          "sha256": "37bc9570de232e9db87ce530b3e4e2d5fa8d75f3bd587069fd26e2fb4ef1ffa5"
+        },
+        {
+          "file": "storage/framework/cache/.gitignore",
+          "sha256": "533853ce8390305dd856510063fdffdd1ae206f24c03b9294542d3cfe5c3e33a"
+        },
+        {
+          "file": "storage/framework/cache/data/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/framework/cache/locks/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/framework/sessions/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/framework/testing/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/framework/views/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "storage/logs/.gitignore",
+          "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+        },
+        {
+          "file": "tests/Feature/ExampleTest.php",
+          "sha256": "aaa4a192fb4aa96d4e81eda06a29968da3d9a73b71026b87a67297e66dd985b8"
+        },
+        {
+          "file": "tests/Feature/ModulD2ApiTest.php",
+          "sha256": "72cf7086e131bc31f5a2220967a003eaf1e758c3ff13ab0c62ab931ab45d580c"
+        },
+        {
+          "file": "tests/TestCase.php",
+          "sha256": "c7c209f5579c42647c1f7b2a79ac828e8b54ac62a98442045a6e94fa2c0d0ebc"
+        },
+        {
+          "file": "tests/Unit/ExampleTest.php",
+          "sha256": "ffacae5c1a2a44c809420af5b3b404910da1b12167d58764dac6d10b8ba8cfaf"
+        },
+        {
+          "file": "vite.config.js",
+          "sha256": "f413e14379e2db8b200c63a6326b925f6d47cc0df458c77bfe188cfc23e8081f"
+        }
+      ]
+    }
+  },
+  "sourceFiles": [
+    {
+      "file": ".env.integration.example",
+      "sha256": "840d3750328f479e638aa389e084a0c80b4a0e8c535a8249136d966bb0d967e3"
+    },
+    {
+      "file": "app/Http/Controllers/Api/F1LoginController.php",
+      "sha256": "d828906a2fa4fde8eabe8d3e5a8aa9c4d5f7d70306f031df5f854d8f6fd6eae9"
+    },
+    {
+      "file": "app/Services/Auth/F1ApiClient.php",
+      "sha256": "15e6271c637d02fed4175b5dd093e313d8e5f2f31676969f4b295a25337a2233"
+    },
+    {
+      "file": "scripts/check-integration-evidence.php",
+      "sha256": "261ebee1db080c264df3f61fd69d61159446af69ad056327bee139eef3b49c21"
+    },
+    {
+      "file": "scripts/enable-integration.php",
+      "sha256": "4cd47574724063720947cfd013639a909d11aa4c507f041f28489f9051e7ee54"
+    },
+    {
+      "file": "scripts/generate-integration-samples.php",
+      "sha256": "6dbb4c72ba338f04d297960f1cb62947683d5109ff9ab7bf8fdadbc865dbd3ac"
+    },
+    {
+      "file": "scripts/prepare-integration.php",
+      "sha256": "01d1450d0e7f0333a91d6b22bbaf6ce2f9a1a417a60e8f1e8f3a2c16cb602d3c"
+    },
+    {
+      "file": "scripts/snapshot-integration.php",
+      "sha256": "29aca15526637ce46d7efbb901751612e7c79a1851b7ad766ede8b88c340ec19"
+    },
+    {
+      "file": "scripts/start-integration.ps1",
+      "sha256": "4f3b02e143ffe04a7784c9be295e1202124704a076bcd5fad61d4532b59ee911"
+    },
+    {
+      "file": "scripts/stop-integration.ps1",
+      "sha256": "6ca1c4e2c97670c49bf8ff1e57eec62dc81ba2dd2dfbb442ac0370cfecac4d81"
+    },
+    {
+      "file": "scripts/test-integration.mjs",
+      "sha256": "1a010f8ee455c588bb21155f838b337b5251da2c5c0678cf023ec818ff393217"
+    },
+    {
+      "file": "scripts/test-recap-concurrency.php",
+      "sha256": "598c03a05f5916660bf41d0e73423a152c1cc3fa9654327de0f4819c9ab3313e"
+    },
+    {
+      "file": "scripts/trace-d2.php",
+      "sha256": "a10f450e16c45463eeca1d734cb549409cf543113b8f87f8adf4c36617deaa7f"
+    },
+    {
+      "file": "scripts/trace-f1.cjs",
+      "sha256": "b6d7cbafe3233df2093132d52c1137a61633263b605d9863ca42c23ac62bafbf"
+    },
+    {
+      "file": "tests/Feature/F1IntegrationTest.php",
+      "sha256": "f8d6db98e1a6aa5671b36b5d9a2e2ef8848a04c45f3d627e000e31ec753fc034"
+    },
+    {
+      "file": ".env.example",
+      "sha256": "417f3f526a8c67adf5e95112147baa355e1ceddea6cc48c5614e1490b543d3ca"
+    },
+    {
+      "file": "app/Console/Commands/GenerateSamplePdfs.php",
+      "sha256": "17d38f4cb56466939bcaafbc546a1a64a1cd9669b7950b4e57292dedfc93dd7d"
+    },
+    {
+      "file": "app/Console/Commands/IssueDevToken.php",
+      "sha256": "7619d7ee55934b226697ba6fdcd074955e04290468c0317827feb5f188d71283"
+    },
+    {
+      "file": "app/Console/Commands/RebuildTaxRecaps.php",
+      "sha256": "b00f58a0fb8f8afde044aa63c4bc452364ceab5ebeafd686056badf4c1864641"
+    },
+    {
+      "file": "app/Exceptions/ApiException.php",
+      "sha256": "3cb46fe2142bc35fbab5f3030ec22781ecc03baae772d0360a1fd2d13b21c459"
+    },
+    {
+      "file": "app/Http/Controllers/Api/D2InvoiceController.php",
+      "sha256": "60fc72d508bfe73d928d63e651e74b9b4b04508f0e9b503989cd7e40dbbb3bbc"
+    },
+    {
+      "file": "app/Http/Controllers/Api/DemoInvoiceController.php",
+      "sha256": "acf74cfe9b1c4a0fbbdb7be418f72d362c47e91f18b207213b8a20f1f5520e10"
+    },
+    {
+      "file": "app/Http/Controllers/Api/DevLoginController.php",
+      "sha256": "84c420a685f2ad541a780c85549fba7d719e41af7c19211ca4eaa3986599c872"
+    },
+    {
+      "file": "app/Http/Controllers/Api/V1/TaxInvoiceController.php",
+      "sha256": "01840fdd08e51fa3dba2b329bfb0756ca1f9e7a6a3487b49b83c37acb93b54d0"
+    },
+    {
+      "file": "app/Http/Controllers/Api/V1/TaxPaymentController.php",
+      "sha256": "31767a694f1f3ae4206e8418cb60d5531b7313528868d3c8c516358b989a2c37"
+    },
+    {
+      "file": "app/Http/Controllers/Api/V1/TaxRecapController.php",
+      "sha256": "60ae658b8bd257a16e388658f8b2087b0972c439fe4a0c5dab7ce872b709b509"
+    },
+    {
+      "file": "app/Http/Controllers/Api/V1/TaxSummaryController.php",
+      "sha256": "71df00b8a2833a53361ad218ca1d85ae10375a8ad839d47d41593f353a1c47c8"
+    },
+    {
+      "file": "app/Http/Controllers/Controller.php",
+      "sha256": "25d1c1ef8e6cc8a376553faacfba2b07d9dfaee9bdbb84f14f77517580e9deb1"
+    },
+    {
+      "file": "app/Http/Middleware/AuthenticateF1Token.php",
+      "sha256": "2332a3f4f71e2dbc92974c81380e1bb8f02311b1186007f202837b26f1acddc6"
+    },
+    {
+      "file": "app/Http/Middleware/ParseMultipartBody.php",
+      "sha256": "4f385f52937810b9e22afaf31a18429f997dbf9cd2525a6f229323beecfc51a4"
+    },
+    {
+      "file": "app/Http/Resources/TaxPresenter.php",
+      "sha256": "badbcf57e75e8303e3ebe68c0349b13ef312284424e9e41d04cffa91e04dd3ac"
+    },
+    {
+      "file": "app/Models/Contract.php",
+      "sha256": "86e7ac67355e9b9587f60f6a867ebafe193ce460eb2400d98d35fab01c519eec"
+    },
+    {
+      "file": "app/Models/FakturPajak.php",
+      "sha256": "a04643ad22e99c1fc349d0838b14ed1f113e2e39ed21f04978e517be22b8590b"
+    },
+    {
+      "file": "app/Models/Invoice.php",
+      "sha256": "f6ffcc520cd1c4dfbb83d51b5d597a7088a4d94a0092bf41e1897eb9bf947177"
+    },
+    {
+      "file": "app/Models/InvoiceHistory.php",
+      "sha256": "65d13b6761abe97dea349b4f64ae932f88d927cf74855b9d2a81ce2e3c37487d"
+    },
+    {
+      "file": "app/Models/ItemFaktur.php",
+      "sha256": "d65d76228433a0ed53dbd7ccd55528f07be3a2bf91855b056c8ee2fb644eac23"
+    },
+    {
+      "file": "app/Models/PembayaranPajak.php",
+      "sha256": "552a557400465d2cdfa6860541459a8fed7691f0451795bb0f9e569f7d86593c"
+    },
+    {
+      "file": "app/Models/RekapPajakBulanan.php",
+      "sha256": "4c0b21c069eedc0a9b6d862fd15b241bfdca44011c05f9382dcf06aeaaf8f64a"
+    },
+    {
+      "file": "app/Models/RiwayatPerubahanFaktur.php",
+      "sha256": "6fca0ba49bfc67c6e246c953e10c250b1e9669c3696fcb57986cd8a2dd891a80"
+    },
+    {
+      "file": "app/Models/RiwayatPerubahanPembayaran.php",
+      "sha256": "c4de2f335e94792e9ba2be586639524ad11debe6dbf8f70475b227efe19383a3"
+    },
+    {
+      "file": "app/Models/TaxParameter.php",
+      "sha256": "05570b44d563963c78d40f12f142c25ba04b003a914356836bfb34e15f68d52d"
+    },
+    {
+      "file": "app/Models/Termin.php",
+      "sha256": "c6a9eba2af96b71d8815446770fd7672e7d625a76d438edf8d8db25dbf09cc73"
+    },
+    {
+      "file": "app/Providers/AppServiceProvider.php",
+      "sha256": "363b71aa4c140e3d5eb6a562d2db2416781f64467aed3a867e7c978402c1c39e"
+    },
+    {
+      "file": "app/Services/Auth/DevTokenIssuer.php",
+      "sha256": "359d83769fa445f41c0fd9de7a7e19d2c6552020771cdfa835575b77c96f7e5a"
+    },
+    {
+      "file": "app/Services/Auth/F1Identity.php",
+      "sha256": "7e94087a059c3738cfd1ef7f2badf6f81a8f1bbffccc3274e697ca614516de02"
+    },
+    {
+      "file": "app/Services/Auth/F1TokenVerifier.php",
+      "sha256": "3bf01ef1b8a9f417f5e257ccf6f90e2be426cda74da0958330ad7cbd16ef666f"
+    },
+    {
+      "file": "app/Services/EFaktur/EFakturPdfParser.php",
+      "sha256": "a3bf590465f18dd2ca8af2dd7a9a0eaa5b9d5fff7b05c0e3c070b3e75b3469fa"
+    },
+    {
+      "file": "app/Services/EFaktur/ExtractedTaxInvoice.php",
+      "sha256": "d2d2f6730d8281820f90bccb8d69d018e1539608eced57f81d1cfb726a4646cd"
+    },
+    {
+      "file": "app/Services/Export/RecapExporter.php",
+      "sha256": "9ac8ac339d37cd6c8e217b5b6921f009b4332eb19fe561a1081b5057d70ed986"
+    },
+    {
+      "file": "app/Services/Export/RecapReport.php",
+      "sha256": "4c95aae145620928e372f16748ced473ac545318898b8b76872032cb0237ed5c"
+    },
+    {
+      "file": "app/Services/Export/RecapWorkbook.php",
+      "sha256": "be29cfbc81ee98c958a01612200257949c7231a0f1f628defb3a606342023332"
+    },
+    {
+      "file": "app/Services/Invoices/HttpInvoiceProvider.php",
+      "sha256": "75e00a8432fe688b2b9bb771b91e9bd4a095c9b69b3dabb53e58087c5fbeed58"
+    },
+    {
+      "file": "app/Services/Invoices/InvoiceData.php",
+      "sha256": "14b61fc2f4b2178f76c9612343c4565da45de93a636b502ff106012fcf89e859"
+    },
+    {
+      "file": "app/Services/Invoices/InvoiceProvider.php",
+      "sha256": "69d785dad233e3bf62d223beba1368170529470fb9956ea4a262101c8896ae41"
+    },
+    {
+      "file": "app/Services/Invoices/MockInvoiceProvider.php",
+      "sha256": "512a0c347810765ec4200b6d4ac60d73fbbe6262348ca67ca813cfb370a2a3fa"
+    },
+    {
+      "file": "app/Services/Tax/FileStore.php",
+      "sha256": "7484ccd5b9c10673d13c0e091a7d5a3d131134985a61c6ffabc0448ca3a36d0b"
+    },
+    {
+      "file": "app/Services/Tax/HistoryRecorder.php",
+      "sha256": "8bae5754ea842dbd15bc61f9c607aa81a4ffb640d450dd43a0335518b6d2c241"
+    },
+    {
+      "file": "app/Services/Tax/PaymentHistoryRecorder.php",
+      "sha256": "579a7ab3717586f6f0e5775ba6421fb66c6945402b62665a9528e99b5b3fc484"
+    },
+    {
+      "file": "app/Services/Tax/RecapData.php",
+      "sha256": "5829cefe50a81a8c550c1073cca539d27edca0aa9dbd30fc4263c4ae87604c3d"
+    },
+    {
+      "file": "app/Services/Tax/RecapService.php",
+      "sha256": "7171689dc2ad52807cebc5e5dce79c05feccb8822909d5fc9f6047ed37a9c95c"
+    },
+    {
+      "file": "app/Services/Tax/TaxInvoiceService.php",
+      "sha256": "c3ec28beadb263e9c664b3bb32eabc863546815a4bf6d59166e58015b644bdc0"
+    },
+    {
+      "file": "app/Services/Tax/TaxPaymentService.php",
+      "sha256": "3a55000b4de515b845d7ac821254c696a559e452978b409c146a4abf52273e3d"
+    },
+    {
+      "file": "app/Support/ApiResponse.php",
+      "sha256": "d40e68d296bb622b98e66337838904ef7879ccdf43322983865329d8e3a04b6a"
+    },
+    {
+      "file": "app/Support/DateDisplay.php",
+      "sha256": "f673e3c9f713468e41a1a45ae3b4370d018be6475fb92c4d5f86c670b993bc9d"
+    },
+    {
+      "file": "app/Support/Money.php",
+      "sha256": "3a869e2a32e6639bd1d0060017fa01e5819adeabcb5cae9d532633b1cceceed8"
+    },
+    {
+      "file": "bootstrap/app.php",
+      "sha256": "ad70020519c489884cb1620c64fb9c6975894ec423f3b527e242539584d8c8ea"
+    },
+    {
+      "file": "bootstrap/cache/.gitignore",
+      "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+    },
+    {
+      "file": "bootstrap/providers.php",
+      "sha256": "f720e185207a343d4c19fc99dbb317a4187efbcd7d38a303a695bbdd77ffb943"
+    },
+    {
+      "file": "composer.json",
+      "sha256": "d49fed1010568b29910364b486a771ca6546a7c554b3e8b97bdd59261cd19458"
+    },
+    {
+      "file": "composer.lock",
+      "sha256": "cdb84304a60cbbd7131f9611baf50fd65fb36be813402c1ebd764485bc0f6f39"
+    },
+    {
+      "file": "config/app.php",
+      "sha256": "b4b25e15efa76846a7f2e19fd1044fec4945e4e928c4098126a2b0042b034383"
+    },
+    {
+      "file": "config/auth.php",
+      "sha256": "c7e204e9785c9f596d66fb884b493f658f2327f157646bdb4088efd6b3a7773f"
+    },
+    {
+      "file": "config/cache.php",
+      "sha256": "5030cdf171704e58b96f2cf17f1c6d5921b27d5c63c2cefb730eeb2da49a8240"
+    },
+    {
+      "file": "config/database.php",
+      "sha256": "f68f217340f551a6506536057af5a1c826017f16232c27c73cfe254cc9cfc1b9"
+    },
+    {
+      "file": "config/e1.php",
+      "sha256": "9fe3d852c9763a433e70751e6a3a44612f198092a886e4c5bd95d5f7d493a25b"
+    },
+    {
+      "file": "config/filesystems.php",
+      "sha256": "ba7060d7a23e490c3ce830656f6d24ad3ccf5b868e3293f2a12e411959dc5635"
+    },
+    {
+      "file": "config/logging.php",
+      "sha256": "beb1ffd0db910f6f0b4f75214c3d5aa385d692733ece8a450f4c169d2c99ce38"
+    },
+    {
+      "file": "config/mail.php",
+      "sha256": "c43ff49a31c5f32ce21eb7159f2a4b3cd2f4074eaed5838d265646dbfedd3474"
+    },
+    {
+      "file": "config/queue.php",
+      "sha256": "6101774da7c8b79af46d0028f2b8b31a484c3f7eda10b76e5b27b6093ad364a4"
+    },
+    {
+      "file": "config/services.php",
+      "sha256": "b7ee786ea1adbc92db9f229f479431c94503527c47051da3862eb0e4d7db70aa"
+    },
+    {
+      "file": "config/session.php",
+      "sha256": "64272cfbef6f47c65bf857f1c5b1e853700c0d0278de46b86663fd83ef4aeed8"
+    },
+    {
+      "file": "database/.gitignore",
+      "sha256": "e758642d95e83e907e010b6e46b07b3f953c7cef11fe5ebefc2a77b9d7b4d5f7"
+    },
+    {
+      "file": "database/data/d2-invoices.json",
+      "sha256": "c4249cae21a0ed21657ba4712fe6c818e09e835ecdc88763eb49c9c906e07118"
+    },
+    {
+      "file": "database/migrations/2026_10_13_000001_create_e1_tax_tables.php",
+      "sha256": "817c0d6ff5933f567890bdf4b0ba97e67b1ad22425b8297d2c0e5135a84545a2"
+    },
+    {
+      "file": "database/migrations/2026_10_21_000002_create_d2_reference_tables.php",
+      "sha256": "fce16d62b3350928c070ddf7357331e83b19addf169273fe393d5c1b62171971"
+    },
+    {
+      "file": "database/migrations/2026_10_24_000001_add_unique_billing_id_to_pembayaran_pajak.php",
+      "sha256": "6b60b8b0e1cab916ded4d4a50c3f8bb837722601c367037f41e2d7e2622bfa78"
+    },
+    {
+      "file": "database/migrations/2026_10_25_000001_add_unique_ntpn_to_pembayaran_pajak.php",
+      "sha256": "d98f2ac10aa28e5c7728dd00750d0bbe1d6b30fd5f67ddd19828622a33ecf148"
+    },
+    {
+      "file": "database/migrations/2026_10_25_000001_create_payment_history_table.php",
+      "sha256": "ddbdf27a60fe2ef5709c6667227d8676cece36c569adf9d2ba27414884c167d8"
+    },
+    {
+      "file": "database/seeders/DatabaseSeeder.php",
+      "sha256": "fbfbe83330893b2e99f09e37b92ee00e18f25ad9abcbe57b64bf6b008c443e11"
+    },
+    {
+      "file": "database/seeders/DemoSeeder.php",
+      "sha256": "337e30c8eb2704da34b3299c78cf865ecfb0a8a87f73eb2a7b1c3d3c81c26d86"
+    },
+    {
+      "file": "database/seeders/ModulD2DemoSeeder.php",
+      "sha256": "49db915fbc05c330bb4a241956dcbbeafcdd7315ba6cb9724249e9843f27a24d"
+    },
+    {
+      "file": "database/seeders/ModulD2Seeder.php",
+      "sha256": "9e79fe38d22df8ac0f3cafe612b29c6af5b69be953bf5517997c2263ae7ebd61"
+    },
+    {
+      "file": "database/seeders/Support/DemoDataset.php",
+      "sha256": "c81384ced8d08b791eec48f6499923fcfcdd7a62d8da9b4b8130bf74fcf790ff"
+    },
+    {
+      "file": "database/seeders/Support/DemoSampleValidator.php",
+      "sha256": "971d9c0a854dae3dfe68b5de56cc3bb1128dcd9a089979f99cff5392412deeab"
+    },
+    {
+      "file": "database/seeders/Support/FakeEFakturPdf.php",
+      "sha256": "9e1b5c95655b0c688e646682eb1ff39c44b7562b64678dd9d2c1c23fd9ada027"
+    },
+    {
+      "file": "openapi.yaml",
+      "sha256": "e0f2acb55b74fb35ff30daca69530b8aca994b448146a000f40a7b41e130aae7"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "4d642dc17f0ddfb763c22d19f45222836199f707d61341514f3d1d465d21b381"
+    },
+    {
+      "file": "package.json",
+      "sha256": "c3fd34f8feca481f075e1a67e2feca20942ad138c0041de276f79602ccbf8fe9"
+    },
+    {
+      "file": "phpunit.xml",
+      "sha256": "969168c5b7a7d038938ed1f22ffff2c0648871fee54cc4b44a2534618f905615"
+    },
+    {
+      "file": "resources/css/app.css",
+      "sha256": "a0c0361621ed534ddff0a1ec23087c9d813cd7138c5e9ae400142fbb2cdd8ab5"
+    },
+    {
+      "file": "resources/icons/solar.svg",
+      "sha256": "b1b823e90b549f5857a5c1ba1ecd13e5682f5e64b28396e05743fb35d1fa689f"
+    },
+    {
+      "file": "resources/js/app.js",
+      "sha256": "452bb56b085cfd081c9aabf1d7998e9f246dfaf170a7969038c796af4ba9d295"
+    },
+    {
+      "file": "resources/js/invoice-picker.js",
+      "sha256": "f48ece0c7d7e54210e9fcde5fe3c1da8b80ccc7db276903fc69ee67590b1fbca"
+    },
+    {
+      "file": "resources/js/lib.js",
+      "sha256": "caa155b33cc7ba2636fd05a010c09ebab90e56c294ed8b5f0d59527ceee68fc0"
+    },
+    {
+      "file": "resources/views/components/icon.blade.php",
+      "sha256": "f49fd92bccb1f7b53881c52159e26733498808fe5ecd2b1e3a9d4be02ac903b8"
+    },
+    {
+      "file": "resources/views/components/ui/alert.blade.php",
+      "sha256": "cf02d06643a94f3168b7535def5c966c1a50d1d8937a5d24fbf7edce7b3f7272"
+    },
+    {
+      "file": "resources/views/components/ui/badge.blade.php",
+      "sha256": "6f03975d2c4ae7ae4981c61aa6108310c0f9991052922fd263916ea8aac03bfa"
+    },
+    {
+      "file": "resources/views/components/ui/button.blade.php",
+      "sha256": "a105cd0de12496406e495a24cd3128f4957e95af92a82adc8c88e9ac884c941c"
+    },
+    {
+      "file": "resources/views/components/ui/card.blade.php",
+      "sha256": "fe99ecbd92a245960ec52ae90f96d5906724344d1fb836d69fbd8f41757109cd"
+    },
+    {
+      "file": "resources/views/components/ui/dialog.blade.php",
+      "sha256": "89350685b2ad417e9c36455dabe6c061bd7d38328ea9696753db8a44344244b7"
+    },
+    {
+      "file": "resources/views/components/ui/input.blade.php",
+      "sha256": "4fe5a68ed53c7057ff0ef418a5e7edba153e2c823a370bb82e6aad4c1f74be54"
+    },
+    {
+      "file": "resources/views/components/ui/pagination.blade.php",
+      "sha256": "6dc21851a6a8eba3148c8dee0c4d7d985683e15eac2c04aae19b91483fbd3c13"
+    },
+    {
+      "file": "resources/views/components/ui/select.blade.php",
+      "sha256": "1beb6cc97693a7ae0a1a88aea35fffc36b68c149fa8873ed367a9b97b0c46adb"
+    },
+    {
+      "file": "resources/views/components/ui/skeleton.blade.php",
+      "sha256": "d488ab71e6661194d0a4a23ea0d48d19ed471e39bdf06f3c287eddf0c13a207c"
+    },
+    {
+      "file": "resources/views/components/ui/table.blade.php",
+      "sha256": "d77229059af5370c108aa40675c3caef265f153e0a6fd1b14e61d18d98471f14"
+    },
+    {
+      "file": "resources/views/components/ui/textarea.blade.php",
+      "sha256": "96192cb47192d7a35f002e440d4d6db311f4ca30e78f5e52ab8520d95e7060cb"
+    },
+    {
+      "file": "resources/views/docs/swagger.blade.php",
+      "sha256": "7b866844c022d426cb9d4075005ffca4d7ea6b2d75270c340178b3a37b591610"
+    },
+    {
+      "file": "resources/views/exports/tax-recap.blade.php",
+      "sha256": "a64a225f4a8273fc6eda6e24eee1d154ccb95333a507126e20d8f56ef88c85b8"
+    },
+    {
+      "file": "resources/views/layouts/app.blade.php",
+      "sha256": "6086511c95d3c2db865e4c53c9b8c31c103931e8859eb9db20a3687ed90df777"
+    },
+    {
+      "file": "resources/views/pages/create.blade.php",
+      "sha256": "871f7da9e3e2faa6607efe09ed6f661144aa50ef417bf305675468ed3b6101cf"
+    },
+    {
+      "file": "resources/views/pages/d2-invoices.blade.php",
+      "sha256": "ac2dcd8a7b1e79501b6e6262cd42be5c0afdfe8f7a8f8cff68541326dadc535a"
+    },
+    {
+      "file": "resources/views/pages/detail.blade.php",
+      "sha256": "10956c6007d0b247eb6b3bb1df2e5bce00050d118d44c4083d60f4cf2fb4627e"
+    },
+    {
+      "file": "resources/views/pages/invoices.blade.php",
+      "sha256": "21fd13d1ffaf84582cd2d3cfe75607b03ccdb498a34b82e3a1d24b1fff5cea6a"
+    },
+    {
+      "file": "resources/views/pages/login.blade.php",
+      "sha256": "b37b2284031ab3bea99be4a661123372e8642845a9fbfd33e06d62570fa7fe9e"
+    },
+    {
+      "file": "resources/views/pages/payment.blade.php",
+      "sha256": "4dee33e4e36b7948ec9e8a8f77f865aa8ee109af0faeed1153b1860ff7785350"
+    },
+    {
+      "file": "resources/views/pages/recap.blade.php",
+      "sha256": "31a27d6a5688834919574ae2e51d9f24929c6272eb9c95b84b85cc7ab2157176"
+    },
+    {
+      "file": "routes/api.php",
+      "sha256": "cd08ba5dcd6ed849217066cdb9eabc90e73396454b7c4baaa956f674a43bdcf4"
+    },
+    {
+      "file": "routes/console.php",
+      "sha256": "9adccc33e7dd400683e434774077c7fdb2f299c5712cedf16a43fdf56f2850fa"
+    },
+    {
+      "file": "routes/web.php",
+      "sha256": "cce649931bed4938e4b70f6af40a7a1cbf10f9bbf96fa8e40292038d436b5ba8"
+    },
+    {
+      "file": "scripts/audit-recap-concurrency.php",
+      "sha256": "ffed0730df8eb2e7cca7090a5dc54718b2f3c1f590c3b728585f3715e468c2ac"
+    },
+    {
+      "file": "scripts/generate-api-reference.php",
+      "sha256": "500efaec3bac92695dcaa19ef5069dfc6b30d7fe0f49927e84f9fe094fc84d19"
+    },
+    {
+      "file": "scripts/generate-demo-contract-addendum.php",
+      "sha256": "94444e0c936b47fcbfc8db12b7364a5c1f17fcf828cc8ef46871be63c06e5a6a"
+    },
+    {
+      "file": "scripts/publish-swagger.mjs",
+      "sha256": "606e46c7aeec7b24db4cd3f04c8aa247c7e0026bb43bdb2589634c20a788bdd1"
+    },
+    {
+      "file": "scripts/solar-assets.mjs",
+      "sha256": "232e24443777eb7100bad55e67c34b8e2f0e1d42b20dd83f36dd0c4401e7e753"
+    },
+    {
+      "file": "server.php",
+      "sha256": "ede3169275c9ac7b1ee241285a6c81e77bf71c6877603afe5f156e368d3b3a08"
+    },
+    {
+      "file": "tests/Feature/AuthTest.php",
+      "sha256": "1d0008a51c4878bc4cbd6a276ae216638392aa57ce17095ca28c21866b4b4035"
+    },
+    {
+      "file": "tests/Feature/BladeInterfaceTest.php",
+      "sha256": "d4224bd243a758fc76a0e89e70732d98d47fae70ac431a5a852f500dd4b2a69d"
+    },
+    {
+      "file": "tests/Feature/CriticalLogicAuditTest.php",
+      "sha256": "5ace22298fd71a26269a1e5e93241131003ee42023360d1610f5534e49411d75"
+    },
+    {
+      "file": "tests/Feature/DemoInvoiceCatalogTest.php",
+      "sha256": "7737481a5593117c2a86266f4b59af7d029d0f8531310af66f3de6d473d3ab27"
+    },
+    {
+      "file": "tests/Feature/DemoSeederTest.php",
+      "sha256": "db7a3eec0a4eda05ce8c69e54af42f177ca25a1654294da917212fe7bf3cdc20"
+    },
+    {
+      "file": "tests/Feature/DevLoginTest.php",
+      "sha256": "45951fa1a7fa78cb14e1f3a4f58f95397a100d28edc7843c5b208e485c443e87"
+    },
+    {
+      "file": "tests/Feature/OpenApiContractTest.php",
+      "sha256": "c1e66e8427e57c3407b3bfe87df0610bd987c14b33c6d070e0d8649d5761bd1e"
+    },
+    {
+      "file": "tests/Feature/OperationalIntegrityTest.php",
+      "sha256": "318c5f3d42ea26da52ce45cc68abfc7bb25be3594f60319a9658e1f71683e24d"
+    },
+    {
+      "file": "tests/Feature/SwaggerDocumentationTest.php",
+      "sha256": "eb44435ccf3f87c65b306b57193c6230e5821125f8e202e9c02148643b1ecd4d"
+    },
+    {
+      "file": "tests/Feature/TaxAmountsTest.php",
+      "sha256": "9cb8215de403ffd6421e75e1bae2887a8ce41e7f05f8060ba8677d130695df5d"
+    },
+    {
+      "file": "tests/Feature/TaxExportAndSummaryTest.php",
+      "sha256": "07c638544899282b3bc5f508170756f3b1eb8eeb7f097ffe2c77150b1c85517c"
+    },
+    {
+      "file": "tests/Feature/TaxInvoiceCreateTest.php",
+      "sha256": "5d601a08bb8bd802d618dfe5018a279306b2122d9fc8342877f7ac3d0ac107b7"
+    },
+    {
+      "file": "tests/Feature/TaxInvoiceExtractTest.php",
+      "sha256": "49efa31a8bb9013d2977994f36454634de398c501b994ae8391b5c1136031d0a"
+    },
+    {
+      "file": "tests/Feature/TaxInvoiceQueryTest.php",
+      "sha256": "be524fbd41de23a15073d97a79d7e4ff421a64fdef1f835017041864f28d0604"
+    },
+    {
+      "file": "tests/Feature/TaxInvoiceUpdateTest.php",
+      "sha256": "e2b667289942cfc769021528ad8fd5a0e86796258e09e38a0c07aac21a3db8ee"
+    },
+    {
+      "file": "tests/Feature/TaxPaymentTest.php",
+      "sha256": "64d686540618cf05669b9ff18714533410bd9bcfef1867283e9ba2a427ceb160"
+    },
+    {
+      "file": "tests/Feature/TaxRecapTest.php",
+      "sha256": "b5245cd9120c800e990858ec889533fd49c453d9ce8eae565b866edfcf094a71"
+    },
+    {
+      "file": "tests/Feature/UploadFilenameTamperingTest.php",
+      "sha256": "255b5a1adc611196b10b441b59fe499acf6f25bafa1cb6e7cfbc2788aa7050a5"
+    },
+    {
+      "file": "tests/Support/InvoiceScenarioSeeder.php",
+      "sha256": "2c75297cb99dbab093b83d37fb9cf103ded8402ed5e63c7743537313a430a670"
+    },
+    {
+      "file": "tests/Support/OpenApiContract.php",
+      "sha256": "dcb4b7dc2946acfa3acc6d32a8eea80fc8f53f1fb02020d5c7fefb1419afdca6"
+    },
+    {
+      "file": "tests/Support/TaxPdf.php",
+      "sha256": "551b55b66a04a6e80c1130c582793c8adda2b42238c441db751340bb34274141"
+    },
+    {
+      "file": "tests/TestCase.php",
+      "sha256": "b39d2166b8eb989eb5a33ba45c773ebdd45f2542d7abdbe3ca42b899bcd8316a"
+    },
+    {
+      "file": "tests/Unit/DateDisplayTest.php",
+      "sha256": "9abb60954c856d77a697f57d7f621b1b027e05ead5884332ccad872cd1f8e11f"
+    },
+    {
+      "file": "tests/Unit/EFakturPdfParserTest.php",
+      "sha256": "9112904e469e8b69456ccea98008aaea8e957f8443387a3d58e8777372dd203b"
+    },
+    {
+      "file": "tests/Unit/HttpInvoiceProviderTest.php",
+      "sha256": "d9314b3c9cfa1b2f5ba085b6d2a09b7f7a9d347e7cdf3d38d796b6b00d446721"
+    },
+    {
+      "file": "tests/Unit/MoneyDisplayTest.php",
+      "sha256": "31214b4a98d855d8c9e73ac505631475f84b499b01310ed4a964ca8ebd448dcb"
+    },
+    {
+      "file": "tests/browser/d2-picker.spec.mjs",
+      "sha256": "e1d512ad2197f0d54327c02f7a25aa51ea184c838b7b964f4ba79a32e9e39df5"
+    },
+    {
+      "file": "tests/browser/e1.spec.mjs",
+      "sha256": "39fc3ad9d6f07f20bd1d88235e1f4f5fa2fec5f8db1074ea60dc921866c3e751"
+    },
+    {
+      "file": "tests/browser/helpers.mjs",
+      "sha256": "2a2c9f7199ab19a8ba88edebca70d9198cf0a9d6129c8d4db1af9826fa98781e"
+    },
+    {
+      "file": "tests/browser/samples.spec.mjs",
+      "sha256": "72bcea78dd57b5c680a796fef6ce178701f46e5a2f1634edca83d730e14b4b14"
+    },
+    {
+      "file": "tests/browser/setup.mjs",
+      "sha256": "146c7840171136b246bf24f0891d92355854bb0046d62858e58053a5b65dcc6d"
+    },
+    {
+      "file": "tests/js/money.test.mjs",
+      "sha256": "be2f283fc2134f23d255c64578bcbe51df157d797267b51389acc1b664dfb1a1"
+    }
+  ],
+  "validation": {
+    "phpTests": 219,
+    "phpAssertions": 1824,
+    "httpCases": 42,
+    "flowChecks": 57,
+    "jsTests": 4,
+    "contractJsonResponses": 21,
+    "businessOperations": 11,
+    "build": "PASS",
+    "composerValidate": "PASS",
+    "composerServeHealth": 200,
+    "formatChecks": 197,
+    "pages": 6,
+    "mainChecks": 18,
+    "restartChecks": 4,
+    "mainUrl": "http://127.0.0.1:8080"
+  },
+  "mainConfiguration": {
+    "observedAtUtc": "2026-10-31T07:52:25+00:00",
+    "environment": "local",
+    "f1Enabled": true,
+    "checkAccount": true,
+    "f1BaseUrl": "http://127.0.0.1:4100",
+    "claimAccount": "accountId",
+    "claimRole": "roleCode",
+    "d2Driver": "http",
+    "d2BaseUrl": "http://127.0.0.1:8026",
+    "provider": "App\\Services\\Invoices\\HttpInvoiceProvider",
+    "devLogin": false
+  }
+}

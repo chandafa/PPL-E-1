@@ -2,7 +2,7 @@
 
 [Indeks dokumentasi](../README.md) · [README proyek](../../README.md) · [Cara menguji](POSTMAN.md) · [OpenAPI](../../openapi.yaml)
 
-Dihasilkan dari OpenAPI **0.2.0** dengan `php scripts/generate-api-reference.php`. Sumber field, tipe, enum, dan contoh tersedia pada kontrak yang sama di Swagger `/docs`.
+Dihasilkan dari OpenAPI **0.2.1** dengan `php scripts/generate-api-reference.php`. Sumber field, tipe, enum, dan contoh tersedia pada kontrak yang sama di Swagger `/docs`.
 
 Keputusan demo lokal dan penyelarasan terhadap PDF spesifikasi/kontrak dijelaskan pada [Adendum E-1 v0.3](../acuan/ADENDUM_DEMO_E1_v0.3.md) ([PDF](../acuan/ADENDUM_DEMO_E1_v0.3.pdf)). NTPN dan bukti pembayaran boleh menyusul saat pencatatan Draft (API-KE01-08), tetapi wajib saat konfirmasi (API-KE01-11).
 
@@ -166,11 +166,37 @@ Konflik status atau data: invoice sudah memiliki faktur aktif (1 invoice : 1 fak
 }
 ```
 
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
 ### HTTP 503
 
-Layanan D-2 tidak dapat dihubungi sehingga invoiceId tidak dapat divalidasi
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
 
-**D2_UNAVAILABLE**: API D-2 tidak tersedia (hanya bila D2_DRIVER=http)
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
 
 ```json
 {
@@ -366,11 +392,37 @@ Konflik status atau data: invoice sudah memiliki faktur aktif (bukan faktur peng
 }
 ```
 
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
 ### HTTP 503
 
-Layanan D-2 tidak dapat dihubungi sehingga invoiceId tidak dapat divalidasi
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
 
-**D2_UNAVAILABLE**: API D-2 tidak tersedia (hanya bila D2_DRIVER=http)
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
 
 ```json
 {
@@ -466,6 +518,47 @@ Pengguna sah, akses tidak cukup (peran bukan Admin, CEO, atau COO)
     "message": "Pengguna sah, akses tidak cukup",
     "data": null,
     "errorCode": "FORBIDDEN"
+}
+```
+
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
 }
 ```
 
@@ -692,6 +785,47 @@ Konflik status atau data: faktur sudah Dibatalkan sehingga tidak dapat diubah la
 }
 ```
 
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
+}
+```
+
 ## API-KE01-06: Riwayat perubahan faktur
 
 `GET /api/v1/tax-invoices/{taxInvoiceId}/history`
@@ -787,6 +921,47 @@ ID tidak ditemukan: taxInvoiceId tidak dikenal
     "message": "Faktur pajak tidak ditemukan",
     "data": null,
     "errorCode": "TAX_INVOICE_NOT_FOUND"
+}
+```
+
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
 }
 ```
 
@@ -891,6 +1066,47 @@ Pengguna sah, akses tidak cukup (peran bukan Admin, CEO, atau COO)
 }
 ```
 
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
+}
+```
+
 ## API-KE01-08: Catat pembayaran dan pelaporan pajak
 
 `POST /api/v1/tax-payments`
@@ -978,6 +1194,8 @@ ID tidak ditemukan: masa pajak belum memiliki rekap
 
 ### HTTP 409
 
+Data unik sudah pernah digunakan (billingId atau NTPN)
+
 **DUPLICATE_BILLING_ID**: ID / kode billing sudah pernah digunakan
 
 ```json
@@ -986,6 +1204,58 @@ ID tidak ditemukan: masa pajak belum memiliki rekap
     "message": "ID / kode billing sudah pernah digunakan",
     "data": null,
     "errorCode": "DUPLICATE_BILLING_ID"
+}
+```
+
+**DUPLICATE_NTPN**: NTPN sudah pernah digunakan
+
+```json
+{
+    "code": "409",
+    "message": "NTPN sudah pernah digunakan",
+    "data": null,
+    "errorCode": "DUPLICATE_NTPN"
+}
+```
+
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
 }
 ```
 
@@ -1059,6 +1329,47 @@ Pengguna sah, akses tidak cukup (peran bukan Admin, CEO, atau COO)
     "message": "Pengguna sah, akses tidak cukup",
     "data": null,
     "errorCode": "FORBIDDEN"
+}
+```
+
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
 }
 ```
 
@@ -1145,6 +1456,47 @@ Pengguna sah, akses tidak cukup (konsumen atau pengguna tidak berwenang membaca 
 }
 ```
 
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
+}
+```
+
 ## API-KE01-11: Lengkapi pembayaran menjadi Terkonfirmasi
 
 `PATCH /api/v1/tax-payments/{taxPaymentId}`
@@ -1226,5 +1578,61 @@ ID tidak ditemukan: taxPaymentId tidak dikenal
     "message": "Catatan pembayaran tidak ditemukan",
     "data": null,
     "errorCode": "TAX_PAYMENT_NOT_FOUND"
+}
+```
+
+### HTTP 409
+
+Konflik: NTPN sudah pernah digunakan oleh catatan pembayaran lain
+
+**DUPLICATE_NTPN**: NTPN sudah pernah digunakan
+
+```json
+{
+    "code": "409",
+    "message": "NTPN sudah pernah digunakan",
+    "data": null,
+    "errorCode": "DUPLICATE_NTPN"
+}
+```
+
+### HTTP 502
+
+Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+
+**F1_INVALID_RESPONSE**
+
+```json
+{
+    "code": "502",
+    "message": "Respons identitas F-1 tidak sesuai kontrak",
+    "data": null,
+    "errorCode": "F1_INVALID_RESPONSE"
+}
+```
+
+### HTTP 503
+
+F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+
+**F1_UNAVAILABLE**
+
+```json
+{
+    "code": "503",
+    "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+    "data": null,
+    "errorCode": "F1_UNAVAILABLE"
+}
+```
+
+**D2_UNAVAILABLE**: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+
+```json
+{
+    "code": "503",
+    "message": "Layanan D-2 tidak dapat dihubungi",
+    "data": null,
+    "errorCode": "D2_UNAVAILABLE"
 }
 ```

@@ -1,7 +1,7 @@
 openapi: "3.1.0"
 info:
   title: E-1 Pencatatan e-Faktur dan pajak proyek
-  version: "0.2.0"
+  version: "0.2.1"
   contact:
     name: "Kelompok 1 / Kelas E (E-1): Pencatatan e-Faktur dan pajak proyek"
   description: "Kontrak E-1 dengan aturan rekap Rancangan Antarmuka v0.2: NORMAL dan REPLACEMENT keluaran yang masih aktif dihitung; CANCELLED dan faktur asal terganti tidak dihitung. Aturan ini menggantikan pengecualian REPLACEMENT pada audit 2026-10-16 sesuai keputusan implementasi UI. Nominal JSON string decimal tanpa pemisah ribuan. type/vendorName merupakan field tambahan skema data yang didokumentasikan; belum membuka API faktur masukan. Kesepakatan lintas kelompok tetap menunggu review. Kontrak API modul pencatatan e-Faktur dan pajak proyek, Kelompok 1 / Kelas E. Memuat 11 operasi API-KE01-01 sampai API-KE01-11; satu operasi (API-KE01-10) dibaca modul lain termasuk E-2, sisanya dipakai antarmuka web E-1. Rujukan: Daftar Kontrak API (04), Spesifikasi Fitur Minimum (01), Rancangan Antarmuka (02), Skema Data Awal (03). Path, field, enum, dan kode kesalahan berstatus usulan sampai ditinjau kelompok konsumen. Kesalahan umum di luar daftar per operasi memakai bentuk Error yang sama: 404 NOT_FOUND (rute tidak dikenal), 405 METHOD_NOT_ALLOWED, 413 PAYLOAD_TOO_LARGE, 500 INTERNAL_ERROR."
@@ -140,20 +140,10 @@ paths:
                     message: "NSFP sudah terdaftar"
                     data: null
                     errorCode: DUPLICATE_NSFP
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
         "503":
-          description: Layanan D-2 tidak dapat dihubungi sehingga invoiceId tidak dapat divalidasi
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              examples:
-                D2_UNAVAILABLE:
-                  summary: API D-2 tidak tersedia (hanya bila D2_DRIVER=http)
-                  value:
-                    code: "503"
-                    message: "Layanan D-2 tidak dapat dihubungi"
-                    data: null
-                    errorCode: D2_UNAVAILABLE
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-invoices/outgoing:
     post:
       operationId: createOutgoingTaxInvoice
@@ -312,20 +302,10 @@ paths:
                     message: "Faktur asal sudah berstatus Dibatalkan"
                     data: null
                     errorCode: TAX_INVOICE_ALREADY_CANCELLED
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
         "503":
-          description: Layanan D-2 tidak dapat dihubungi sehingga invoiceId tidak dapat divalidasi
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              examples:
-                D2_UNAVAILABLE:
-                  summary: API D-2 tidak tersedia (hanya bila D2_DRIVER=http)
-                  value:
-                    code: "503"
-                    message: "Layanan D-2 tidak dapat dihubungi"
-                    data: null
-                    errorCode: D2_UNAVAILABLE
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-invoices:
     get:
       operationId: listTaxInvoices
@@ -434,6 +414,10 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-invoices/{taxInvoiceId}:
     get:
       operationId: getTaxInvoice
@@ -632,6 +616,10 @@ paths:
                     message: "NSFP sudah terdaftar"
                     data: null
                     errorCode: DUPLICATE_NSFP
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-invoices/{taxInvoiceId}/history:
     get:
       operationId: getTaxInvoiceHistory
@@ -704,6 +692,10 @@ paths:
                     message: "Faktur pajak tidak ditemukan"
                     data: null
                     errorCode: TAX_INVOICE_NOT_FOUND
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-recaps/{taxPeriod}:
     get:
       operationId: getTaxRecap
@@ -777,6 +769,10 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-payments:
     post:
       operationId: createTaxPayment
@@ -905,6 +901,10 @@ paths:
                     message: "NTPN sudah pernah digunakan"
                     data: null
                     errorCode: DUPLICATE_NTPN
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-recaps/{taxPeriod}/export:
     get:
       operationId: exportTaxRecap
@@ -972,6 +972,10 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax/summary:
     get:
       operationId: getTaxSummary
@@ -1051,6 +1055,10 @@ paths:
                     message: "Pengguna sah, akses tidak cukup"
                     data: null
                     errorCode: FORBIDDEN
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
   /api/v1/tax-payments/{taxPaymentId}:
     patch:
       operationId: completeTaxPayment
@@ -1154,14 +1162,52 @@ paths:
                     message: "NTPN sudah pernah digunakan"
                     data: null
                     errorCode: DUPLICATE_NTPN
+        "502":
+          $ref: "#/components/responses/F1InvalidResponse"
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: "Token diterbitkan F-1 saat login dan dikirim sebagai Authorization: Bearer <token>. Layanan memeriksa tanda tangan, iss, aud, dan exp, lalu peran (kodePeran) dan izin. Pemilik kunci, masa token, dan perilaku logout ditetapkan F-1."
+      description: "Token diterbitkan F-1 saat login dan dikirim sebagai Authorization: Bearer <token>. E-1 memeriksa tanda tangan dan exp; iss/aud diperiksa bila dikonfigurasi. Profil demo resmi F-1 v0.4 memakai accountId/roleCode dan belum memiliki iss/aud; pengecualian hanya pada profil integrasi lokal yang didokumentasikan. F1_CHECK_ACCOUNT=true memeriksa status/peran terkini ke F-1, lalu E-1 menerapkan izin. Pemilik kunci, masa token, dan perilaku logout ditetapkan F-1."
   responses:
+    F1InvalidResponse:
+      description: Respons pemeriksaan identitas/peran F-1 tidak sesuai kontrak; operasi bisnis tidak dijalankan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            F1_INVALID_RESPONSE:
+              value:
+                code: "502"
+                message: "Respons identitas F-1 tidak sesuai kontrak"
+                data: null
+                errorCode: F1_INVALID_RESPONSE
+    DependencyUnavailable:
+      description: F-1 tidak tersedia saat F1_CHECK_ACCOUNT=true; pada ekstraksi/pencatatan juga dapat berarti D-2 HTTP tidak tersedia. Tidak memakai fallback data/token tiruan.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            F1_UNAVAILABLE:
+              value:
+                code: "503"
+                message: "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih"
+                data: null
+                errorCode: F1_UNAVAILABLE
+            D2_UNAVAILABLE:
+              summary: Hanya pada ekstraksi dan pencatatan yang memanggil D-2 HTTP.
+              value:
+                code: "503"
+                message: "Layanan D-2 tidak dapat dihubungi"
+                data: null
+                errorCode: D2_UNAVAILABLE
     Unauthorized:
       description: Token tidak ada atau tidak sah
       content:
@@ -2118,6 +2164,8 @@ components:
             - TAX_PAYMENT_NOT_FOUND
             - INVALID_INVOICE_ID
             - D2_UNAVAILABLE
+            - F1_UNAVAILABLE
+            - F1_INVALID_RESPONSE
             - NOT_FOUND
             - METHOD_NOT_ALLOWED
             - PAYLOAD_TOO_LARGE

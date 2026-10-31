@@ -7,11 +7,18 @@ use App\Models\PembayaranPajak;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\InvoiceScenarioSeeder;
 use Tests\TestCase;
 
-/** Karakterisasi WAPT: perilaku saat ini, bukan persyaratan menerima berkas palsu. */
+/** Regresi validasi PDF; nama klien tidak dipakai sebagai nama berkas server. */
 class UploadFilenameTamperingTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(InvoiceScenarioSeeder::class);
+    }
+
     public static function filenames(): array
     {
         return [
@@ -59,13 +66,13 @@ class UploadFilenameTamperingTest extends TestCase
         $this->post('/api/v1/tax-invoices/outgoing', [
             'invoiceId' => 'inv-demo-001',
             'eFakturFile' => $this->pdfUpload($this->fakePdf(), 'dokumen.php'),
-        ], $this->auth())->assertStatus(400)->assertJsonPath('errorCode', 'EXTRACTION_FAILED');
+        ], $this->auth())->assertStatus(400)->assertJsonPath('errorCode', 'INVALID_FILE');
 
         $this->assertSame([], Storage::disk('local')->allFiles());
         $this->assertDatabaseCount('faktur_pajak', 0);
     }
 
-    public function test_penanda_pdf_palsu_lolos_pada_ebilling_dan_bukti_saat_create(): void
+    public function test_penanda_pdf_palsu_ditolak_pada_ebilling_dan_bukti_saat_create(): void
     {
         $this->createFaktur();
         $binary = $this->fakePdf();
@@ -76,26 +83,28 @@ class UploadFilenameTamperingTest extends TestCase
             'paymentProofFile' => $this->pdfUpload($binary, 'bukti.pdf.php'),
         ], $this->auth());
 
-        $response->assertOk()->assertJsonPath('data.status', 'CONFIRMED');
-        $payment = PembayaranPajak::query()->findOrFail($response->json('data.taxPaymentId'));
-        $this->assertStoredAsPdf($payment->e_billing_uri, $binary);
-        $this->assertStoredAsPdf($payment->payment_proof_uri, $binary);
+        $response->assertStatus(400)->assertJsonPath('errorCode', 'INVALID_PAYMENT');
+        $this->assertDatabaseCount('pembayaran_pajak', 0);
+        $this->assertDatabaseCount('riwayat_perubahan_pembayaran', 0);
     }
 
-    public function test_penanda_pdf_palsu_lolos_pada_bukti_saat_complete(): void
+    public function test_penanda_pdf_palsu_ditolak_pada_bukti_saat_complete(): void
     {
         $this->createFaktur();
         $payment = $this->createPayment('2026-11', '11000000.00');
         $binary = $this->fakePdf();
 
+        $files = Storage::disk('local')->allFiles();
         $this->patchMultipart('/api/v1/tax-payments/'.$payment['taxPaymentId'], [
             'ntpn' => 'h7n3w9k2p6',
         ], [
             'paymentProofFile' => $this->pdfUpload($binary, 'bukti.php'),
-        ])->assertOk()->assertJsonPath('data.status', 'CONFIRMED');
+        ])->assertStatus(400)->assertJsonPath('errorCode', 'INVALID_PAYMENT');
 
         $stored = PembayaranPajak::query()->findOrFail($payment['taxPaymentId']);
-        $this->assertStoredAsPdf($stored->payment_proof_uri, $binary);
+        $this->assertNull($stored->payment_proof_uri);
+        $this->assertSame('INCOMPLETE', $stored->status);
+        $this->assertSame($files, Storage::disk('local')->allFiles());
     }
 
     private function fakePdf(): string

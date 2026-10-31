@@ -27,14 +27,20 @@ return [
     | dikonfigurasi lewat environment.
     */
     'f1' => [
+        'api_enabled' => (bool) env('F1_API_ENABLED', false),
+        'base_url' => env('F1_BASE_URL', 'http://127.0.0.1:4100'),
+        'login_path' => env('F1_LOGIN_PATH', '/auth/login'),
+        'role_path' => env('F1_ROLE_PATH', '/accounts/{accountId}/role'),
+        'timeout' => (int) env('F1_TIMEOUT', 5),
+        'check_account' => (bool) env('F1_CHECK_ACCOUNT', false),
         'algo' => env('F1_JWT_ALGO', 'HS256'),
         'secret' => env('F1_JWT_SECRET'),
         'public_key_path' => env('F1_JWT_PUBLIC_KEY_PATH'),
         'issuer' => env('F1_JWT_ISSUER'),
         'audience' => env('F1_JWT_AUDIENCE'),
         'leeway' => (int) env('F1_JWT_LEEWAY', 30),
-        'claim_akun_id' => env('F1_CLAIM_AKUN_ID', 'akunId'),
-        'claim_role' => env('F1_CLAIM_ROLE', 'kodePeran'),
+        'claim_akun_id' => env('F1_CLAIM_AKUN_ID', 'accountId'),
+        'claim_role' => env('F1_CLAIM_ROLE', 'roleCode'),
     ],
 
     /*

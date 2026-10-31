@@ -1,0 +1,165 @@
+{
+  "createdAtUtc": "2026-10-31T08:18:01.251Z",
+  "result": "PASS",
+  "secretScan": "PASS",
+  "upstreamTreesClean": true,
+  "pagesVisuallyReviewed": 6,
+  "formatChecks": 197,
+  "files": [
+    {
+      "file": "aktif-utama.json",
+      "sha256": "d012e8026e0490f935a606281ff009bfa75c0309cb59bf0b94e5cc9f64a42c7d",
+      "bytes": 7068
+    },
+    {
+      "file": "bukti-http.json",
+      "sha256": "b86e70d49e164d8650dcf7bb38d931ad330643896efac9785ddd29bdc7dec69e",
+      "bytes": 84401
+    },
+    {
+      "file": "d2-requests.ndjson",
+      "sha256": "af85b71cf06aed2f41d4a88d2d56b857a8e2f708fa560eb3d2cbae831a882bd1",
+      "bytes": 4190
+    },
+    {
+      "file": "E1-09-PDF.pdf",
+      "sha256": "0057e8a8596e920d8b7e2fa41134066606106beb1cacc36c645b26a553e98ed6",
+      "bytes": 3543
+    },
+    {
+      "file": "E1-09-XLSX.xlsx",
+      "sha256": "8f52f4e666bef3574541aa1738c57e7cec7293a0c7c8c6ff60eb8c4da3021dd2",
+      "bytes": 7833
+    },
+    {
+      "file": "f1-requests.ndjson",
+      "sha256": "304200c395aad9583d7b02927c29d5d5e6a05828b3b0795d970157addd23855d",
+      "bytes": 12734
+    },
+    {
+      "file": "input/bukti-pembayaran.pdf",
+      "sha256": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349",
+      "bytes": 1542
+    },
+    {
+      "file": "input/e-billing.pdf",
+      "sha256": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+      "bytes": 1515
+    },
+    {
+      "file": "input/efaktur-pengganti.pdf",
+      "sha256": "6278b07dbaeaea06e5347d82abd74b1bf0cd7a0095caa180d1c3362d30344af3",
+      "bytes": 2698
+    },
+    {
+      "file": "input/efaktur.pdf",
+      "sha256": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+      "bytes": 2697
+    },
+    {
+      "file": "input/invoice-d2.json",
+      "sha256": "e6e828cc7641357f604fd7979cccd98323c8e8c08217461f9728ecc5048b9f82",
+      "bytes": 803
+    },
+    {
+      "file": "input/manifest.json",
+      "sha256": "cc764c77ee0dcaf07035161cb3ea527002709e38442ec0657ce2e61d0320181e",
+      "bytes": 1095
+    },
+    {
+      "file": "konkurensi.json",
+      "sha256": "5f8f81fed66220e6fc814f8b7fbf2afb95a109f73b707758ccc8d21e5dd6afc0",
+      "bytes": 703
+    },
+    {
+      "file": "korelasi.json",
+      "sha256": "b7f49216d3c943ce4f428f1e8729cf4b4b2c18e5bc4600997ba132f2cd27c2f6",
+      "bytes": 3673
+    },
+    {
+      "file": "main-setup/bukti-pembayaran.pdf",
+      "sha256": "f2909d8c08984bbb59e71fa87ca8b82f4291bbd3b661f94cc2231d964ab6483b",
+      "bytes": 1543
+    },
+    {
+      "file": "main-setup/e-billing.pdf",
+      "sha256": "15465af02b9501b2ff6756090a5377437bda930f94d814b02a653b8f978e6e9d",
+      "bytes": 1514
+    },
+    {
+      "file": "main-setup/efaktur-pengganti.pdf",
+      "sha256": "8d521162acf52ef1c963afa637ccf17de7411d27f9429c198bc346b4c192e4e3",
+      "bytes": 2693
+    },
+    {
+      "file": "main-setup/efaktur.pdf",
+      "sha256": "71dd152a6f551f225373336d80d525a740e0fa99a1a7369c233adfdb13cff80a",
+      "bytes": 2693
+    },
+    {
+      "file": "main-setup/invoice-d2.json",
+      "sha256": "72381dac87b2fd37175065a197ca674ec3148974207e5fc0d8dc71f52f835879",
+      "bytes": 795
+    },
+    {
+      "file": "main-setup/manifest.json",
+      "sha256": "591ec46cba940bfe97666fc1955b5af31998251d89659a5a8a25f5841d17e074",
+      "bytes": 1103
+    },
+    {
+      "file": "pemeriksaan-format.json",
+      "sha256": "e229032123d776b0ae47a1e137a3db712d668619418c4f31bc84ed4436665a8c",
+      "bytes": 23189
+    },
+    {
+      "file": "pemulihan.json",
+      "sha256": "b68f7abdaa9fd0d0efe2cbeb802e653e08b5b38346a2ecfce1ab62074b3bc460",
+      "bytes": 605
+    },
+    {
+      "file": "README.md",
+      "sha256": "88c7e51075b97c52966fe2629d5adeeef4f2a598a34c9405f5bf0f42c45a2b16",
+      "bytes": 2204
+    },
+    {
+      "file": "regresi.json",
+      "sha256": "2e4e39b70e6787475a80fcc465af8793deffe2eed1b96ec253f8d6d36e425f4a",
+      "bytes": 354
+    },
+    {
+      "file": "UI-01-pratinjau.png",
+      "sha256": "cce624ec44a813c001a4c118fe6c0efb1e0bcdd49ff0b73f4ebfef70ea5a1ddd",
+      "bytes": 75742
+    },
+    {
+      "file": "UI-02-tersimpan.png",
+      "sha256": "3d62bd2b4f16e3d1801cf2f87cc1ca032cc3d798364e26cd8f67328722bbf76b",
+      "bytes": 85773
+    },
+    {
+      "file": "UI-03-d2-putus.png",
+      "sha256": "1a3b972296300f921ad570a05670680cf64c3596639172b43e42fba09bab38bb",
+      "bytes": 65968
+    },
+    {
+      "file": "UI-04-utama-siap-uji.png",
+      "sha256": "d2bfc05476c81a82d786bcb58d5f713ce562ecb4f222c203eb49e6b8e41ada97",
+      "bytes": 77073
+    },
+    {
+      "file": "UI-05-login-utama.png",
+      "sha256": "b80eb39f470601f194b1e53a317769e04195cf6c8e22636c5ea7b92c8a559ee7",
+      "bytes": 34892
+    },
+    {
+      "file": "validasi-kontrak.json",
+      "sha256": "1d9119f242d0c2ce800eba6a9bdfc5620860e7b55269dad0837a2bbc9f2f790f",
+      "bytes": 3075
+    },
+    {
+      "file": "versi-sumber.json",
+      "sha256": "ff5f0b3ffd11e4447060a8f51ede97841a9e9667a3dc68782ee8c57ba0408fa0",
+      "bytes": 44908
+    }
+  ]
+}

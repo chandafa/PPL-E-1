@@ -1,3 +1,5 @@
+> Pembaruan 31 Oktober 2026: AUD-01 (rantai pengganti), AUD-02 (refresh rekap), AUD-03 (batas agregat), dan AUD-04 (struktur PDF) telah diperbaiki di E-1. Lihat [hasil integrasi dan regresi](integrasi/README.md). Keunikan NTPN telah ditolak 409. OBS-02 tentang koreksi setelah pembayaran tetap memerlukan keputusan kebijakan. Isi berikut dipertahankan sebagai bukti historis, bukan status kerentanan terbaru.
+
 Engagement: Pentest/WAPT pada proyek PPL-E-1.
 
 # Uji perubahan ekstensi upload

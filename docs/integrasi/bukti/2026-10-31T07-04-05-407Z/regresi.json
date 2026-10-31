@@ -1,0 +1,12 @@
+{
+  "tool": "phpunit",
+  "result": "passed",
+  "tests": 219,
+  "passed": 219,
+  "assertions": 1824,
+  "duration_ms": 72326,
+  "observedAtUtc": "2026-10-31T07:17:18.314Z",
+  "database": "e1_integrasi_20261031_070346_cac018_tests",
+  "command": "php artisan test --log-junit <audit>/regression-contract-junit.xml",
+  "scope": "Suite lokal PostgreSQL; Http::fake pada tes adapter. Bukti real HTTP terpisah dalam bukti-http.json."
+}

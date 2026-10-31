@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\FakturPajak;
+use App\Models\Invoice;
 use App\Models\PembayaranPajak;
 use App\Services\EFaktur\EFakturPdfParser;
 use App\Services\Tax\TaxPaymentService;
@@ -29,19 +30,19 @@ class DemoSeederTest extends TestCase
         $this->assertSame([], array_intersect(array_column($first->json('data.items'), 'taxInvoiceId'), array_column($second->json('data.items'), 'taxInvoiceId')));
         foreach (
             [
-                '2026-10' => [25, '16940000.00', '-11000000.00', 'CONFIRMED'],
-                '2026-11' => [3, '46750000.00', '0.00', 'INCOMPLETE'],
-                '2026-12' => [2, '19800000.00', '-19800000.00', 'NOT_RECORDED'],
-                '2027-01' => [1, '1100000.00', '-100000.00', 'CONFIRMED'],
+                '2026-10' => [25, '16940000.00', '0.00', 'CONFIRMED'],
+                '2026-11' => [3, '46750000.00', '0.00', 'CONFIRMED'],
+                '2026-12' => [2, '19800000.00', '0.00', 'CONFIRMED'],
+                '2027-01' => [1, '1100000.00', '0.00', 'CONFIRMED'],
                 '2027-02' => [1, '1100000.00', '0.00', 'CONFIRMED'],
             ] as $period => [$count, $ppn, $difference, $status]
         ) {
-            $this->getJson('/api/v1/tax-recaps/' . $period, $this->auth())->assertOk()
+            $this->getJson('/api/v1/tax-recaps/'.$period, $this->auth())->assertOk()
                 ->assertJsonPath('data.recap.invoiceCount', $count)->assertJsonPath('data.recap.totalPpn', $ppn)
                 ->assertJsonPath('data.recap.paymentDifference', $difference)->assertJsonPath('data.recap.paymentStatus', $status);
         }
-        $this->getJson('/api/v1/tax-recaps/2026-10', $this->auth())->assertJsonPath('data.recap.totalPpnbm', '0.00')->assertJsonCount(2, 'data.payments');
-        $this->assertSame(41, count(Storage::disk('local')->allFiles('tax')));
+        $this->getJson('/api/v1/tax-recaps/2026-10', $this->auth())->assertJsonPath('data.recap.totalPpnbm', '0.00')->assertJsonCount(1, 'data.payments');
+        $this->assertSame(42, count(Storage::disk('local')->allFiles('tax')));
         foreach (FakturPajak::all() as $invoice) {
             Storage::disk('local')->assertExists(substr($invoice->pdf_uri, strlen('/files/')));
             $pdf = app(EFakturPdfParser::class)->parse(Storage::disk('local')->get(substr($invoice->pdf_uri, strlen('/files/'))));
@@ -58,7 +59,7 @@ class DemoSeederTest extends TestCase
         }
 
         $invoice = FakturPajak::where('invoice_id', 'inv-demo-sample')->firstOrFail();
-        $this->patchJson('/api/v1/tax-invoices/' . $invoice->tax_invoice_id, ['changes' => ['ppnbm' => '500.00'], 'note' => 'Edit pengguna'], $this->auth())->assertOk();
+        $this->patchJson('/api/v1/tax-invoices/'.$invoice->tax_invoice_id, ['changes' => ['ppnbm' => '500.00'], 'note' => 'Edit pengguna'], $this->auth())->assertOk();
         $snapshot = [];
         foreach (['faktur_pajak', 'item_faktur', 'riwayat_perubahan_faktur', 'pembayaran_pajak', 'rekap_pajak_bulanan'] as $table) {
             $snapshot[$table] = DB::table($table)->get()->toJson();
@@ -66,36 +67,36 @@ class DemoSeederTest extends TestCase
         $files = Storage::disk('local')->allFiles();
         $this->seed(DemoSeeder::class);
         foreach ($snapshot as $table => $json) {
-            $this->assertSame($json, DB::table($table)->get()->toJson(), $table . ' tidak boleh diubah saat seeding ulang');
+            $this->assertSame($json, DB::table($table)->get()->toJson(), $table.' tidak boleh diubah saat seeding ulang');
         }
         $this->assertSame($files, Storage::disk('local')->allFiles());
     }
 
     public function test_pdf_siap_pakai_bisa_diekstrak_disimpan_dan_diganti_tanpa_konflik_nsfp(): void
     {
-        $relative = 'storage/framework/testing/demo-samples-' . Str::uuid();
+        $relative = 'storage/framework/testing/demo-samples-'.Str::uuid();
         $directory = base_path($relative);
         try {
             $this->artisan('demo:samples', ['--path' => $relative])->assertSuccessful();
-            $this->assertCount(11, glob($directory . '/*.pdf'));
-            $manifest = json_decode(file_get_contents($directory . '/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
+            $this->assertCount(4, glob($directory.'/*.pdf'));
+            $manifest = json_decode(file_get_contents($directory.'/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertCount(2, $manifest);
             $this->assertCount(2, array_unique(array_column($manifest, 'nsfp')));
-            $validation = json_decode(file_get_contents($directory . '/validation.json'), true, flags: JSON_THROW_ON_ERROR);
+            $validation = json_decode(file_get_contents($directory.'/validation.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertSame('PASSED', $validation['result']);
-            $this->assertSame(9, $validation['attachmentCount']);
+            $this->assertSame(2, $validation['attachmentCount']);
             $invoiceId = 'inv-demo-sample';
             $original = $this->post('/api/v1/tax-invoices/outgoing', [
                 'invoiceId' => $invoiceId,
-                'eFakturFile' => $this->pdfUpload(file_get_contents($directory . '/efaktur-' . $invoiceId . '.pdf')),
+                'eFakturFile' => $this->pdfUpload(file_get_contents($directory.'/efaktur-'.$invoiceId.'.pdf')),
             ], $this->auth())->assertOk();
-            $replacementFile = 'efaktur-' . $invoiceId . '-pengganti.pdf';
+            $replacementFile = 'efaktur-'.$invoiceId.'-pengganti.pdf';
             $replacement = $this->post('/api/v1/tax-invoices/outgoing', [
                 'invoiceId' => $invoiceId,
                 'replacesTaxInvoiceId' => $original->json('data.taxInvoiceId'),
-                'eFakturFile' => $this->pdfUpload(file_get_contents($directory . '/' . $replacementFile)),
+                'eFakturFile' => $this->pdfUpload(file_get_contents($directory.'/'.$replacementFile)),
             ], $this->auth())->assertOk()->assertJsonPath('data.status', 'REPLACEMENT');
-            $this->getJson('/api/v1/tax-invoices/' . $original->json('data.taxInvoiceId'), $this->auth())
+            $this->getJson('/api/v1/tax-invoices/'.$original->json('data.taxInvoiceId'), $this->auth())
                 ->assertJsonPath('data.replacedByTaxInvoiceId', $replacement->json('data.taxInvoiceId'));
         } finally {
             File::deleteDirectory($directory);
@@ -135,24 +136,24 @@ class DemoSeederTest extends TestCase
 
     public function test_pdf_generator_uses_current_d2_invoice_dates_amounts_and_nsfp_year(): void
     {
-        $relative = 'storage/framework/testing/demo-check-' . Str::uuid();
+        $relative = 'storage/framework/testing/demo-check-'.Str::uuid();
         $directory = base_path($relative);
         try {
             $this->artisan('demo:samples', ['--path' => $relative])->assertSuccessful();
             $catalog = DemoDataset::invoices();
-            $manifest = json_decode(file_get_contents($directory . '/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
+            $manifest = json_decode(file_get_contents($directory.'/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertCount(1, $catalog);
             foreach ($manifest as $sample) {
                 $reference = $catalog[$sample['invoiceId']];
                 $this->assertSame($reference['invoiceDate'], $sample['invoiceDate']);
                 $this->assertSame(substr($reference['invoiceDate'], 0, 7), $sample['taxPeriod']);
                 $this->assertSame(substr($reference['invoiceDate'], 2, 2), substr($sample['nsfp'], 8, 2));
-                $this->assertSame(hash_file('sha256', $directory . '/' . $sample['file']), $sample['sha256']);
+                $this->assertSame(hash_file('sha256', $directory.'/'.$sample['file']), $sample['sha256']);
             }
             $sample = $manifest[0];
             $this->post('/api/v1/tax-invoices/extractions', [
                 'invoiceId' => $sample['invoiceId'],
-                'eFakturFile' => $this->pdfUpload(file_get_contents($directory . '/' . $sample['file'])),
+                'eFakturFile' => $this->pdfUpload(file_get_contents($directory.'/'.$sample['file'])),
             ], $this->auth())->assertOk()
                 ->assertJsonPath('data.taxInvoiceDate', $sample['invoiceDate'])
                 ->assertJsonPath('data.taxPeriod', $sample['taxPeriod'])
@@ -170,10 +171,10 @@ class DemoSeederTest extends TestCase
 
     public function test_empty_d2_catalog_fails_before_sample_files_are_published(): void
     {
-        $relative = 'storage/framework/testing/empty-d2-' . Str::uuid();
+        $relative = 'storage/framework/testing/empty-d2-'.Str::uuid();
         $directory = base_path($relative);
         try {
-            \App\Models\Invoice::query()->delete();
+            Invoice::query()->delete();
             $this->artisan('demo:samples', ['--path' => $relative])->assertFailed();
             $this->assertDirectoryDoesNotExist($directory);
             $this->assertDatabaseCount('faktur_pajak', 0);

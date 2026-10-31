@@ -124,13 +124,13 @@ php artisan demo:samples
 | `php artisan key:generate` | Mengisi `APP_KEY` pada `.env` |
 | `php artisan config:clear` | Memuat konfigurasi `.env` terbaru |
 | `php artisan migrate` | Membuat tabel yang diperlukan aplikasi |
-| `php artisan db:seed --class=ModulD2DemoSeeder` | Menambahkan 31 invoice sumber D-2 yang diperlukan oleh dataset demo E-1; invoice UI 006/007 tetap tersedia |
+| `php artisan db:seed` | Mengisi referensi snapshot D-2 lokal: 3 kontrak, 4 termin, 1 parameter pajak, dan invoice `inv-demo-sample` |
 | `php artisan db:seed --class=DemoSeeder` | Membuat 32 faktur pajak, 5 pembayaran, dan 5 masa pajak demo |
 | `php artisan demo:samples` | Membuat PDF contoh dan memeriksa kembali hasil ekstraksinya |
 
 PDF tersedia di **`docs/postman/samples/`**. Gunakan `manifest.json` untuk mencocokkan PDF dengan invoice, tanggal, dan masa pajak. Hasil pemeriksaannya tercatat di `validation.json`.
 
-Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Untuk mencoba pencatatan baru setelah seeding, pilih `inv-demo-006` dan unggah `efaktur-inv-demo-006.pdf`. Skenario lain tersedia di [panduan data demo](docs/panduan/DEMO_SEEDER.md).
+Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Untuk mencoba pencatatan baru, gunakan database baru setelah `db:seed` tanpa `DemoSeeder`, lalu pilih `inv-demo-sample` dan PDF pasangannya. `DemoSeeder` mengisi seluruh 32 faktur contoh, sehingga skenario berikutnya memakai koreksi/pengganti. Lihat [panduan data demo](docs/panduan/DEMO_SEEDER.md).
 
 ### 6. Jalankan aplikasi
 
@@ -147,6 +147,12 @@ Biarkan terminal tersebut berjalan, lalu buka:
 | **Kontrak OpenAPI** | http://127.0.0.1:8080/docs/openapi.yaml |
 
 `composer serve` sudah mengatur batas unggah PHP agar PDF hingga 5 MB dapat diterima aplikasi. Untuk menghentikan server, tekan **Ctrl+C**.
+
+## Integrasi dengan repo F-1 dan D-2
+
+Setelah dependensi ketiga repo dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8080/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada .env utama dan menjalankan ketiga layanan. Untuk berhenti, gunakan **composer integration:stop**.
+
+[Langkah uji kelompok dan PDF siap pakai](docs/integrasi/UJI_KELOMPOK.md) tersedia agar tim langsung mencoba alurnya. [Panduan lengkap dan hasil pengujian](docs/integrasi/README.md) menjelaskan profil utama serta suite terpisah. [Temuan F-1/D-2](docs/integrasi/TEMUAN_F1_D2.md) dicatat tanpa mengubah kode kedua kelompok.
 
 ## Alur proses
 

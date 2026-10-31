@@ -1,0 +1,235 @@
+{
+  "observedAtUtc": "2026-10-31T07:52:25.209Z",
+  "e1BaseUrl": "http://127.0.0.1:8080",
+  "checks": [
+    {
+      "name": "Konfigurasi .env utama memakai F-1 dan HttpInvoiceProvider, bukan login/sumber mock E-1",
+      "result": "PASS"
+    },
+    {
+      "name": "Login E-1 utama benar-benar menerima JWT F-1",
+      "result": "PASS"
+    },
+    {
+      "name": "Data transaksi utama dapat dibaca dengan akun F-1",
+      "result": "PASS"
+    },
+    {
+      "name": "Invoice contoh untuk uji manual dibuat lewat API resmi D-2 pada DB integrasi",
+      "result": "PASS"
+    },
+    {
+      "name": "Invoice D-2 contoh dibaca ulang sesuai tanggal dan proyek",
+      "result": "PASS"
+    },
+    {
+      "name": "Endpoint login demo E-1 dinonaktifkan",
+      "result": "PASS"
+    },
+    {
+      "name": "Halaman utama menyediakan form F-1 tanpa form akun demo E-1",
+      "result": "PASS"
+    },
+    {
+      "name": "Browser utama memanggil invoice D-2 dan menampilkan PDF sesuai Desember, PPN, PPnBM",
+      "result": "PASS"
+    },
+    {
+      "name": "Contoh siap disimpan oleh kelompok dari form E-1 utama",
+      "result": "PASS"
+    },
+    {
+      "name": "Data lama tetap: faktur_pajak",
+      "result": "PASS"
+    },
+    {
+      "name": "Data lama tetap: item_faktur",
+      "result": "PASS"
+    },
+    {
+      "name": "Data lama tetap: riwayat_perubahan_faktur",
+      "result": "PASS"
+    },
+    {
+      "name": "Data lama tetap: pembayaran_pajak",
+      "result": "PASS"
+    },
+    {
+      "name": "Data lama tetap: rekap_pajak_bulanan",
+      "result": "PASS"
+    },
+    {
+      "name": "Konfigurasi/data utama tetap: databaseIdentityHash",
+      "result": "PASS"
+    },
+    {
+      "name": "Konfigurasi/data utama tetap: appKeyHash",
+      "result": "PASS"
+    },
+    {
+      "name": "Konfigurasi/data utama tetap: storageHash",
+      "result": "PASS"
+    },
+    {
+      "name": "Konfigurasi/data utama tetap: files",
+      "result": "PASS"
+    }
+  ],
+  "steps": [
+    {
+      "id": "M-01",
+      "requestId": "E1-MAIN-M-01-3157eed9-7457-454b-8daf-5858e5d856b7",
+      "url": "http://127.0.0.1:8080/api/auth/f1/login",
+      "method": "POST",
+      "status": 200,
+      "response": {
+        "code": "200",
+        "message": "Login melalui F-1 berhasil",
+        "data": {
+          "accessToken": "[REDACTED]",
+          "tokenType": "Bearer",
+          "expiresIn": 3600,
+          "accountId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+          "roleCode": "ADMIN"
+        }
+      }
+    },
+    {
+      "id": "M-02",
+      "requestId": "E1-MAIN-M-02-d1a423fb-1540-4866-800c-1ee262571bca",
+      "url": "http://127.0.0.1:8080/api/v1/tax-invoices?pageSize=1",
+      "method": "GET",
+      "status": 200,
+      "response": {
+        "code": "200",
+        "pagination": {
+          "page": 1,
+          "pageSize": 1,
+          "totalItems": 32
+        }
+      }
+    },
+    {
+      "id": "M-03",
+      "requestId": "E1-MAIN-M-03-23b12557-34b7-4476-ad61-176c05cb2c39",
+      "url": "http://127.0.0.1:8026/api/v1/invoices",
+      "method": "POST",
+      "status": 201,
+      "response": {
+        "status": "success",
+        "message": "Invoice INV-2026-0003 berhasil dibuat",
+        "data": {
+          "invoiceId": "inv-6ae59e3b342a5",
+          "invoiceNumber": "INV-2026-0003",
+          "terminId": "trm-demo-002",
+          "invoiceDate": "2026-12-15",
+          "dppAmount": "150000000.00",
+          "ppnAmount": "16500000.00",
+          "pphAmount": "3000000.00",
+          "totalAmount": "163500000.00",
+          "taxParamId": "pjk-demo-001",
+          "status": "TERTAGIH",
+          "createdBy": "emp-demo-012",
+          "createdAt": "2026-10-31T07:52:27.000000Z"
+        }
+      }
+    },
+    {
+      "id": "M-04",
+      "requestId": "E1-MAIN-M-04-752e8676-895a-4d74-b0ae-cb4e52971552",
+      "url": "http://127.0.0.1:8026/api/v1/invoices/inv-6ae59e3b342a5",
+      "method": "GET",
+      "status": 200,
+      "response": {
+        "status": "success",
+        "message": "Detail invoice berhasil dimuat",
+        "data": {
+          "invoiceId": "inv-6ae59e3b342a5",
+          "invoiceNumber": "INV-2026-0003",
+          "invoiceDate": "2026-12-15",
+          "dppAmount": "150000000.00",
+          "ppnAmount": "16500000.00",
+          "pphAmount": "3000000.00",
+          "totalAmount": "163500000.00",
+          "status": "TERTAGIH",
+          "terkait": {
+            "terminId": "trm-demo-002",
+            "terminNumber": 2,
+            "contractId": "ktr-demo-001",
+            "contractNumber": "KTR/2026/001",
+            "projectId": "prj-demo-001",
+            "poStatus": "PO_ADA"
+          },
+          "riwayat": {
+            "0": {
+              "status": "TERTAGIH",
+              "changedAt": "2026-10-31T07:52:27.000000Z",
+              "changedBy": "emp-demo-012",
+              "note": "Invoice diterbitkan oleh petugas keuangan"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "M-05",
+      "requestId": "E1-MAIN-M-05-6cbe0fe7-1d36-4647-8856-e36c116799a8",
+      "url": "http://127.0.0.1:8080/api/dev/f1/login",
+      "method": "POST",
+      "status": 404,
+      "response": {
+        "code": "404",
+        "message": "Sumber daya tidak ditemukan",
+        "data": null,
+        "errorCode": "NOT_FOUND"
+      }
+    },
+    {
+      "id": "M-06",
+      "requestId": "E1-MAIN-UI-c884f760-2847-4c9f-b725-a82094c5bfb1",
+      "url": "http://127.0.0.1:8080/api/v1/tax-invoices/extractions",
+      "method": "POST",
+      "status": 200,
+      "response": {
+        "code": "200",
+        "message": "Hasil ekstraksi (belum tersimpan)",
+        "data": {
+          "invoiceId": "inv-6ae59e3b342a5",
+          "taxInvoiceNumber": "010.000-26.66000101",
+          "taxInvoiceDate": "2026-12-15",
+          "taxPeriod": "2026-12",
+          "dpp": "150000000.00",
+          "ppn": "16500000.00",
+          "ppnbm": "0.00",
+          "items": [
+            {
+              "itemCode": "620100",
+              "itemName": "Jasa implementasi ERP proyek",
+              "saleReplacementAdvanceTermAmount": "150000000.00",
+              "discountAmount": "0.00",
+              "receivedAdvanceAmount": "0.00"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "observedAtUtc": "2026-10-31T07:52:25+00:00",
+    "environment": "local",
+    "f1Enabled": true,
+    "checkAccount": true,
+    "f1BaseUrl": "http://127.0.0.1:4100",
+    "claimAccount": "accountId",
+    "claimRole": "roleCode",
+    "d2Driver": "http",
+    "d2BaseUrl": "http://127.0.0.1:8026",
+    "provider": "App\\Services\\Invoices\\HttpInvoiceProvider",
+    "devLogin": false
+  },
+  "manualInvoiceId": "inv-6ae59e3b342a5",
+  "existingDataPreserved": true,
+  "mainE1WritePerformed": false,
+  "scope": "Login, baca transaksi lama dan pratinjau PDF dari E-1 utama 8080. Invoice fiktif dibuat di D-2 DB integrasi lewat API resmi; faktur utama belum disimpan agar kelompok dapat menguji sendiri. Data dan berkas E-1 lama tetap; empat migrasi E-1 menambah schema/index yang tertinggal tanpa mengubah baris lama.",
+  "result": "PASS"
+}

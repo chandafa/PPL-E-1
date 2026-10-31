@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 /**
  * Pemanggil layanan D-2 sebenarnya (D2_DRIVER=http). Path dan bentuk respons
@@ -45,6 +46,19 @@ class HttpInvoiceProvider implements InvoiceProvider
 
         if (! is_array($row) || ($row['invoiceId'] ?? null) !== $invoiceId) {
             throw $this->unavailable();
+        }
+
+        if (isset($row['terkait']) && ! is_array($row['terkait'])) {
+            throw $this->unavailable();
+        }
+        $related = $row['terkait'] ?? [];
+        foreach (['projectId', 'projectName', 'clientId', 'clientName'] as $field) {
+            if (isset($related[$field])) {
+                if (! is_string($related[$field]) || (isset($row[$field]) && $row[$field] !== $related[$field])) {
+                    throw $this->unavailable();
+                }
+                $row[$field] = $related[$field];
+            }
         }
 
         foreach (['invoiceNumber', 'invoiceDate', 'status', 'projectId', 'projectName', 'clientId', 'clientName', 'dppAmount', 'ppnAmount'] as $field) {
@@ -97,7 +111,11 @@ class HttpInvoiceProvider implements InvoiceProvider
 
     private function client(): PendingRequest
     {
-        $client = Http::acceptJson()->timeout($this->timeout);
+        // Jangan meneruskan Bearer ke tujuan redirect dari upstream.
+        $client = Http::acceptJson()->withoutRedirecting()->timeout($this->timeout);
+        $requestId = (string) request()->header('X-Request-ID', '');
+        $client = $client->withHeaders(['X-Request-ID' => preg_match('/^[A-Za-z0-9._:-]{1,100}$/D', $requestId) === 1
+            ? $requestId : (string) Str::uuid7()]);
 
         return $this->bearerToken !== null ? $client->withToken($this->bearerToken) : $client;
     }
