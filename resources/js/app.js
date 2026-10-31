@@ -237,35 +237,6 @@ function configureMenu() {
     };
 }
 
-function tokenIdentity(token) {
-    try {
-        const payload = token
-            .split(".")[1]
-            .replace(/-/g, "+")
-            .replace(/_/g, "/");
-        const data = JSON.parse(
-            new TextDecoder().decode(
-                Uint8Array.from(
-                    atob(
-                        payload.padEnd(Math.ceil(payload.length / 4) * 4, "="),
-                    ),
-                    (c) => c.charCodeAt(0),
-                ),
-            ),
-        );
-        return {
-            account: data[config.claimAccount] || data.sub || "Pengguna F-1",
-            role:
-                data[config.claimRole] ||
-                data.role ||
-                data.peran ||
-                "Pengguna berwenang",
-        };
-    } catch {
-        return { account: "Pengguna F-1", role: "Pengguna berwenang" };
-    }
-}
-
 async function loginPage() {
     async function enter(token) {
         sessionStorage.setItem(
@@ -1424,9 +1395,9 @@ async function start() {
         return;
     }
     try {
-        await api("/tax-invoices?pageSize=1");
-        const identity = tokenIdentity(token);
-        $("[data-account]").textContent = identity.account;
+        const identity = await api("/api/ui/profile");
+        $("[data-account]").textContent = identity.name;
+        $("[data-account]").title = identity.name;
         $("[data-role]").textContent = identity.role;
         $("#page-content").hidden = false;
         const message = sessionStorage.getItem("e1.flash");

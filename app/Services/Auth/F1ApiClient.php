@@ -99,6 +99,29 @@ class F1ApiClient
         return new F1Identity($data['accountId'], $data['roleCode']);
     }
 
+    /** Profil hanya untuk tampilan; identitas dan hak akses tetap dari token/middleware. */
+    public function displayName(F1Identity $identity, string $token): string
+    {
+        $fallback = 'Pengguna F-1';
+        if (! config('e1.f1.api_enabled')) {
+            return $fallback;
+        }
+        $path = str_replace('{accountId}', rawurlencode($identity->akunId), (string) config('e1.f1.profile_path'));
+        try {
+            $response = $this->client()->withToken($token)->get($this->baseUrl().$path);
+        } catch (ConnectionException) {
+            return $fallback;
+        }
+        $data = $response->json();
+        if (! $response->successful() || ! is_array($data)
+            || ($data['accountId'] ?? null) !== $identity->akunId
+            || ! is_string($data['name'] ?? null) || trim($data['name']) === '') {
+            return $fallback;
+        }
+
+        return trim($data['name']);
+    }
+
     private function client(): PendingRequest
     {
         return Http::acceptJson()->asJson()->withoutRedirecting()->timeout((int) config('e1.f1.timeout', 5))

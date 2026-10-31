@@ -150,7 +150,23 @@ Biarkan terminal tersebut berjalan, lalu buka:
 
 ## Integrasi dengan repo F-1 dan D-2
 
-Untuk anggota yang baru memasang proyek, ikuti [setup integrasi di laptop masing-masing](docs/integrasi/SETUP_ANGGOTA.md). Perintah `composer integration` otomatis mengambil F-1/D-2 ke folder `../_integrasi`, memasang dependensi keduanya, lalu menjalankan tiga layanan.
+Untuk anggota yang baru memasang proyek, ikuti [setup integrasi di laptop masing-masing](docs/integrasi/SETUP_ANGGOTA.md). Perintah `php artisan integration` memasang dependensi F-1/D-2 lalu menjalankan tiga layanan. Di Linux, checkout tetangga `../PPL_F1` dan `../PPL-D-2` dipakai jika tersedia; jika belum ada, repo diambil ke `../_integrasi`. Checkout yang sudah ada tidak diubah revisinya. Diperlukan Git, Node.js/npm, Composer, serta PostgreSQL yang sudah siap. Windows memakai PowerShell; Linux memakai Bash, nvm (`$NVM_DIR/nvm.sh` atau `~/.nvm/nvm.sh`), `setsid`/`nohup`, dan ekstensi PHP `posix`.
+
+Jalankan dari folder `PPL-E-1`:
+
+```bash
+php artisan integration
+# Hentikan ketiga layanan:
+php artisan integration:stop
+```
+
+`composer integration` dan `composer integration:stop` tetap tersedia sebagai alias perintah Artisan tersebut.
+
+Di Linux, Node.js/npm dijalankan melalui nvm, mengikuti `.nvmrc` F-1 atau E-1 jika tersedia; tanpa `.nvmrc`, digunakan versi `default` nvm. Lokasi checkout dapat ditentukan lewat `F1_PATH` dan `D2_PATH`:
+
+```bash
+F1_PATH=/lokasi/PPL_F1 D2_PATH=/lokasi/PPL-D-2 php artisan integration
+```
 
 Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8080/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada `.env` utama, mengambil serta memasang F-1/D-2 jika belum ada di `../_integrasi`, dan menjalankan ketiga layanan. Untuk berhenti, gunakan **composer integration:stop**.
 

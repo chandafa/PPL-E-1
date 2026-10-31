@@ -31,6 +31,7 @@ return [
         'base_url' => env('F1_BASE_URL', 'http://127.0.0.1:4100'),
         'login_path' => env('F1_LOGIN_PATH', '/auth/login'),
         'role_path' => env('F1_ROLE_PATH', '/accounts/{accountId}/role'),
+        'profile_path' => env('F1_PROFILE_PATH', '/identity/accounts/{accountId}'),
         'timeout' => (int) env('F1_TIMEOUT', 5),
         'check_account' => (bool) env('F1_CHECK_ACCOUNT', false),
         'algo' => env('F1_JWT_ALGO', 'HS256'),

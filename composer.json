@@ -61,12 +61,10 @@
         ],
         "integration": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan config:clear",
-            "@php scripts/enable-integration.php",
-            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-integration.ps1 -Main"
+            "@php artisan integration"
         ],
         "integration:stop": [
-            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-integration.ps1"
+            "@php artisan integration:stop"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",
