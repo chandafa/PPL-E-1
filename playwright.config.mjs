@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { browserEnvironment } from './tests/browser/environment.mjs';
 
 export default defineConfig({
     testDir: './tests/browser',
@@ -19,7 +20,7 @@ export default defineConfig({
             command: 'php -d upload_max_filesize=6M -d post_max_size=16M -S 127.0.0.1:8081 -t public server.php',
             url: 'http://127.0.0.1:8081/up',
             reuseExistingServer: false,
-            env: { APP_ENV: 'testing', DB_CONNECTION: 'pgsql', DB_DATABASE: process.env.E1_UI_TEST_DATABASE || 'e1_pajak_ui_test', E1_DEV_LOGIN: 'true', ...(process.platform !== 'win32' ? { PHP_CLI_SERVER_WORKERS: '4' } : {}) },
+            env: { ...browserEnvironment(), ...(process.platform !== 'win32' ? { PHP_CLI_SERVER_WORKERS: '4' } : {}) },
         },
     } : {}),
     reporter: [['list'], ['json', { outputFile: 'test-results/browser-results.json' }]],
