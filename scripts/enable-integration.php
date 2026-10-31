@@ -25,8 +25,6 @@ if (($profile['F1_JWT_SECRET'] ?? null) !== $runtime['jwtSecret']) {
     throw new RuntimeException('Profil dan runtime integrasi berbeda; siapkan ulang setelah semua proses uji dihentikan.');
 }
 $environment = file_get_contents($repo.'/.env');
-$backup = $runtime['directory'].'/main-before-enable-'.date('Ymd_His').'-'.bin2hex(random_bytes(3)).'.env';
-copy($repo.'/.env', $backup);
 $keys = [
     'F1_API_ENABLED', 'F1_BASE_URL', 'F1_LOGIN_PATH', 'F1_ROLE_PATH', 'F1_CHECK_ACCOUNT', 'F1_TIMEOUT',
     'F1_JWT_ALGO', 'F1_JWT_SECRET', 'F1_JWT_PUBLIC_KEY_PATH', 'F1_JWT_ISSUER', 'F1_JWT_AUDIENCE', 'F1_JWT_LEEWAY',
@@ -48,6 +46,12 @@ foreach (array_unique(array_merge(array_keys($main), array_keys($updated))) as $
         throw new RuntimeException('Konfigurasi di luar koneksi F-1/D-2 berubah: '.$key);
     }
 }
+if ($environment === file_get_contents($repo.'/.env')) {
+    echo 'Konfigurasi koneksi F-1/D-2 pada .env E-1 sudah aktif.'.PHP_EOL;
+    exit(0);
+}
+$backup = $runtime['directory'].'/main-before-enable-'.date('Ymd_His').'-'.bin2hex(random_bytes(3)).'.env';
+copy($repo.'/.env', $backup);
 file_put_contents($repo.'/.env', $environment);
 echo 'Koneksi F-1/D-2 aktif pada .env E-1: login F-1, cek akun aktif, invoice HTTP. Login demo E-1 mati.'.PHP_EOL;
 echo 'Database, storage, dan APP_KEY utama tetap. Cadangan .env tersimpan privat di runtime integrasi.'.PHP_EOL;

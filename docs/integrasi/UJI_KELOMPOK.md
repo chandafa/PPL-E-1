@@ -2,6 +2,8 @@
 
 Konfigurasi aplikasi utama sudah terhubung ke repo resmi F-1 dan D-2. Perbaikan hanya di E-1. Kode, kontrak, dan seed upstream dibiarkan sebagaimana versi pemilik; temuan ada di [TEMUAN_F1_D2.md](TEMUAN_F1_D2.md).
 
+Untuk laptop anggota yang baru, mulai dari [setup tiga repo dan dependensi](SETUP_ANGGOTA.md). Gunakan kode E-1 terbaru yang memuat perbaikan startup ini.
+
 ## Jalankan
 
 Dari folder PPL-E-1 di Windows:
@@ -12,7 +14,7 @@ composer integration
 
 Buka **http://127.0.0.1:8080/login**. Akun fiktif resmi F-1: **super.admin**, kata sandi **Password123!**. Login ini memanggil server F-1 pada 4100. Invoice dibaca melalui HTTP D-2 pada 8026. Form/endpoint akun demo E-1 dimatikan.
 
-Jika ketiga layanan sudah berjalan, langsung buka alamat tersebut. Untuk berhenti: composer integration:stop. Setelah berhenti, composer integration memakai database yang sama dan tidak menanam ulang seed D-2. Pada laptop baru, clone/install ketiga repo dan siapkan PostgreSQL menurut [panduan lengkap](README.md).
+Jika ketiga layanan sudah berjalan, composer integration menampilkan status berhasil; langsung buka alamat tersebut. Layanan yang masih aktif tidak direstart, dan hanya layanan yang berhenti yang dinyalakan. Untuk berhenti: composer integration:stop. Setelah berhenti, composer integration memakai database yang sama dan tidak menanam ulang seed D-2. Pada laptop baru, ikuti [setup anggota](SETUP_ANGGOTA.md).
 
 ## Contoh siap diuji di laptop ini
 

@@ -12,6 +12,8 @@ Hasil **31 Oktober 2026, diperiksa ulang pada konfigurasi utama**: E-1 Laravel b
 
 ## Siap diuji dari aplikasi utama
 
+[Panduan anggota baru](SETUP_ANGGOTA.md) menjelaskan clone ketiga repo, pemasangan dependensi, PostgreSQL, dan satu perintah untuk menjalankannya pada setiap laptop.
+
 Konfigurasi .env utama sekarang memakai login/cek akun F-1 dan HttpInvoiceProvider D-2; E1_DEV_LOGIN=false. Empat migrasi E-1 yang tertinggal sudah diterapkan pada laptop ini tanpa mengubah seluruh baris transaksi, rekap, audit, atau berkas lama. Composer serve juga membaca konfigurasi HTTP yang sama, tetapi hanya menjalankan E-1.
 
 Untuk menjalankan ketiga layanan pada Windows dari folder PPL-E-1:
@@ -20,7 +22,7 @@ Untuk menjalankan ketiga layanan pada Windows dari folder PPL-E-1:
 composer integration
 ```
 
-Buka http://127.0.0.1:8080/login. Gunakan akun fiktif resmi super.admin / Password123!. Jalankan composer integration:stop untuk berhenti. Perintah startup boleh dipakai kembali sesudah stop: database E-1 tetap, database D-2 tidak diseed ulang, dan JWT_SECRET demo tetap sama pada runtime yang sama. Server F-1 tetap mereset data memorinya sesuai implementasi pemilik.
+Buka http://127.0.0.1:8080/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah composer integration boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan composer integration:stop untuk berhenti. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
 
 Persiapan awal repo/dependensi/PostgreSQL tetap diperlukan pada laptop baru sebagaimana bagian Menyiapkan laptop di bawah. enable-integration.php otomatis menyiapkan runtime bila belum ada, mengaktifkan hanya kunci F1_*/D2_*/E1_DEV_LOGIN pada .env, membuat cadangan privat, serta mempertahankan APP_ENV, APP_KEY, database, dan storage utama. Aktivasi demo ini ditolak di production. Jalankan php artisan migrate pada instalasi E-1 yang belum memiliki schema terbaru.
 
