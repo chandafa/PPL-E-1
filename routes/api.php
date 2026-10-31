@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\D2InvoiceController;
 use App\Http\Controllers\Api\DemoInvoiceController;
 use App\Http\Controllers\Api\DevLoginController;
+use App\Http\Controllers\Api\F1LoginController;
 use App\Http\Controllers\Api\V1\TaxInvoiceController;
 use App\Http\Controllers\Api\V1\TaxPaymentController;
 use App\Http\Controllers\Api\V1\TaxRecapController;
@@ -17,46 +18,10 @@ use Illuminate\Support\Facades\Route;
 */
 // Login tiruan F-1 untuk Postman/demo lokal; mati kecuali E1_DEV_LOGIN=true (di luar kontrak openapi.yaml)
 Route::post('dev/f1/login', DevLoginController::class);
+Route::post('auth/f1/login', F1LoginController::class)->middleware('throttle:10,1');
 Route::get('ui/d2/invoices', DemoInvoiceController::class)->middleware('f1.auth');
 Route::get('ui/d2/invoices/all', D2InvoiceController::class)->middleware('f1.auth');
 Route::get('ui/tax-recap-periods', [TaxRecapController::class, 'periods'])->middleware('f1.auth');
-
-// Endpoint uji dependensi F-1 & D-2 (DEP-F1-01, DEP-F1-02, DEP-D2-01, DEP-D2-02)
-Route::post('auth/login', function () {
-    return response()->json([
-        'code' => '200',
-        'message' => 'Login mock F-1 berhasil',
-        'data' => [
-            'accessToken' => 'placeholder-token-mock-f1-bukan-jwt-tiga-segmen',
-            'tokenType' => 'Bearer',
-            'expiresIn' => 3600,
-        ],
-    ]);
-});
-
-Route::post('auth/f1/login', function () {
-    throw \App\Exceptions\ApiException::make(502, 'F1_INVALID_TOKEN', 'JWT placeholder ditolak verifikator E-1');
-});
-
-Route::get('v1/invoices/{invoiceId}', function (string $invoiceId) {
-    if ($invoiceId === 'inv-demo-001') {
-        return \App\Support\ApiResponse::ok([
-            'invoiceId' => 'inv-demo-001',
-            'invoiceNumber' => 'INV-2026-0001',
-            'invoiceDate' => '2026-11-01',
-            'dppAmount' => '100000000.00',
-            'ppnAmount' => '11000000.00',
-            'status' => 'TERTAGIH',
-            'terkait' => [
-                'projectId' => 'prj-demo-001',
-            ],
-            'clientId' => null,
-        ], 'Detail invoice D-2 berhasil dimuat');
-    }
-
-    // DEP-D2-02: Mengembalikan 404 jika invoiceId tidak ditemukan
-    throw \App\Exceptions\ApiException::notFound('INVOICE_NOT_FOUND', 'Invoice tidak ditemukan');
-});
 
 Route::prefix('v1')->group(function () {
     // Antarmuka web E-1 (internal): Admin, CEO, COO

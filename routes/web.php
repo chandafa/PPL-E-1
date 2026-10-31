@@ -3,17 +3,6 @@
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/tax-invoices');
-Route::post('/auth/login', function () {
-    return response()->json([
-        'code' => '200',
-        'message' => 'Login mock F-1 berhasil',
-        'data' => [
-            'accessToken' => 'placeholder-token-mock-f1-bukan-jwt-tiga-segmen',
-            'tokenType' => 'Bearer',
-            'expiresIn' => 3600,
-        ],
-    ]);
-});
 Route::view('/login', 'pages.login', ['page' => 'login'])->name('ui.login');
 Route::view('/tax-invoices', 'pages.invoices', ['page' => 'invoices'])->name('ui.invoices');
 Route::view('/d2-invoices', 'pages.d2-invoices', ['page' => 'd2-invoices'])->name('ui.d2-invoices');

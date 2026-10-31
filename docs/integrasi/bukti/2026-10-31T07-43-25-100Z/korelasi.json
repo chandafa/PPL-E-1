@@ -1,0 +1,115 @@
+{
+  "observedAtUtc": "2026-10-31T08:18:00.618Z",
+  "result": "PASS",
+  "method": "X-Request-ID dari request browser E-1 diteruskan ke F-1 dan D-2; observer luar checkout merekam request handler asli tanpa kredensial",
+  "cases": [
+    {
+      "case": "UI-01",
+      "requestId": "E1-P6-UI-37937412-3535-41e8-bf95-beaef3f30e6b",
+      "consumer": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/extractions",
+        "body": {
+          "invoiceId": "inv-demo-sample",
+          "eFakturFile": "input/efaktur.pdf"
+        }
+      },
+      "producers": {
+        "F1": [
+          {
+            "service": "F1",
+            "startedAtUtc": "2026-10-31T07:43:43.438Z",
+            "finishedAtUtc": "2026-10-31T07:43:43.439Z",
+            "method": "GET",
+            "path": "/accounts/01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1/role",
+            "status": 200,
+            "requestId": "E1-P6-UI-37937412-3535-41e8-bf95-beaef3f30e6b"
+          }
+        ],
+        "D2": [
+          {
+            "service": "D2",
+            "startedAtUtc": "2026-10-31T07:43:43+00:00",
+            "finishedAtUtc": "2026-10-31T07:43:43+00:00",
+            "method": "GET",
+            "path": "/api/v1/invoices/inv-demo-sample",
+            "status": 200,
+            "requestId": "E1-P6-UI-37937412-3535-41e8-bf95-beaef3f30e6b"
+          }
+        ]
+      },
+      "result": "PASS"
+    },
+    {
+      "case": "UI-02",
+      "requestId": "E1-P6-UI-9c04bf19-a20d-4ec4-b6d9-ebc348c8f65e",
+      "consumer": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/outgoing",
+        "body": {
+          "invoiceId": "inv-demo-sample",
+          "eFakturFile": "input/efaktur.pdf"
+        }
+      },
+      "producers": {
+        "F1": [
+          {
+            "service": "F1",
+            "startedAtUtc": "2026-10-31T07:43:44.714Z",
+            "finishedAtUtc": "2026-10-31T07:43:44.715Z",
+            "method": "GET",
+            "path": "/accounts/01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1/role",
+            "status": 200,
+            "requestId": "E1-P6-UI-9c04bf19-a20d-4ec4-b6d9-ebc348c8f65e"
+          }
+        ],
+        "D2": [
+          {
+            "service": "D2",
+            "startedAtUtc": "2026-10-31T07:43:44+00:00",
+            "finishedAtUtc": "2026-10-31T07:43:45+00:00",
+            "method": "GET",
+            "path": "/api/v1/invoices/inv-demo-sample",
+            "status": 200,
+            "requestId": "E1-P6-UI-9c04bf19-a20d-4ec4-b6d9-ebc348c8f65e"
+          }
+        ]
+      },
+      "result": "PASS"
+    },
+    {
+      "case": "M-06",
+      "requestId": "E1-MAIN-UI-c884f760-2847-4c9f-b725-a82094c5bfb1",
+      "consumer": {
+        "url": "http://127.0.0.1:8080/api/v1/tax-invoices/extractions",
+        "status": 200
+      },
+      "producers": {
+        "F1": [
+          {
+            "service": "F1",
+            "startedAtUtc": "2026-10-31T07:52:36.504Z",
+            "finishedAtUtc": "2026-10-31T07:52:36.505Z",
+            "method": "GET",
+            "path": "/accounts/01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1/role",
+            "status": 200,
+            "requestId": "E1-MAIN-UI-c884f760-2847-4c9f-b725-a82094c5bfb1"
+          }
+        ],
+        "D2": [
+          {
+            "service": "D2",
+            "startedAtUtc": "2026-10-31T07:52:36+00:00",
+            "finishedAtUtc": "2026-10-31T07:52:36+00:00",
+            "method": "GET",
+            "path": "/api/v1/invoices/inv-6ae59e3b342a5",
+            "status": 200,
+            "requestId": "E1-MAIN-UI-c884f760-2847-4c9f-b725-a82094c5bfb1"
+          }
+        ]
+      },
+      "result": "PASS"
+    }
+  ],
+  "partnerSignoff": false
+}

@@ -1,0 +1,34 @@
+[
+    {
+        "file": "efaktur.pdf",
+        "invoiceId": "inv-6ae59e3b342a5",
+        "invoiceDate": "2026-12-15",
+        "taxPeriod": "2026-12",
+        "sha256": "71dd152a6f551f225373336d80d525a740e0fa99a1a7369c233adfdb13cff80a",
+        "textReadable": true
+    },
+    {
+        "file": "efaktur-pengganti.pdf",
+        "invoiceId": "inv-6ae59e3b342a5",
+        "invoiceDate": "2026-12-15",
+        "taxPeriod": "2026-12",
+        "sha256": "8d521162acf52ef1c963afa637ccf17de7411d27f9429c198bc346b4c192e4e3",
+        "textReadable": true
+    },
+    {
+        "file": "e-billing.pdf",
+        "invoiceId": "inv-6ae59e3b342a5",
+        "invoiceDate": "2026-12-15",
+        "taxPeriod": "2026-12",
+        "sha256": "15465af02b9501b2ff6756090a5377437bda930f94d814b02a653b8f978e6e9d",
+        "textReadable": true
+    },
+    {
+        "file": "bukti-pembayaran.pdf",
+        "invoiceId": "inv-6ae59e3b342a5",
+        "invoiceDate": "2026-12-15",
+        "taxPeriod": "2026-12",
+        "sha256": "f2909d8c08984bbb59e71fa87ca8b82f4291bbd3b661f94cc2231d964ab6483b",
+        "textReadable": true
+    }
+]

@@ -7,6 +7,7 @@ Indeks ini mengelompokkan dokumen acuan, panduan aktif, paket pengujian, dan ars
 
 | Kebutuhan | Dokumen |
 |---|---|
+| Menghubungkan repo resmi F-1 dan D-2 | [Panduan integrasi](integrasi/README.md) dan [temuan upstream](integrasi/TEMUAN_F1_D2.md) |
 | Menjalankan demo dengan data contoh | [Panduan data demo](panduan/DEMO_SEEDER.md) |
 | Memahami halaman dan alur web | [Panduan UI Blade](panduan/UI_BLADE.md) |
 | Mencoba API melalui Postman | [Panduan Postman](api/POSTMAN.md) |

@@ -56,8 +56,17 @@
             "@php artisan migrate --force"
         ],
         "serve": [
-            "ComposerConfig::disableProcessTimeout",
+            "Composer\\Config::disableProcessTimeout",
             "@php -d upload_max_filesize=6M -d post_max_size=16M -S 127.0.0.1:8080 -t public server.php"
+        ],
+        "integration": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php scripts/enable-integration.php",
+            "@php artisan config:clear",
+            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-integration.ps1 -Main"
+        ],
+        "integration:stop": [
+            "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-integration.ps1"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

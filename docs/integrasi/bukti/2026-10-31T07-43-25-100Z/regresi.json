@@ -1,0 +1,10 @@
+{
+  "tool": "phpunit",
+  "result": "passed",
+  "tests": 219,
+  "passed": 219,
+  "assertions": 1824,
+  "duration_ms": 71931,
+  "observedAtUtc": "2026-10-31T08:08:05.206Z",
+  "scope": "Suite PHP PostgreSQL terpisah setelah .env utama diaktifkan. Http::fake dipakai pada tes adapter; bukti HTTP repo resmi berada di bukti-http.json dan aktif-utama.json."
+}

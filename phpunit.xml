@@ -36,6 +36,8 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <!-- Token F-1 untuk uji (bukan rahasia asli) -->
         <env name="F1_JWT_ALGO" value="HS256"/>
+        <env name="F1_API_ENABLED" value="false"/>
+        <env name="F1_CHECK_ACCOUNT" value="false"/>
         <env name="F1_JWT_SECRET" value="rahasia-uji-e1-minimal-32-karakter-0123456789"/>
         <env name="F1_JWT_ISSUER" value="f1-identity"/>
         <env name="F1_JWT_AUDIENCE" value="erp-anaheim"/>

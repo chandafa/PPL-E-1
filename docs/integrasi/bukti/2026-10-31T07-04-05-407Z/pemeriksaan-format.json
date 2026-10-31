@@ -1,0 +1,797 @@
+{
+    "checkedAtUtc": "2026-10-31T07:21:34+00:00",
+    "result": "PASS",
+    "checks": 197,
+    "sourceFilesUnchanged": 107,
+    "formatMethod": "Entri ZIP selain word/document.xml identik; 67 blok dan seluruh properti format identik setelah teks diabaikan, dengan klon baris tabel sesuai isi.",
+    "details": [
+        {
+            "check": "Jumlah entri paket sama",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: [Content_Types].xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: _rels/.rels",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/_rels/document.xml.rels",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/theme/theme1.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/settings.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: customXml/item1.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: customXml/itemProps1.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/numbering.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/styles.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/webSettings.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: word/fontTable.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: docProps/core.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: docProps/app.xml",
+            "result": "PASS"
+        },
+        {
+            "check": "Entri paket identik: customXml/_rels/item1.xml.rels",
+            "result": "PASS"
+        },
+        {
+            "check": "XML luar body identik",
+            "result": "PASS"
+        },
+        {
+            "check": "67 blok asli dipertahankan",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 0 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 1 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 2 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 3 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 4 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 5 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 6 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 7 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 8 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 9 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 10 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 11 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 12 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 13 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 14 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 15 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 16 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 17 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 18 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 19 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 20 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 21 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 22 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 23 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 24 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 25 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 26 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 27 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 28 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 29 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 30 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 31 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 32 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 33 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 34 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 35 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 36 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 37 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 38 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 39 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 40 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 41 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 42 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 43 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 44 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 45 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 46 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 47 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 48 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 49 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 50 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 51 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 52 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 53 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 54 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 55 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 56 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 57 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 58 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 59 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 60 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 61 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 62 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 63 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 64 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 65 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "Format blok 66 tetap",
+            "result": "PASS"
+        },
+        {
+            "check": "XML valid",
+            "result": "PASS"
+        },
+        {
+            "check": "Tidak ada placeholder tersisa",
+            "result": "PASS"
+        },
+        {
+            "check": "Batas produksi/review tidak disembunyikan",
+            "result": "PASS"
+        },
+        {
+            "check": "Hasil regresi dicantumkan",
+            "result": "PASS"
+        },
+        {
+            "check": "Path invoice tetap placeholder rute",
+            "result": "PASS"
+        },
+        {
+            "check": "Salinan pengumpulan identik",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/2020-Scrum-Guide-US.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/Backlog_Awal_Proyek_E-1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/Jawaban_Mitra_E1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/Pembagian pekerjaan proyek perangkat lunak ERP PT Anaheim Nimbus Universal.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/Pertanyaan_Mitra_E-1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/Peta_Aktor_dan_Proses_E-1_v0.4.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/PPL Sesi 1.pptx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/Scrum-Guide-Indonesian.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan1/SOP1.pptx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/01_Spesifikasi_Fitur_Minimum_E-1_v0.2.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/02_Rancangan_Antarmuka_Inti_E-1_v0.2.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/03_ERD_Skema_Data_Awal_E-1.sql",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/03_Skema_Data_Awal_E-1_v0.1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/04_Daftar_Kontrak_API_Kelas_E_Kelompok_1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/Depedensi F-1 dan D-2/Skema_Data_Awal_D2.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/Depedensi F-1 dan D-2/Skema_Data_Awal_F1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan2/Slide 2.pptx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-01-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-01-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-02-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-02-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-03-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-03-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-04-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-04-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-05-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-05-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-06-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-06-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-07-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-07-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-08-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-08-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-09-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-10-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-10-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-11-error.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/examples/api-ke01-11-success.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/Materi_Pertemuan_3_OpenAPI_dan_Fondasi_Kerja_v2.pptx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/openapi.yaml",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/Pertanyaan_Mitra_E1_v0.3.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan3/Tugas_Pertemuan_3_OpenAPI_Versi_Awal_E-1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/ASTRAX/bukti_demo_alur_lokal_pertama.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/ASTRAX/Kontrak_API_Final_Kelas_E_Kelompok_1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/ASTRAX/Laporan_Demo_Alur_Lokal_Pertama.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Bukti/Bukti Catat Faktur.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Bukti/Bukti Gagal(NSFP Duplikat).png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Bukti/Bukti Pembayaran Pajak.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Bukti/Demo-PPL-01.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/bukti_demo_alur_lokal_pertama.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/bukti_integrasi_f1_d2.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Kontrak_API_Final_Kelas_E_Kelompok_1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Materi_Pertemuan_4_Alur_Utama_dan_Review_Kontrak_API_v2.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Template_Laporan_Demo_Alur_Lokal_Perbaikan.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan4/Template_Laporan_Demo_Alur_Lokal_Pertama.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/ACUAN_DAN_SELISIH.md",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-01-faktur-dibuat.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-01.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-02.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-03.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-04-koreksi-tersimpan.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-04.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-05.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-06.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-07.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-10-rekap-terkonfirmasi.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-12.xlsx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/B-13.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Candra/bukti initial project dan pembayaran.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Candra/Screenshot 2026-10-28 205940.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Candra/Screenshot 2026-10-28 210117.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Pedil/Screenshot From 2026-10-28 21-00-21.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Pedil/Screenshot From 2026-10-28 21-08-54.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Raihan/DEP-D2-01.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Raihan/DEP-D2-02.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Raihan/selisih setor - PPN.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Bukti Raihan/validasi duplikasi NTPN.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/bukti-http.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/bukti-konsistensi.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/DEP-F1-01.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/DEP-F1-02.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/hasil-pengulangan.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/input/bukti-pembayaran.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/input/e-billing.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/input/efaktur-inv-demo-001.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/manifest-bukti.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/pemeriksaan-dokumen.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/periksa-bukti.php",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Raden/B-01.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/Raden/B-02.png",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/README.md",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/siapkan-runtime.php",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/snapshot-data.php",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/sumber-acuan.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/uji-operasi-data.mjs",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/ulang-demo.ps1",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/VAL-01.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/VAL-02.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/VAL-03.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/VAL-04.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/VAL-05.mkv",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/validasi-kontrak.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/versi-demo.json",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Bukti/versi-demo.patch",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Laporan_Operasi_Validasi_E1.docx",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Materi_Pertemuan_5_Data_dan_Proses_Inti.pdf",
+            "result": "PASS"
+        },
+        {
+            "check": "Sumber tetap: Pertemuan5/Template_Laporan_Pertemuan_5_Operasi_Data_Validasi_dan_Endpoint.docx",
+            "result": "PASS"
+        }
+    ]
+}

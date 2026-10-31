@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Exceptions\ApiException;
+use App\Services\Auth\F1ApiClient;
 use App\Services\Auth\F1Identity;
 use App\Services\Auth\F1TokenVerifier;
 use Closure;
@@ -21,7 +22,7 @@ class AuthenticateF1Token
 {
     public const ATTRIBUTE = 'f1.identity';
 
-    public function __construct(private readonly F1TokenVerifier $verifier) {}
+    public function __construct(private readonly F1TokenVerifier $verifier, private readonly F1ApiClient $accounts) {}
 
     public function handle(Request $request, Closure $next, string $ability = 'manage'): Response
     {
@@ -32,6 +33,9 @@ class AuthenticateF1Token
         }
 
         $identity = $this->verifier->verify($matches[1]);
+        if (config('e1.f1.check_account')) {
+            $identity = $this->accounts->currentIdentity($identity, $matches[1]);
+        }
 
         if (! $this->isAuthorized($identity, $ability)) {
             throw ApiException::make(403, 'FORBIDDEN', 'Pengguna sah, akses tidak cukup');

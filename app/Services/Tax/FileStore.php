@@ -6,6 +6,8 @@ use App\Exceptions\ApiException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Smalot\PdfParser\Parser;
+use Throwable;
 
 /**
  * Validasi dan penyimpanan berkas PDF (e-Faktur, e-Billing, bukti pembayaran).
@@ -31,7 +33,15 @@ class FileStore
 
         $binary = (string) file_get_contents($file->getRealPath());
 
-        if (! str_contains(substr($binary, 0, 1024), '%PDF-')) {
+        if (! str_starts_with($binary, '%PDF-')) {
+            throw ApiException::badRequest($errorCode, $notPdfMessage);
+        }
+
+        try {
+            if ((new Parser)->parseContent($binary)->getPages() === []) {
+                throw new RuntimeException('PDF tidak memiliki halaman');
+            }
+        } catch (Throwable) {
             throw ApiException::badRequest($errorCode, $notPdfMessage);
         }
 

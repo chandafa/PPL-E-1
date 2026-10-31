@@ -7,16 +7,23 @@ use App\Models\PembayaranPajak;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\InvoiceScenarioSeeder;
 use Tests\TestCase;
 
-/** Bukti karakterisasi WAPT; hasil rentan tidak dimaksudkan menjadi kontrak permanen. */
+/** Regresi audit; OBS-02 tentang koreksi setelah setor tetap observasi kebijakan. */
 class CriticalLogicAuditTest extends TestCase
 {
-    public function test_cancel_middle_replacement_double_counts_one_invoice_and_increases_payment_limit(): void
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(InvoiceScenarioSeeder::class);
+    }
+
+    public function test_cancel_middle_replacement_is_rejected_without_double_counting(): void
     {
         $a = $this->createFaktur();
-        $b = $this->createFaktur('inv-demo-001', [], $a['taxInvoiceId']);
-        $c = $this->createFaktur('inv-demo-001', [], $b['taxInvoiceId']);
+        $b = $this->createFaktur('inv-demo-sample', [], $a['taxInvoiceId']);
+        $c = $this->createFaktur('inv-demo-sample', [], $b['taxInvoiceId']);
 
         $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()
             ->assertJsonPath('data.recap.invoiceCount', 1)
@@ -24,15 +31,13 @@ class CriticalLogicAuditTest extends TestCase
 
         $this->patchJson('/api/v1/tax-invoices/'.$b['taxInvoiceId'], [
             'changes' => ['status' => 'CANCELLED'],
-        ], $this->auth())->assertOk();
+        ], $this->auth())->assertStatus(409)->assertJsonPath('errorCode', 'INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE');
 
-        $this->assertEqualsCanonicalizing([$a['taxInvoiceId'], $c['taxInvoiceId']],
+        $this->assertEqualsCanonicalizing([$c['taxInvoiceId']],
             FakturPajak::query()->active()->pluck('tax_invoice_id')->all());
         $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()
-            ->assertJsonPath('data.recap.invoiceCount', 2)
-            ->assertJsonPath('data.recap.totalPpn', '22000000.00');
-        $this->createPayment('2026-11', '22000000.00');
-        $this->assertDatabaseHas('rekap_pajak_bulanan', ['tax_period' => '2026-11', 'amount_paid' => '22000000.00']);
+            ->assertJsonPath('data.recap.invoiceCount', 1)
+            ->assertJsonPath('data.recap.totalPpn', '11000000.00');
     }
 
     public function test_paid_invoice_can_be_reduced_then_payment_confirmed_with_positive_difference(): void
@@ -54,23 +59,25 @@ class CriticalLogicAuditTest extends TestCase
             ->assertJsonPath('data.recap.paymentStatus', 'CONFIRMED');
     }
 
-    public function test_same_ntpn_and_proof_can_be_counted_as_two_payments(): void
+    public function test_same_ntpn_cannot_be_counted_as_two_payments(): void
     {
         $this->createFaktur();
         $proof = $this->simplePdf();
-        foreach (['x8k4n2q9m6', 'w7r3z8p2v5'] as $billing) {
-            $this->createPayment('2026-11', '5500000.00', [
-                'billingId' => $billing, 'ntpn' => 'q9z3k7m2w8',
-                'paymentProofFile' => $this->pdfUpload($proof),
-            ]);
-        }
-        $this->assertSame(2, PembayaranPajak::query()->where('ntpn', 'q9z3k7m2w8')->count());
+        $this->createPayment('2026-11', '5500000.00', [
+            'billingId' => 'x8k4n2q9m6', 'ntpn' => 'q9z3k7m2w8', 'paymentProofFile' => $this->pdfUpload($proof),
+        ]);
+        $this->post('/api/v1/tax-payments', [
+            'taxPeriod' => '2026-11', 'taxYear' => 2026, 'amountPaid' => '5500000.00',
+            'billingId' => 'w7r3z8p2v5', 'ntpn' => 'q9z3k7m2w8',
+            'eBillingFile' => $this->pdfUpload($this->simplePdf()), 'paymentProofFile' => $this->pdfUpload($proof),
+        ], $this->auth())->assertStatus(409)->assertJsonPath('errorCode', 'DUPLICATE_NTPN');
+        $this->assertSame(1, PembayaranPajak::query()->where('ntpn', 'q9z3k7m2w8')->count());
         $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()
-            ->assertJsonPath('data.recap.amountPaid', '11000000.00')
+            ->assertJsonPath('data.recap.amountPaid', '5500000.00')
             ->assertJsonPath('data.recap.paymentStatus', 'CONFIRMED');
     }
 
-    public function test_aggregate_overflow_returns_500_and_rolls_back_correction(): void
+    public function test_aggregate_overflow_is_rejected_400_and_rolls_back_correction(): void
     {
         $a = $this->createFaktur();
         $b = $this->createFaktur('inv-demo-002');
@@ -79,7 +86,7 @@ class CriticalLogicAuditTest extends TestCase
         ], $this->auth())->assertOk();
         $this->patchJson('/api/v1/tax-invoices/'.$b['taxInvoiceId'], [
             'changes' => ['dpp' => '100000001.00'],
-        ], $this->auth())->assertStatus(500)->assertJsonPath('errorCode', 'INTERNAL_ERROR');
+        ], $this->auth())->assertStatus(400)->assertJsonPath('errorCode', 'INVALID_CHANGE');
 
         $this->assertSame('100000000.00', FakturPajak::query()->findOrFail($b['taxInvoiceId'])->dpp);
         $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()

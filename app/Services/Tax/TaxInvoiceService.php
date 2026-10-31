@@ -103,11 +103,13 @@ class TaxInvoiceService
                 DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', [$invoice->invoiceId]);
 
                 if ($original !== null) {
-                    $this->assertReplaceable($original->fresh());
+                    $original = $original->fresh();
+                    $this->assertReplaceable($original);
                 } else {
                     $this->assertNoActiveFaktur($invoice->invoiceId);
                 }
                 $this->assertNsfpFree($data->taxInvoiceNumber);
+                $this->recap->lockPeriods([$data->taxPeriod, $original?->tax_period]);
 
                 $faktur = $this->persist($id, $pdfUri, $data, $invoice, $original, $actor);
 
@@ -217,12 +219,13 @@ class TaxInvoiceService
      */
     public function update(mixed $taxInvoiceId, mixed $changes, mixed $note, F1Identity $actor): array
     {
-        $this->requireFaktur($taxInvoiceId);   // 404 lebih dulu dari 400 dan 409
+        $existing = $this->requireFaktur($taxInvoiceId);   // 404 lebih dulu dari 400 dan 409
         $changes = $this->normalizeChanges($changes);
         $note = $this->normalizeNote($note);
 
         try {
-            return DB::transaction(function () use ($taxInvoiceId, $changes, $note, $actor): array {
+            return DB::transaction(function () use ($taxInvoiceId, $changes, $note, $actor, $existing): array {
+                DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', [$existing->invoice_id]);
                 /** @var FakturPajak $faktur */
                 $faktur = FakturPajak::query()->whereKey($taxInvoiceId)->lockForUpdate()->firstOrFail();
 
@@ -232,6 +235,9 @@ class TaxInvoiceService
 
                 $faktur->load('items');
                 $oldPeriod = $faktur->tax_period;
+                $originalPeriod = $faktur->replaces_tax_invoice_id !== null
+                    ? FakturPajak::query()->whereKey($faktur->replaces_tax_invoice_id)->value('tax_period') : null;
+                $this->recap->lockPeriods([$oldPeriod, $changes['taxPeriod'] ?? null, $originalPeriod]);
 
                 $audit = isset($changes['status'])
                     ? $this->cancel($faktur, $note, $actor)
@@ -327,6 +333,11 @@ class TaxInvoiceService
 
     private function cancel(FakturPajak $faktur, ?string $note, F1Identity $actor): RiwayatPerubahanFaktur
     {
+        // Melepas B pada A -> B -> C akan mengaktifkan A dan C sekaligus.
+        if ($faktur->isReplaced()) {
+            throw ApiException::conflict('INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE', 'Batalkan faktur pengganti terakhir terlebih dahulu');
+        }
+
         $originalId = $faktur->replaces_tax_invoice_id;
 
         $before = ['status' => $faktur->status];
@@ -419,7 +430,9 @@ class TaxInvoiceService
 
     private function refreshPeriods(?string ...$periods): void
     {
-        foreach (array_unique(array_filter($periods)) as $period) {
+        $periods = array_unique(array_filter($periods));
+        sort($periods);
+        foreach ($periods as $period) {
             $this->recap->refresh($period);
         }
     }

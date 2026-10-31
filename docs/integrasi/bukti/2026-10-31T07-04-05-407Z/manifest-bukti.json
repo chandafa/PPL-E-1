@@ -1,0 +1,130 @@
+{
+  "createdAtUtc": "2026-10-31T07:26:45.587Z",
+  "result": "PASS",
+  "secretScan": "PASS",
+  "upstreamTreesClean": true,
+  "pagesVisuallyReviewed": 6,
+  "formatChecks": 197,
+  "files": [
+    {
+      "file": "bukti-http.json",
+      "sha256": "4b794d5cf0151729cdc58c2f1be8517c8dd0dfe1425b3094a52265fad3df1172",
+      "bytes": 84401
+    },
+    {
+      "file": "d2-requests.ndjson",
+      "sha256": "cb8fb7a290fc9fa406bc192c14086524559e109cdbcca67663ac4456d5896314",
+      "bytes": 3271
+    },
+    {
+      "file": "E1-09-PDF.pdf",
+      "sha256": "fadee1f144fe8d8ce3acfa278f79b71409d2d1da58e66f226219629e02a5a527",
+      "bytes": 3543
+    },
+    {
+      "file": "E1-09-XLSX.xlsx",
+      "sha256": "7275d051422b2f63861ce03f8400f2f46ede66a5378a1c91b3e348bb83d1aea0",
+      "bytes": 7831
+    },
+    {
+      "file": "f1-requests.ndjson",
+      "sha256": "bce8a0f60fd7f6d7fd97e281c94f8363aba8ad9188360501bd0ebec7b08b0123",
+      "bytes": 14139
+    },
+    {
+      "file": "input/bukti-pembayaran.pdf",
+      "sha256": "96443d13f963558f7ec6931aa01069509f4522652cacbe7713d38e207a588ad2",
+      "bytes": 1542
+    },
+    {
+      "file": "input/e-billing.pdf",
+      "sha256": "44a6aeafb3880d039c91ba5fd108dd6cf975f69729a53a5db15fd045637c0a5f",
+      "bytes": 1515
+    },
+    {
+      "file": "input/efaktur-pengganti.pdf",
+      "sha256": "74d981f599daabcf7897612ee4ec531d714f7a1c81c150f4f1c2876c9bf4ac20",
+      "bytes": 2698
+    },
+    {
+      "file": "input/efaktur.pdf",
+      "sha256": "66c8e881fd12dab2267b3b4be2793e48594758bc6d35f49dfbe0fe35e85d3ff5",
+      "bytes": 2697
+    },
+    {
+      "file": "input/invoice-d2.json",
+      "sha256": "e6e828cc7641357f604fd7979cccd98323c8e8c08217461f9728ecc5048b9f82",
+      "bytes": 803
+    },
+    {
+      "file": "input/manifest.json",
+      "sha256": "d7a40a9b2641a3873b4855ec50a3bbe809ec2cc70c254079b6cea3a865b52618",
+      "bytes": 1095
+    },
+    {
+      "file": "konkurensi.json",
+      "sha256": "0b47afc924959f1a300531d6ab42c898be8cd31cdc43c8a34510036569191524",
+      "bytes": 703
+    },
+    {
+      "file": "korelasi.json",
+      "sha256": "8d534a80c1ff036e6eeb47d8ecff43eb6e54c1a13b605dcaf81451384a8e2d90",
+      "bytes": 2610
+    },
+    {
+      "file": "pemeriksaan-format.json",
+      "sha256": "0f401c20f998c104b8f112f79d7340fb34e169d8c721e3096ed5891b1256be22",
+      "bytes": 23189
+    },
+    {
+      "file": "pemulihan.json",
+      "sha256": "6f83e6969b6fa89b656d36bc5fbbca47b0c48c3e70fd2790fd7c6d0677cb2ece",
+      "bytes": 495
+    },
+    {
+      "file": "README.md",
+      "sha256": "9a45a4bcaff0407a6bfb8b500c402493c62a88a4192ae85ea8f3a4ca6304eb36",
+      "bytes": 1898
+    },
+    {
+      "file": "regresi.json",
+      "sha256": "4fdf0a5881be9fe63ccf6dba1ea33c518b53d129897795744b1b6a6b532dbc4b",
+      "bytes": 429
+    },
+    {
+      "file": "UI-01-pratinjau.png",
+      "sha256": "cce624ec44a813c001a4c118fe6c0efb1e0bcdd49ff0b73f4ebfef70ea5a1ddd",
+      "bytes": 75742
+    },
+    {
+      "file": "UI-02-tersimpan.png",
+      "sha256": "d4b0c24363b574a863305e6b22a27b64226efe88dd6eb2f3e1b629f74dda9fab",
+      "bytes": 110802
+    },
+    {
+      "file": "UI-03-d2-putus.png",
+      "sha256": "c2530a7dd78c7b0aea77041ee82d7546fcbdad53a04ce5b5a6cacac59e3dd3ab",
+      "bytes": 65980
+    },
+    {
+      "file": "UI-login-desktop.png",
+      "sha256": "b80eb39f470601f194b1e53a317769e04195cf6c8e22636c5ea7b92c8a559ee7",
+      "bytes": 34892
+    },
+    {
+      "file": "UI-login-mobile.png",
+      "sha256": "38a81f1e11df9716d5c6a9e2c04985a2f2654e5db18205c2f4033166aa697a95",
+      "bytes": 25347
+    },
+    {
+      "file": "validasi-kontrak.json",
+      "sha256": "98094889cd1de98b5a9864b2dc73079390c81850a509cf990a7ae7124e0c8760",
+      "bytes": 3075
+    },
+    {
+      "file": "versi-sumber.json",
+      "sha256": "9054dda26dd2ea763b56a2a6eeae9736bc03bc95ed5315a00ae2dcd31bd23ba8",
+      "bytes": 44265
+    }
+  ]
+}

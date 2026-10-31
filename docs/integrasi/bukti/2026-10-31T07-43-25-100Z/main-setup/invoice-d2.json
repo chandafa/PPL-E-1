@@ -1,0 +1,30 @@
+{
+  "status": "success",
+  "message": "Detail invoice berhasil dimuat",
+  "data": {
+    "invoiceId": "inv-6ae59e3b342a5",
+    "invoiceNumber": "INV-2026-0003",
+    "invoiceDate": "2026-12-15",
+    "dppAmount": "150000000.00",
+    "ppnAmount": "16500000.00",
+    "pphAmount": "3000000.00",
+    "totalAmount": "163500000.00",
+    "status": "TERTAGIH",
+    "terkait": {
+      "terminId": "trm-demo-002",
+      "terminNumber": 2,
+      "contractId": "ktr-demo-001",
+      "contractNumber": "KTR/2026/001",
+      "projectId": "prj-demo-001",
+      "poStatus": "PO_ADA"
+    },
+    "riwayat": [
+      {
+        "status": "TERTAGIH",
+        "changedAt": "2026-10-31T07:52:27.000000Z",
+        "changedBy": "emp-demo-012",
+        "note": "Invoice diterbitkan oleh petugas keuangan"
+      }
+    ]
+  }
+}

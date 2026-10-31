@@ -52,7 +52,7 @@ foreach ($spec['paths'] as $path => $methods) {
         }
     }
 }
-file_put_contents($root.'/docs/api/RESPON_API.md', $out);
+file_put_contents($root.'/docs/api/RESPON_API.md', rtrim($out)."\n");
 if (isset($argv[1])) {
     file_put_contents($argv[1], json_encode($spec, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 }

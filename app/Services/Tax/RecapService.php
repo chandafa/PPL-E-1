@@ -57,6 +57,12 @@ class RecapService
 
         $payments = PembayaranPajak::query()->where('tax_period', $taxPeriod)->get(['amount_paid', 'status']);
 
+        foreach (['total_dpp', 'total_ppn', 'total_ppnbm'] as $column) {
+            if (! Money::isValid((string) $totals->$column)) {
+                throw ApiException::badRequest('INVALID_CHANGE', 'Total rekap melebihi kapasitas nominal; perubahan dibatalkan');
+            }
+        }
+
         $totalPpn = Money::normalize((string) $totals->total_ppn);
         $amountPaid = Money::sum($payments->pluck('amount_paid'));
 
@@ -78,6 +84,27 @@ class RecapService
      * Dipanggil setiap faktur atau pembayaran berubah.
      */
     public function refresh(string $taxPeriod): RekapPajakBulanan
+    {
+        return DB::transaction(function () use ($taxPeriod): RekapPajakBulanan {
+            // Termasuk periode yang baris rekapnya belum ada. Kunci SEBELUM membaca
+            // sumber agar upsert dari snapshot lama tidak menimpa hasil yang baru.
+            $this->lockPeriods([$taxPeriod]);
+
+            return $this->refreshLocked($taxPeriod);
+        });
+    }
+
+    /** Seluruh penulis memakai urutan periode yang sama sebelum mengunci baris rekap. */
+    public function lockPeriods(array $periods): void
+    {
+        $periods = array_unique(array_filter($periods));
+        sort($periods);
+        foreach ($periods as $period) {
+            DB::select('select pg_advisory_xact_lock(hashtextextended(?, 0))', ['e1.recap.'.$period]);
+        }
+    }
+
+    private function refreshLocked(string $taxPeriod): RekapPajakBulanan
     {
         $recap = $this->compute($taxPeriod);
 

@@ -1,0 +1,13 @@
+{
+  "observedAtUtc": "2026-10-31T08:06:25.235Z",
+  "result": "PASS",
+  "checks": [
+    "composer integration:stop dan composer integration berhasil",
+    "Login E-1 utama kembali 200 dengan JWT F-1",
+    "Invoice D-2 yang dibuat sebelum restart tetap ada dan seluruh respons detail sama, tanpa seed ulang",
+    "E-1 utama memakai .env HTTP, bukan profil mock"
+  ],
+  "scope": "Restart memakai database yang sama; tidak menjalankan migrate:fresh atau seed ulang D-2. F-1 tetap memakai state memori sesuai implementasi pemilik.",
+  "e1BaseUrl": "http://127.0.0.1:8080",
+  "invoiceId": "inv-6ae59e3b342a5"
+}

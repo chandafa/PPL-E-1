@@ -70,7 +70,8 @@ class TaxPaymentService
             $proofUri = $proof !== null ? $this->files->put('payment-proof', $id, $proof) : null;
 
             return DB::transaction(function () use ($id, $taxPeriod, $taxYear, $amountPaid, $billingId, $ntpn, $eBillingUri, $proofUri, $actor): array {
-                // Kunci baris rekap lalu cek ulang agar dua penyimpanan bersamaan tidak lolos lebih setor.
+                // Urutan seragam: advisory periode, baris rekap, lalu pembayaran.
+                $this->recap->lockPeriods([$taxPeriod]);
                 DB::table('rekap_pajak_bulanan')->where('tax_period', $taxPeriod)->lockForUpdate()->first();
                 $this->assertBillingIdFree($billingId);
                 if ($ntpn !== null) {
@@ -146,7 +147,8 @@ class TaxPaymentService
 
         try {
             return DB::transaction(function () use ($payment, $ntpn, $proofUri, $actor): array {
-                // Urutan kunci sama dengan create(): rekap, lalu pembayaran.
+                // Urutan kunci sama dengan create(): periode, rekap, pembayaran.
+                $this->recap->lockPeriods([$payment->tax_period]);
                 DB::table('rekap_pajak_bulanan')->where('tax_period', $payment->tax_period)->lockForUpdate()->first();
                 $payment = PembayaranPajak::query()->whereKey($payment->tax_payment_id)->lockForUpdate()->first();
                 if ($payment === null) {

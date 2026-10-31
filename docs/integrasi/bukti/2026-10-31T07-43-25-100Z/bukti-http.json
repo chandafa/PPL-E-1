@@ -1,0 +1,2568 @@
+{
+  "startedAtUtc": "2026-10-31T07:43:25.101Z",
+  "mode": "HTTP ke server demo resmi F-1 dan backend database D-2; D-1 internal D-2 masih mock",
+  "steps": [
+    {
+      "id": "F1-01",
+      "requestId": "E1-P6-F1-01-68aae2f2-cfc6-47a8-be4a-9827eb2eeaf5",
+      "startedAtUtc": "2026-10-31T07:43:25.101Z",
+      "finishedAtUtc": "2026-10-31T07:43:25.137Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4100/auth/login",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-01-68aae2f2-cfc6-47a8-be4a-9827eb2eeaf5",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "emailOrUsername": "super.admin",
+          "password": "[REDACTED]"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "accessToken": "[REDACTED]",
+          "tokenType": "Bearer",
+          "expiresIn": 3600,
+          "accountId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+          "roleCode": "ADMIN"
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "F1-02",
+      "requestId": "E1-P6-F1-02-d6b42f8e-bf29-46b8-befa-40c833917262",
+      "startedAtUtc": "2026-10-31T07:43:25.137Z",
+      "finishedAtUtc": "2026-10-31T07:43:25.571Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/auth/f1/login",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-02-d6b42f8e-bf29-46b8-befa-40c833917262",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "emailOrUsername": "super.admin",
+          "password": "[REDACTED]"
+        }
+      },
+      "response": {
+        "status": 401,
+        "body": {
+          "code": "401",
+          "message": "Email/username atau kata sandi salah",
+          "data": null,
+          "errorCode": "INVALID_CREDENTIALS"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "F1-03",
+      "requestId": "E1-P6-F1-03-965827d9-1d53-4b76-99a7-18004266c9a0",
+      "startedAtUtc": "2026-10-31T07:43:25.571Z",
+      "finishedAtUtc": "2026-10-31T07:43:25.910Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/auth/f1/login",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-03-965827d9-1d53-4b76-99a7-18004266c9a0",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "emailOrUsername": "amaliyah",
+          "password": "[REDACTED]"
+        }
+      },
+      "response": {
+        "status": 403,
+        "body": {
+          "code": "403",
+          "message": "Akun F-1 terkunci atau nonaktif",
+          "data": null,
+          "errorCode": "F1_ACCOUNT_BLOCKED"
+        }
+      },
+      "expectedStatus": 403,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "F1-04",
+      "requestId": "E1-P6-F1-04-8c1892fe-799c-4b95-8353-b275392996e0",
+      "startedAtUtc": "2026-10-31T07:43:25.910Z",
+      "finishedAtUtc": "2026-10-31T07:43:26.212Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/auth/f1/login",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-04-8c1892fe-799c-4b95-8353-b275392996e0",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "emailOrUsername": "icha.aprilia",
+          "password": "[REDACTED]"
+        }
+      },
+      "response": {
+        "status": 403,
+        "body": {
+          "code": "403",
+          "message": "Akun F-1 terkunci atau nonaktif",
+          "data": null,
+          "errorCode": "F1_ACCOUNT_BLOCKED"
+        }
+      },
+      "expectedStatus": 403,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "F1-05",
+      "requestId": "E1-P6-F1-05-b01b563c-f57f-4c00-8733-37ab3b1bc2a4",
+      "startedAtUtc": "2026-10-31T07:43:26.212Z",
+      "finishedAtUtc": "2026-10-31T07:43:26.521Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/auth/f1/login",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-05-b01b563c-f57f-4c00-8733-37ab3b1bc2a4",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "emailOrUsername": "dwi.saputra",
+          "password": "[REDACTED]"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Login melalui F-1 berhasil",
+          "data": {
+            "accessToken": "[REDACTED]",
+            "tokenType": "Bearer",
+            "expiresIn": 3600,
+            "accountId": "01929b4a-83a1-7d55-8b12-9f7c2e4a6b10",
+            "roleCode": "EMPLOYEE"
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "A-01",
+      "requestId": "E1-P6-A-01-57f7fb9f-749e-4bfb-802d-3b37296008cf",
+      "startedAtUtc": "2026-10-31T07:43:27.097Z",
+      "finishedAtUtc": "2026-10-31T07:43:27.335Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-A-01-57f7fb9f-749e-4bfb-802d-3b37296008cf"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 401,
+        "body": {
+          "code": "401",
+          "message": "Token tidak ada atau tidak sah",
+          "data": null,
+          "errorCode": "UNAUTHORIZED"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "A-02",
+      "requestId": "E1-P6-A-02-f96a468e-85be-483f-947a-f17c790aaebc",
+      "startedAtUtc": "2026-10-31T07:43:28.249Z",
+      "finishedAtUtc": "2026-10-31T07:43:28.498Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-A-02-f96a468e-85be-483f-947a-f17c790aaebc",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 401,
+        "body": {
+          "code": "401",
+          "message": "Token tidak ada atau tidak sah",
+          "data": null,
+          "errorCode": "UNAUTHORIZED"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "A-03",
+      "requestId": "E1-P6-A-03-b203f5ab-1aed-4224-97c4-5fd99de55cb8",
+      "startedAtUtc": "2026-10-31T07:43:29.534Z",
+      "finishedAtUtc": "2026-10-31T07:43:29.817Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-A-03-b203f5ab-1aed-4224-97c4-5fd99de55cb8",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 403,
+        "body": {
+          "code": "403",
+          "message": "Pengguna sah, akses tidak cukup",
+          "data": null,
+          "errorCode": "FORBIDDEN"
+        }
+      },
+      "expectedStatus": 403,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "A-04",
+      "requestId": "E1-P6-A-04-694aba80-76b8-4f9a-a2af-06589cc9b30c",
+      "startedAtUtc": "2026-10-31T07:43:30.383Z",
+      "finishedAtUtc": "2026-10-31T07:43:30.626Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-A-04-694aba80-76b8-4f9a-a2af-06589cc9b30c",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 401,
+        "body": {
+          "code": "401",
+          "message": "Token tidak ada atau tidak sah",
+          "data": null,
+          "errorCode": "UNAUTHORIZED"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "D2-01",
+      "requestId": "E1-P6-D2-01-e16946c1-94e9-45fd-83d0-64c72b395707",
+      "startedAtUtc": "2026-10-31T07:43:30.626Z",
+      "finishedAtUtc": "2026-10-31T07:43:30.993Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-demo-sample",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-01-e16946c1-94e9-45fd-83d0-64c72b395707",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "Detail invoice berhasil dimuat",
+          "data": {
+            "invoiceId": "inv-demo-sample",
+            "invoiceNumber": "INV-2026-SAMPLE",
+            "invoiceDate": "2026-10-11",
+            "dppAmount": "100000000.00",
+            "ppnAmount": "11000000.00",
+            "pphAmount": "2000000.00",
+            "totalAmount": "109000000.00",
+            "status": "TERTAGIH",
+            "terkait": {
+              "terminId": "trm-demo-sample",
+              "terminNumber": 1,
+              "contractId": "ktr-demo-sample",
+              "contractNumber": "KTR/2026/SAMPLE",
+              "projectId": "prj-demo-001",
+              "poStatus": "PO_ADA"
+            },
+            "riwayat": [
+              {
+                "status": "TERTAGIH",
+                "changedAt": "2026-10-11T02:00:00.000000Z",
+                "changedBy": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan"
+              }
+            ]
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "D2-02",
+      "requestId": "E1-P6-D2-02-ff3bdfc9-054a-495b-b5e8-2551614d9e26",
+      "startedAtUtc": "2026-10-31T07:43:30.994Z",
+      "finishedAtUtc": "2026-10-31T07:43:31.268Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-tidak-ada",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-02-ff3bdfc9-054a-495b-b5e8-2551614d9e26",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 404,
+        "body": {
+          "status": "error",
+          "code": "INVOICE_NOT_FOUND",
+          "message": "Invoice dengan ID 'inv-tidak-ada' tidak ditemukan"
+        }
+      },
+      "expectedStatus": 404,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "D2-03",
+      "requestId": "E1-P6-D2-03-a2dd2ba0-277e-4a97-bdb0-ba82201d1218",
+      "startedAtUtc": "2026-10-31T07:43:31.268Z",
+      "finishedAtUtc": "2026-10-31T07:43:31.463Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-demo-sample",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-03-a2dd2ba0-277e-4a97-bdb0-ba82201d1218"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 401,
+        "body": {
+          "status": "error",
+          "code": "UNAUTHORIZED",
+          "message": "Token autentikasi tidak ada atau tidak valid"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "D2-04",
+      "requestId": "E1-P6-D2-04-4129db72-6532-4b6b-bc83-26a086e2c5c0",
+      "startedAtUtc": "2026-10-31T07:43:31.463Z",
+      "finishedAtUtc": "2026-10-31T07:43:31.852Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-demo-sample",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-04-4129db72-6532-4b6b-bc83-26a086e2c5c0",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "Detail invoice berhasil dimuat",
+          "data": {
+            "invoiceId": "inv-demo-sample",
+            "invoiceNumber": "INV-2026-SAMPLE",
+            "invoiceDate": "2026-10-11",
+            "dppAmount": "100000000.00",
+            "ppnAmount": "11000000.00",
+            "pphAmount": "2000000.00",
+            "totalAmount": "109000000.00",
+            "status": "TERTAGIH",
+            "terkait": {
+              "terminId": "trm-demo-sample",
+              "terminNumber": 1,
+              "contractId": "ktr-demo-sample",
+              "contractNumber": "KTR/2026/SAMPLE",
+              "projectId": "prj-demo-001",
+              "poStatus": "PO_ADA"
+            },
+            "riwayat": [
+              {
+                "status": "TERTAGIH",
+                "changedAt": "2026-10-11T02:00:00.000000Z",
+                "changedBy": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan"
+              }
+            ]
+          }
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": false,
+      "observation": true
+    },
+    {
+      "id": "D2-05",
+      "requestId": "E1-P6-D2-05-a2c8b0e0-bbff-49cb-94c1-a8e612dfbdfe",
+      "startedAtUtc": "2026-10-31T07:43:31.852Z",
+      "finishedAtUtc": "2026-10-31T07:43:32.249Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-demo-sample",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-05-a2c8b0e0-bbff-49cb-94c1-a8e612dfbdfe",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "Detail invoice berhasil dimuat",
+          "data": {
+            "invoiceId": "inv-demo-sample",
+            "invoiceNumber": "INV-2026-SAMPLE",
+            "invoiceDate": "2026-10-11",
+            "dppAmount": "100000000.00",
+            "ppnAmount": "11000000.00",
+            "pphAmount": "2000000.00",
+            "totalAmount": "109000000.00",
+            "status": "TERTAGIH",
+            "terkait": {
+              "terminId": "trm-demo-sample",
+              "terminNumber": 1,
+              "contractId": "ktr-demo-sample",
+              "contractNumber": "KTR/2026/SAMPLE",
+              "projectId": "prj-demo-001",
+              "poStatus": "PO_ADA"
+            },
+            "riwayat": [
+              {
+                "status": "TERTAGIH",
+                "changedAt": "2026-10-11T02:00:00.000000Z",
+                "changedBy": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan"
+              }
+            ]
+          }
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": false,
+      "observation": true
+    },
+    {
+      "id": "D2-06",
+      "requestId": "E1-P6-D2-06-8dc0d89e-966b-4d9d-b5c3-a348a9c148e1",
+      "startedAtUtc": "2026-10-31T07:43:32.249Z",
+      "finishedAtUtc": "2026-10-31T07:43:32.534Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-demo-sample",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-06-8dc0d89e-966b-4d9d-b5c3-a348a9c148e1",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "Detail invoice berhasil dimuat",
+          "data": {
+            "invoiceId": "inv-demo-sample",
+            "invoiceNumber": "INV-2026-SAMPLE",
+            "invoiceDate": "2026-10-11",
+            "dppAmount": "100000000.00",
+            "ppnAmount": "11000000.00",
+            "pphAmount": "2000000.00",
+            "totalAmount": "109000000.00",
+            "status": "TERTAGIH",
+            "terkait": {
+              "terminId": "trm-demo-sample",
+              "terminNumber": 1,
+              "contractId": "ktr-demo-sample",
+              "contractNumber": "KTR/2026/SAMPLE",
+              "projectId": "prj-demo-001",
+              "poStatus": "PO_ADA"
+            },
+            "riwayat": [
+              {
+                "status": "TERTAGIH",
+                "changedAt": "2026-10-11T02:00:00.000000Z",
+                "changedBy": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan"
+              }
+            ]
+          }
+        }
+      },
+      "expectedStatus": 403,
+      "expectationMet": false,
+      "observation": true
+    },
+    {
+      "id": "D2-07",
+      "requestId": "E1-P6-D2-07-7b66f979-3f78-4a71-bfd1-a2119e3bb31a",
+      "startedAtUtc": "2026-10-31T07:43:32.534Z",
+      "finishedAtUtc": "2026-10-31T07:43:32.727Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-07-7b66f979-3f78-4a71-bfd1-a2119e3bb31a",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 405,
+        "body": {
+          "message": "The GET method is not supported for route api/v1/invoices. Supported methods: POST."
+        }
+      },
+      "expectedStatus": 405,
+      "expectationMet": true,
+      "observation": true
+    },
+    {
+      "id": "D2-08",
+      "requestId": "E1-P6-D2-08-b8cf84ac-2c48-4f6f-a83a-3d9eb30c8e81",
+      "startedAtUtc": "2026-10-31T07:43:32.727Z",
+      "finishedAtUtc": "2026-10-31T07:43:33.049Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8026/api/v1/invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-08-b8cf84ac-2c48-4f6f-a83a-3d9eb30c8e81",
+          "Authorization": "[REDACTED]",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "terminId": "trm-demo-001",
+          "invoiceDate": "2026-11-01",
+          "dppAmount": "100000000.00"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "status": "success",
+          "message": "Invoice INV-2026-0002 berhasil dibuat",
+          "data": {
+            "invoiceId": "inv-demo-001",
+            "invoiceNumber": "INV-2026-0002",
+            "terminId": "trm-demo-001",
+            "invoiceDate": "2026-11-01",
+            "dppAmount": "100000000.00",
+            "ppnAmount": "11000000.00",
+            "pphAmount": "2000000.00",
+            "totalAmount": "109000000.00",
+            "taxParamId": "pjk-demo-001",
+            "status": "TERTAGIH",
+            "createdBy": "emp-demo-012",
+            "createdAt": "2026-10-31T07:43:33.000000Z"
+          }
+        }
+      },
+      "expectedStatus": 201,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "D2-09",
+      "requestId": "E1-P6-D2-09-6cf417e3-9dc3-4a8c-9ea4-56b8eb0deec9",
+      "startedAtUtc": "2026-10-31T07:43:33.049Z",
+      "finishedAtUtc": "2026-10-31T07:43:33.348Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8026/api/v1/invoices/inv-demo-001",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-09-6cf417e3-9dc3-4a8c-9ea4-56b8eb0deec9",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "Detail invoice berhasil dimuat",
+          "data": {
+            "invoiceId": "inv-demo-001",
+            "invoiceNumber": "INV-2026-0002",
+            "invoiceDate": "2026-11-01",
+            "dppAmount": "100000000.00",
+            "ppnAmount": "11000000.00",
+            "pphAmount": "2000000.00",
+            "totalAmount": "109000000.00",
+            "status": "TERTAGIH",
+            "terkait": {
+              "terminId": "trm-demo-001",
+              "terminNumber": 1,
+              "contractId": "ktr-demo-001",
+              "contractNumber": "KTR/2026/001",
+              "projectId": "prj-demo-001",
+              "poStatus": "PO_ADA"
+            },
+            "riwayat": [
+              {
+                "status": "TERTAGIH",
+                "changedAt": "2026-10-31T07:43:33.000000Z",
+                "changedBy": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan"
+              }
+            ]
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "D2-10",
+      "requestId": "E1-P6-D2-10-51fc3b54-73e1-4c01-8985-046fadfdf908",
+      "startedAtUtc": "2026-10-31T07:43:33.348Z",
+      "finishedAtUtc": "2026-10-31T07:43:33.641Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8026/api/v1/invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-D2-10-51fc3b54-73e1-4c01-8985-046fadfdf908",
+          "Authorization": "[REDACTED]",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "terminId": "trm-demo-001",
+          "invoiceDate": "2026-11-01",
+          "dppAmount": "100000000.00"
+        }
+      },
+      "response": {
+        "status": 409,
+        "body": {
+          "status": "error",
+          "code": "TERMIN_ALREADY_INVOICED",
+          "message": "Termin ini sudah memiliki invoice atau belum berstatus siap ditagih"
+        }
+      },
+      "expectedStatus": 409,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "UI-01",
+      "requestId": "E1-P6-UI-37937412-3535-41e8-bf95-beaef3f30e6b",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/extractions",
+        "body": {
+          "invoiceId": "inv-demo-sample",
+          "eFakturFile": "input/efaktur.pdf"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Hasil ekstraksi (belum tersimpan)",
+          "data": {
+            "invoiceId": "inv-demo-sample",
+            "taxInvoiceNumber": "010.000-26.66000101",
+            "taxInvoiceDate": "2026-10-11",
+            "taxPeriod": "2026-10",
+            "dpp": "100000000.00",
+            "ppn": "11000000.00",
+            "ppnbm": "0.00",
+            "items": [
+              {
+                "itemCode": "620100",
+                "itemName": "Jasa implementasi ERP proyek",
+                "saleReplacementAdvanceTermAmount": "100000000.00",
+                "discountAmount": "0.00",
+                "receivedAdvanceAmount": "0.00"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "UI-02",
+      "requestId": "E1-P6-UI-9c04bf19-a20d-4ec4-b6d9-ebc348c8f65e",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/outgoing",
+        "body": {
+          "invoiceId": "inv-demo-sample",
+          "eFakturFile": "input/efaktur.pdf"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Faktur tersimpan",
+          "data": {
+            "taxInvoiceId": "01a190ea-205e-729b-b1d4-5487aab66f6b",
+            "type": "OUTGOING",
+            "invoiceId": "inv-demo-sample",
+            "vendorName": null,
+            "status": "NORMAL",
+            "replacesTaxInvoiceId": null,
+            "taxInvoiceNumber": "010.000-26.66000101",
+            "taxInvoiceDate": "2026-10-11",
+            "taxPeriod": "2026-10",
+            "dpp": "100000000.00",
+            "ppn": "11000000.00",
+            "ppnbm": "0.00",
+            "items": [
+              {
+                "itemCode": "620100",
+                "itemName": "Jasa implementasi ERP proyek",
+                "saleReplacementAdvanceTermAmount": "100000000.00",
+                "discountAmount": "0.00",
+                "receivedAdvanceAmount": "0.00"
+              }
+            ],
+            "createdByAkunId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+            "createdAt": "2026-10-31T07:43:45Z"
+          }
+        }
+      }
+    },
+    {
+      "id": "E1-03",
+      "requestId": "E1-P6-E1-03-d55577a4-ae86-4bb0-bbe0-cb77d4c797a7",
+      "startedAtUtc": "2026-10-31T07:43:49.212Z",
+      "finishedAtUtc": "2026-10-31T07:43:49.594Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices?project=prj-demo-001",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-03-d55577a4-ae86-4bb0-bbe0-cb77d4c797a7",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Daftar faktur",
+          "data": {
+            "items": [
+              {
+                "taxInvoiceId": "01a190ea-205e-729b-b1d4-5487aab66f6b",
+                "type": "OUTGOING",
+                "taxInvoiceNumber": "010.000-26.66000101",
+                "taxInvoiceDate": "2026-10-11",
+                "invoiceId": "inv-demo-sample",
+                "projectId": "prj-demo-001",
+                "clientId": null,
+                "vendorName": null,
+                "taxPeriod": "2026-10",
+                "dpp": "100000000.00",
+                "ppn": "11000000.00",
+                "status": "NORMAL",
+                "replacedByTaxInvoiceId": null
+              }
+            ],
+            "pagination": {
+              "page": 1,
+              "pageSize": 20,
+              "totalItems": 1
+            }
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-04",
+      "requestId": "E1-P6-E1-04-d5f973e3-abaa-417a-bfae-f3407415e4ef",
+      "startedAtUtc": "2026-10-31T07:43:49.594Z",
+      "finishedAtUtc": "2026-10-31T07:43:49.957Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/01a190ea-205e-729b-b1d4-5487aab66f6b",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-04-d5f973e3-abaa-417a-bfae-f3407415e4ef",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Detail faktur",
+          "data": {
+            "taxInvoice": {
+              "taxInvoiceId": "01a190ea-205e-729b-b1d4-5487aab66f6b",
+              "type": "OUTGOING",
+              "invoiceId": "inv-demo-sample",
+              "projectId": "prj-demo-001",
+              "clientId": null,
+              "vendorName": null,
+              "taxInvoiceNumber": "010.000-26.66000101",
+              "taxInvoiceDate": "2026-10-11",
+              "taxPeriod": "2026-10",
+              "dpp": "100000000.00",
+              "ppn": "11000000.00",
+              "ppnbm": "0.00",
+              "status": "NORMAL",
+              "pdfUri": "/files/tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf",
+              "createdByAkunId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+              "createdAt": "2026-10-31T07:43:45Z",
+              "updatedAt": "2026-10-31T07:43:45Z"
+            },
+            "items": [
+              {
+                "itemCode": "620100",
+                "itemName": "Jasa implementasi ERP proyek",
+                "saleReplacementAdvanceTermAmount": "100000000.00",
+                "discountAmount": "0.00",
+                "receivedAdvanceAmount": "0.00"
+              }
+            ],
+            "replacesTaxInvoiceId": null,
+            "replacedByTaxInvoiceId": null
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "V-01",
+      "requestId": "E1-P6-V-01-6dbf7f88-872f-4c17-bb88-6cb8b27b1cd6",
+      "startedAtUtc": "2026-10-31T07:43:50.429Z",
+      "finishedAtUtc": "2026-10-31T07:43:51.093Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/outgoing",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-V-01-6dbf7f88-872f-4c17-bb88-6cb8b27b1cd6",
+          "Authorization": "[REDACTED]"
+        },
+        "body": {
+          "invoiceId": "inv-demo-sample",
+          "eFakturFile": {
+            "file": "efaktur.pdf",
+            "bytes": 2697
+          }
+        }
+      },
+      "response": {
+        "status": 409,
+        "body": {
+          "code": "409",
+          "message": "Invoice ini sudah memiliki faktur aktif",
+          "data": null,
+          "errorCode": "INVOICE_ALREADY_HAS_ACTIVE_TAX_INVOICE"
+        }
+      },
+      "expectedStatus": 409,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "V-02",
+      "requestId": "E1-P6-V-02-41e2452d-ab6d-4e28-94e3-6a78aaeaf580",
+      "startedAtUtc": "2026-10-31T07:43:52.009Z",
+      "finishedAtUtc": "2026-10-31T07:43:52.575Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/outgoing",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-V-02-41e2452d-ab6d-4e28-94e3-6a78aaeaf580",
+          "Authorization": "[REDACTED]"
+        },
+        "body": {
+          "invoiceId": "inv-tidak-ada",
+          "eFakturFile": {
+            "file": "efaktur.pdf",
+            "bytes": 2697
+          }
+        }
+      },
+      "response": {
+        "status": 404,
+        "body": {
+          "code": "404",
+          "message": "Invoice tidak ditemukan",
+          "data": null,
+          "errorCode": "INVOICE_NOT_FOUND"
+        }
+      },
+      "expectedStatus": 404,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-05",
+      "requestId": "E1-P6-E1-05-ba376bb8-7207-47cd-813f-afe7d8c90fdf",
+      "startedAtUtc": "2026-10-31T07:43:53.038Z",
+      "finishedAtUtc": "2026-10-31T07:43:53.459Z",
+      "request": {
+        "method": "PATCH",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/01a190ea-205e-729b-b1d4-5487aab66f6b",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-05-ba376bb8-7207-47cd-813f-afe7d8c90fdf",
+          "Authorization": "[REDACTED]",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "changes": {
+            "items": [
+              {
+                "itemCode": "620100",
+                "itemName": "Jasa implementasi ERP proyek (koreksi uraian)",
+                "saleReplacementAdvanceTermAmount": "100000000.00",
+                "discountAmount": "0.00",
+                "receivedAdvanceAmount": "0.00"
+              }
+            ]
+          },
+          "note": "Koreksi uraian jasa pada uji integrasi lokal"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Faktur diperbarui",
+          "data": {
+            "taxInvoice": {
+              "taxInvoiceId": "01a190ea-205e-729b-b1d4-5487aab66f6b",
+              "type": "OUTGOING",
+              "invoiceId": "inv-demo-sample",
+              "projectId": "prj-demo-001",
+              "clientId": null,
+              "vendorName": null,
+              "taxInvoiceNumber": "010.000-26.66000101",
+              "taxInvoiceDate": "2026-10-11",
+              "taxPeriod": "2026-10",
+              "dpp": "100000000.00",
+              "ppn": "11000000.00",
+              "ppnbm": "0.00",
+              "status": "NORMAL",
+              "pdfUri": "/files/tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf",
+              "createdByAkunId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+              "createdAt": "2026-10-31T07:43:45Z",
+              "updatedAt": "2026-10-31T07:43:53Z"
+            },
+            "auditId": "01a190ea-404b-7281-8371-8bbf2ba78da5"
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-06",
+      "requestId": "E1-P6-E1-06-88396fa1-1dad-4af9-a045-b92b4ca10029",
+      "startedAtUtc": "2026-10-31T07:43:53.459Z",
+      "finishedAtUtc": "2026-10-31T07:43:53.825Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/01a190ea-205e-729b-b1d4-5487aab66f6b/history",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-06-88396fa1-1dad-4af9-a045-b92b4ca10029",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Riwayat faktur",
+          "data": {
+            "history": [
+              {
+                "auditId": "01a190ea-208e-73af-9bd3-ffd8b6a7ee9e",
+                "action": "CREATE",
+                "actorAkunId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+                "changedAt": "2026-10-31T07:43:45Z",
+                "beforeSnapshot": null,
+                "afterSnapshot": {
+                  "taxInvoiceNumber": "010.000-26.66000101",
+                  "taxInvoiceDate": "2026-10-11",
+                  "taxPeriod": "2026-10",
+                  "dpp": "100000000.00",
+                  "ppn": "11000000.00",
+                  "ppnbm": "0.00",
+                  "status": "NORMAL",
+                  "items": [
+                    {
+                      "itemCode": "620100",
+                      "itemName": "Jasa implementasi ERP proyek",
+                      "saleReplacementAdvanceTermAmount": "100000000.00",
+                      "discountAmount": "0.00",
+                      "receivedAdvanceAmount": "0.00"
+                    }
+                  ],
+                  "invoiceId": "inv-demo-sample"
+                },
+                "note": null
+              },
+              {
+                "auditId": "01a190ea-404b-7281-8371-8bbf2ba78da5",
+                "action": "UPDATE",
+                "actorAkunId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+                "changedAt": "2026-10-31T07:43:53Z",
+                "beforeSnapshot": {
+                  "items": [
+                    {
+                      "itemCode": "620100",
+                      "itemName": "Jasa implementasi ERP proyek",
+                      "saleReplacementAdvanceTermAmount": "100000000.00",
+                      "discountAmount": "0.00",
+                      "receivedAdvanceAmount": "0.00"
+                    }
+                  ]
+                },
+                "afterSnapshot": {
+                  "items": [
+                    {
+                      "itemCode": "620100",
+                      "itemName": "Jasa implementasi ERP proyek (koreksi uraian)",
+                      "saleReplacementAdvanceTermAmount": "100000000.00",
+                      "discountAmount": "0.00",
+                      "receivedAdvanceAmount": "0.00"
+                    }
+                  ]
+                },
+                "note": "Koreksi uraian jasa pada uji integrasi lokal"
+              }
+            ]
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-07",
+      "requestId": "E1-P6-E1-07-d206c646-085d-47ca-a74b-41a93391482f",
+      "startedAtUtc": "2026-10-31T07:43:53.825Z",
+      "finishedAtUtc": "2026-10-31T07:43:54.193Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-recaps/2026-10",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-07-d206c646-085d-47ca-a74b-41a93391482f",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Rekap masa pajak",
+          "data": {
+            "recap": {
+              "taxPeriod": "2026-10",
+              "invoiceCount": 1,
+              "totalDpp": "100000000.00",
+              "totalPpn": "11000000.00",
+              "totalPpnbm": "0.00",
+              "amountPaid": "0.00",
+              "paymentDifference": "-11000000.00",
+              "paymentStatus": "NOT_RECORDED",
+              "computedAt": "2026-10-31T07:43:54Z"
+            },
+            "invoices": [
+              {
+                "taxInvoiceId": "01a190ea-205e-729b-b1d4-5487aab66f6b",
+                "taxInvoiceNumber": "010.000-26.66000101",
+                "invoiceId": "inv-demo-sample",
+                "projectId": "prj-demo-001",
+                "clientId": null,
+                "status": "NORMAL",
+                "dpp": "100000000.00",
+                "ppn": "11000000.00",
+                "ppnbm": "0.00",
+                "isCounted": true
+              }
+            ],
+            "payments": []
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-08",
+      "requestId": "E1-P6-E1-08-01f8458f-3e71-4bdb-ba31-0cdb6799741f",
+      "startedAtUtc": "2026-10-31T07:43:54.194Z",
+      "finishedAtUtc": "2026-10-31T07:43:54.620Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-payments",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-08-01f8458f-3e71-4bdb-ba31-0cdb6799741f",
+          "Authorization": "[REDACTED]"
+        },
+        "body": {
+          "taxPeriod": "2026-10",
+          "taxYear": "2026",
+          "amountPaid": "5500000.00",
+          "billingId": "BILL-INTEGRASI-001",
+          "eBillingFile": {
+            "file": "e-billing.pdf",
+            "bytes": 1515
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Pembayaran tersimpan",
+          "data": {
+            "taxPaymentId": "01a190ea-44c1-7369-9bd2-1b3319a7ccd2",
+            "status": "INCOMPLETE",
+            "taxPeriod": "2026-10",
+            "paymentDifference": "-5500000.00"
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-11",
+      "requestId": "E1-P6-E1-11-6f57fc4f-5fa1-4eb4-b126-817c06b5fcb2",
+      "startedAtUtc": "2026-10-31T07:43:54.621Z",
+      "finishedAtUtc": "2026-10-31T07:43:55.147Z",
+      "request": {
+        "method": "PATCH",
+        "url": "http://127.0.0.1:8087/api/v1/tax-payments/01a190ea-44c1-7369-9bd2-1b3319a7ccd2",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-11-6f57fc4f-5fa1-4eb4-b126-817c06b5fcb2",
+          "Authorization": "[REDACTED]"
+        },
+        "body": {
+          "ntpn": "NTPN-INTEGRASI-001",
+          "paymentProofFile": {
+            "file": "bukti-pembayaran.pdf",
+            "bytes": 1542
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Pembayaran Terkonfirmasi",
+          "data": {
+            "taxPaymentId": "01a190ea-44c1-7369-9bd2-1b3319a7ccd2",
+            "status": "CONFIRMED",
+            "paymentStatus": "CONFIRMED"
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "V-03",
+      "requestId": "E1-P6-V-03-72be8fb2-dd67-4c7a-bf7b-91d397148fcc",
+      "startedAtUtc": "2026-10-31T07:43:55.620Z",
+      "finishedAtUtc": "2026-10-31T07:43:56.079Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-payments",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-V-03-72be8fb2-dd67-4c7a-bf7b-91d397148fcc",
+          "Authorization": "[REDACTED]"
+        },
+        "body": {
+          "taxPeriod": "2026-10",
+          "taxYear": "2026",
+          "amountPaid": "5500000.00",
+          "billingId": "BILL-INTEGRASI-002",
+          "ntpn": "NTPN-INTEGRASI-001",
+          "eBillingFile": {
+            "file": "e-billing.pdf",
+            "bytes": 1515
+          },
+          "paymentProofFile": {
+            "file": "bukti-pembayaran.pdf",
+            "bytes": 1542
+          }
+        }
+      },
+      "response": {
+        "status": 409,
+        "body": {
+          "code": "409",
+          "message": "NTPN sudah pernah digunakan",
+          "data": null,
+          "errorCode": "DUPLICATE_NTPN"
+        }
+      },
+      "expectedStatus": 409,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "V-04",
+      "requestId": "E1-P6-V-04-22bb7700-4d1b-4b01-9059-3d2ae8986b3e",
+      "startedAtUtc": "2026-10-31T07:43:56.640Z",
+      "finishedAtUtc": "2026-10-31T07:43:57.127Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-payments",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-V-04-22bb7700-4d1b-4b01-9059-3d2ae8986b3e",
+          "Authorization": "[REDACTED]"
+        },
+        "body": {
+          "taxPeriod": "2026-10",
+          "taxYear": "2026",
+          "amountPaid": "5500000.01",
+          "billingId": "BILL-INTEGRASI-003",
+          "eBillingFile": {
+            "file": "e-billing.pdf",
+            "bytes": 1515
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "body": {
+          "code": "400",
+          "message": "Jumlah setor melebihi total PPN (lebih setor Rp 0,01). Sisa yang boleh disetor: Rp 5.500.000,00.",
+          "data": null,
+          "errorCode": "INVALID_PAYMENT"
+        }
+      },
+      "expectedStatus": 400,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-09-PDF",
+      "requestId": "E1-P6-E1-09-PDF-172e02c1-373d-4872-b5f8-fd599ac9f597",
+      "startedAtUtc": "2026-10-31T07:43:57.590Z",
+      "finishedAtUtc": "2026-10-31T07:43:58.095Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-recaps/2026-10/export?format=pdf",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-09-PDF-172e02c1-373d-4872-b5f8-fd599ac9f597",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "file": "E1-09-PDF.pdf",
+          "bytes": 3543,
+          "sha256": "0057e8a8596e920d8b7e2fa41134066606106beb1cacc36c645b26a553e98ed6",
+          "contentType": "application/pdf"
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-09-XLSX",
+      "requestId": "E1-P6-E1-09-XLSX-830f884e-ec02-4963-a49d-b46c7a82df11",
+      "startedAtUtc": "2026-10-31T07:43:58.095Z",
+      "finishedAtUtc": "2026-10-31T07:43:58.682Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-recaps/2026-10/export?format=xlsx",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-09-XLSX-830f884e-ec02-4963-a49d-b46c7a82df11",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "file": "E1-09-XLSX.xlsx",
+          "bytes": 7833,
+          "sha256": "8f52f4e666bef3574541aa1738c57e7cec7293a0c7c8c6ff60eb8c4da3021dd2",
+          "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "E1-10",
+      "requestId": "E1-P6-E1-10-f542d41e-258f-4901-803e-d1c5b17324a8",
+      "startedAtUtc": "2026-10-31T07:43:58.682Z",
+      "finishedAtUtc": "2026-10-31T07:43:59.098Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax/summary?taxPeriod=2026-10&projectId=prj-demo-001",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-E1-10-f542d41e-258f-4901-803e-d1c5b17324a8",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "code": "200",
+          "message": "Ringkasan pajak",
+          "data": {
+            "taxPeriod": "2026-10",
+            "invoiceCount": 1,
+            "totalDpp": "100000000.00",
+            "totalPpn": "11000000.00",
+            "totalPpnbm": "0.00",
+            "paymentStatus": "CONFIRMED"
+          }
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "F1-GAP-01",
+      "requestId": "E1-P6-F1-GAP-01-4ee320c4-0a99-48f7-bbf5-ee46630ab8b1",
+      "startedAtUtc": "2026-10-31T07:43:59.098Z",
+      "finishedAtUtc": "2026-10-31T07:43:59.102Z",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:4100/accounts",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-GAP-01-4ee320c4-0a99-48f7-bbf5-ee46630ab8b1",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "employeeId": "01929b4a-5f10-7a22-9d44-3c8f1b2e7a90",
+          "roleCode": "EMPLOYEE",
+          "username": "e1.test.1793432639098"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "accountId": "01a190ea-567c-7639-8fa2-cb843016860b",
+          "employeeId": "01929b4a-5f10-7a22-9d44-3c8f1b2e7a90",
+          "username": "e1.test.1793432639098",
+          "email": "e1.test.1793432639098@anaheimnimbus.co.id",
+          "name": "Pegawai Baru (Demo)",
+          "roleCode": "EMPLOYEE",
+          "status": "active",
+          "createdAt": "2026-10-31T07:43:59.101Z"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": false,
+      "observation": true
+    },
+    {
+      "id": "F1-GAP-02",
+      "requestId": "E1-P6-F1-GAP-02-0ad36445-9033-41a4-8dbe-48760097bf21",
+      "startedAtUtc": "2026-10-31T07:43:59.102Z",
+      "finishedAtUtc": "2026-10-31T07:43:59.104Z",
+      "request": {
+        "method": "PUT",
+        "url": "http://127.0.0.1:4100/accounts/01a190ea-567c-7639-8fa2-cb843016860b",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-GAP-02-0ad36445-9033-41a4-8dbe-48760097bf21",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "inactive"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "accountId": "01a190ea-567c-7639-8fa2-cb843016860b",
+          "employeeId": "01929b4a-5f10-7a22-9d44-3c8f1b2e7a90",
+          "username": "e1.test.1793432639098",
+          "email": "e1.test.1793432639098@anaheimnimbus.co.id",
+          "name": "Pegawai Baru (Demo)",
+          "roleCode": "EMPLOYEE",
+          "status": "inactive",
+          "createdAt": "2026-10-31T07:43:59.101Z"
+        }
+      },
+      "expectedStatus": 401,
+      "expectationMet": false,
+      "observation": true
+    },
+    {
+      "id": "F1-STATUS-SETUP",
+      "requestId": "E1-P6-F1-STATUS-SETUP-3458b98e-17ec-449a-9e68-34115dbf7ebe",
+      "startedAtUtc": "2026-10-31T07:43:59.104Z",
+      "finishedAtUtc": "2026-10-31T07:43:59.117Z",
+      "request": {
+        "method": "PUT",
+        "url": "http://127.0.0.1:4100/accounts/01929b4a-83a1-7d55-8b12-9f7c2e4a6b10",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-STATUS-SETUP-3458b98e-17ec-449a-9e68-34115dbf7ebe",
+          "Authorization": "[REDACTED]",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "inactive"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "accountId": "01929b4a-83a1-7d55-8b12-9f7c2e4a6b10",
+          "employeeId": "01929b4a-5f10-7a22-9d44-3c8f1b2e7a92",
+          "username": "dwi.saputra",
+          "email": "dwi.saputra@anaheimnimbus.co.id",
+          "passwordHash": "[REDACTED]",
+          "roleCode": "EMPLOYEE",
+          "status": "inactive",
+          "position": "Staf Operasional",
+          "name": "Dwi Saputra"
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "A-05",
+      "requestId": "E1-P6-A-05-e7e58746-fc9c-4ef3-8ffc-0be17b8df40e",
+      "startedAtUtc": "2026-10-31T07:43:59.117Z",
+      "finishedAtUtc": "2026-10-31T07:43:59.400Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-A-05-e7e58746-fc9c-4ef3-8ffc-0be17b8df40e",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 403,
+        "body": {
+          "code": "403",
+          "message": "Akun F-1 terkunci atau nonaktif",
+          "data": null,
+          "errorCode": "FORBIDDEN"
+        }
+      },
+      "expectedStatus": 403,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "F1-STATUS-RESTORE",
+      "requestId": "E1-P6-F1-STATUS-RESTORE-0a042a2d-c4a3-4552-8d36-afb0b6e987b0",
+      "startedAtUtc": "2026-10-31T07:43:59.400Z",
+      "finishedAtUtc": "2026-10-31T07:43:59.416Z",
+      "request": {
+        "method": "PUT",
+        "url": "http://127.0.0.1:4100/accounts/01929b4a-83a1-7d55-8b12-9f7c2e4a6b10",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-F1-STATUS-RESTORE-0a042a2d-c4a3-4552-8d36-afb0b6e987b0",
+          "Authorization": "[REDACTED]",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "active"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "accountId": "01929b4a-83a1-7d55-8b12-9f7c2e4a6b10",
+          "employeeId": "01929b4a-5f10-7a22-9d44-3c8f1b2e7a92",
+          "username": "dwi.saputra",
+          "email": "dwi.saputra@anaheimnimbus.co.id",
+          "passwordHash": "[REDACTED]",
+          "roleCode": "EMPLOYEE",
+          "status": "active",
+          "position": "Staf Operasional",
+          "name": "Dwi Saputra"
+        }
+      },
+      "expectedStatus": 200,
+      "expectationMet": true,
+      "observation": false
+    },
+    {
+      "id": "UI-03",
+      "requestId": "E1-P6-UI-6fa05956-5960-4a9a-bdaa-90bf50cdaadf",
+      "request": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices/extractions"
+      },
+      "response": {
+        "status": 503,
+        "body": {
+          "code": "503",
+          "message": "Layanan D-2 tidak dapat dihubungi",
+          "data": null,
+          "errorCode": "D2_UNAVAILABLE"
+        }
+      }
+    },
+    {
+      "id": "A-06",
+      "requestId": "E1-P6-A-06-e82bfc4c-b698-43ea-99c2-fe50c7907de7",
+      "startedAtUtc": "2026-10-31T07:44:07.014Z",
+      "finishedAtUtc": "2026-10-31T07:44:09.325Z",
+      "request": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8087/api/v1/tax-invoices",
+        "headers": {
+          "Accept": "application/json",
+          "X-Request-ID": "E1-P6-A-06-e82bfc4c-b698-43ea-99c2-fe50c7907de7",
+          "Authorization": "[REDACTED]"
+        },
+        "body": null
+      },
+      "response": {
+        "status": 503,
+        "body": {
+          "code": "503",
+          "message": "Layanan F-1 tidak tersedia; coba kembali setelah layanan pulih",
+          "data": null,
+          "errorCode": "F1_UNAVAILABLE"
+        }
+      },
+      "expectedStatus": 503,
+      "expectationMet": true,
+      "observation": false
+    }
+  ],
+  "checks": [
+    {
+      "name": "F1-01: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-01: JWT tiga segmen memiliki exp dan accountId/roleCode",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-02: HTTP 401",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-03: HTTP 403",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-04: HTTP 403",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-05: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "A-01: HTTP 401",
+      "result": "PASS"
+    },
+    {
+      "name": "A-01: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "A-02: HTTP 401",
+      "result": "PASS"
+    },
+    {
+      "name": "A-02: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "A-03: HTTP 403",
+      "result": "PASS"
+    },
+    {
+      "name": "A-03: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "A-04: HTTP 401",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-01: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-01: proyek nested dan tanggal invoice contoh",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-02: HTTP 404",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-03: HTTP 401",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-08: HTTP 201",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-09: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-09: invoice baru benar-benar tersimpan dan nominal konsisten",
+      "result": "PASS"
+    },
+    {
+      "name": "D2-10: HTTP 409",
+      "result": "PASS"
+    },
+    {
+      "name": "UI: login demo E-1 tidak tampil pada profil HTTP",
+      "result": "PASS"
+    },
+    {
+      "name": "UI: login melalui F-1 berhasil",
+      "result": "PASS"
+    },
+    {
+      "name": "UI-01: ekstraksi sesuai tanggal Oktober, PPN dan PPnBM jasa",
+      "result": "PASS"
+    },
+    {
+      "name": "UI-01: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "UI-02: tersimpan dengan identitas asli F-1 dan invoice D-2",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-03: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-04: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-04: relasi invoice/proyek utuh; klien yang tidak dikirim tetap null",
+      "result": "PASS"
+    },
+    {
+      "name": "V-01: HTTP 409",
+      "result": "PASS"
+    },
+    {
+      "name": "V-01: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "V-02: HTTP 404",
+      "result": "PASS"
+    },
+    {
+      "name": "V-02: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-05: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-06: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-06: riwayat CREATE dan UPDATE tercatat",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-07: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-07: total PPN sesuai faktur",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-08: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-08: pembayaran awal Draft",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-11: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-11: pembayaran menjadi CONFIRMED",
+      "result": "PASS"
+    },
+    {
+      "name": "V-03: HTTP 409",
+      "result": "PASS"
+    },
+    {
+      "name": "V-03: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "V-04: HTTP 400",
+      "result": "PASS"
+    },
+    {
+      "name": "V-04: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-09-PDF: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-09-XLSX: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-10: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "E1-10: agregat proyek cocok dan tidak membuka rincian pembayaran",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-STATUS-SETUP: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "A-05: HTTP 403",
+      "result": "PASS"
+    },
+    {
+      "name": "F1-STATUS-RESTORE: HTTP 200",
+      "result": "PASS"
+    },
+    {
+      "name": "UI-03: D-2 putus ditangani 503 dan Simpan dinonaktifkan",
+      "result": "PASS"
+    },
+    {
+      "name": "UI-03: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    },
+    {
+      "name": "A-06: HTTP 503",
+      "result": "PASS"
+    },
+    {
+      "name": "A-06: database, audit dan berkas tidak berubah",
+      "result": "PASS"
+    }
+  ],
+  "stateChecks": [
+    {
+      "id": "A-01",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "unchanged": true
+    },
+    {
+      "id": "A-02",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "unchanged": true
+    },
+    {
+      "id": "A-03",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "unchanged": true
+    },
+    {
+      "id": "UI-01",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "item_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          }
+        },
+        "files": []
+      },
+      "unchanged": true
+    },
+    {
+      "id": "V-01",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "ff11f6c36d87934ff5a537dea403d1b42fdd1ad89dcaddc00ff7ae2dcbe5a6ac"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "d6c0ec84b9fe168a8379ceb56cdff5ffafc18c71d55fdf0f517eb31faf84dd0a"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 1,
+            "sha256": "5e1bd7619d6b483ae823fca9262865d063bcf044014af394fd4f58585e0d5913"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "4ff4071fc1af9887937c32224544a5d3ef4ef172b90cbc407e55146e076ca725"
+          }
+        },
+        "files": {
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd"
+        }
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "ff11f6c36d87934ff5a537dea403d1b42fdd1ad89dcaddc00ff7ae2dcbe5a6ac"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "d6c0ec84b9fe168a8379ceb56cdff5ffafc18c71d55fdf0f517eb31faf84dd0a"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 1,
+            "sha256": "5e1bd7619d6b483ae823fca9262865d063bcf044014af394fd4f58585e0d5913"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "4ff4071fc1af9887937c32224544a5d3ef4ef172b90cbc407e55146e076ca725"
+          }
+        },
+        "files": {
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd"
+        }
+      },
+      "unchanged": true
+    },
+    {
+      "id": "V-02",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "ff11f6c36d87934ff5a537dea403d1b42fdd1ad89dcaddc00ff7ae2dcbe5a6ac"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "d6c0ec84b9fe168a8379ceb56cdff5ffafc18c71d55fdf0f517eb31faf84dd0a"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 1,
+            "sha256": "5e1bd7619d6b483ae823fca9262865d063bcf044014af394fd4f58585e0d5913"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "4ff4071fc1af9887937c32224544a5d3ef4ef172b90cbc407e55146e076ca725"
+          }
+        },
+        "files": {
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd"
+        }
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "ff11f6c36d87934ff5a537dea403d1b42fdd1ad89dcaddc00ff7ae2dcbe5a6ac"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "d6c0ec84b9fe168a8379ceb56cdff5ffafc18c71d55fdf0f517eb31faf84dd0a"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 1,
+            "sha256": "5e1bd7619d6b483ae823fca9262865d063bcf044014af394fd4f58585e0d5913"
+          },
+          "pembayaran_pajak": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "4ff4071fc1af9887937c32224544a5d3ef4ef172b90cbc407e55146e076ca725"
+          }
+        },
+        "files": {
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd"
+        }
+      },
+      "unchanged": true
+    },
+    {
+      "id": "V-03",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "unchanged": true
+    },
+    {
+      "id": "V-04",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "unchanged": true
+    },
+    {
+      "id": "UI-03",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "unchanged": true
+    },
+    {
+      "id": "A-06",
+      "before": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "after": {
+        "tables": {
+          "faktur_pajak": {
+            "count": 1,
+            "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+          },
+          "item_faktur": {
+            "count": 1,
+            "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+          },
+          "riwayat_perubahan_faktur": {
+            "count": 2,
+            "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+          },
+          "pembayaran_pajak": {
+            "count": 1,
+            "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+          },
+          "riwayat_perubahan_pembayaran": {
+            "count": 2,
+            "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+          },
+          "rekap_pajak_bulanan": {
+            "count": 1,
+            "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+          }
+        },
+        "files": {
+          "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+          "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+          "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+        }
+      },
+      "unchanged": true
+    }
+  ],
+  "browser": [
+    {
+      "id": "UI-01",
+      "screenshot": "UI-01-pratinjau.png",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-02",
+      "screenshot": "UI-02-tersimpan.png",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-03",
+      "screenshot": "UI-03-d2-putus.png",
+      "result": "PASS"
+    }
+  ],
+  "claimsObserved": {
+    "accountId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+    "roleCode": "ADMIN",
+    "expPresent": true,
+    "issPresent": false,
+    "audPresent": false
+  },
+  "taxInvoiceId": "01a190ea-205e-729b-b1d4-5487aab66f6b",
+  "accountId": "01929b4a-6e2a-7b3f-8c71-0ab4e3d9f2a1",
+  "paymentId": "01a190ea-44c1-7369-9bd2-1b3319a7ccd2",
+  "finalState": {
+    "tables": {
+      "faktur_pajak": {
+        "count": 1,
+        "sha256": "595bf8825fe041bf21d05c959dc5940d1cf7a95b49168ed712903155a651ba2f"
+      },
+      "item_faktur": {
+        "count": 1,
+        "sha256": "fc3e7a2528831a4d7308cb182e3af16085785677dd469ca9ee858aacd6892144"
+      },
+      "riwayat_perubahan_faktur": {
+        "count": 2,
+        "sha256": "762ae4379621f50f60911704ae4ee7fd878e9dfd72b7e47a92709b431eb4bd76"
+      },
+      "pembayaran_pajak": {
+        "count": 1,
+        "sha256": "c4728345a24ddebef88622e55c921dc9a172fde847b43df646269549da78c74e"
+      },
+      "riwayat_perubahan_pembayaran": {
+        "count": 2,
+        "sha256": "44c4c18820d0656ec636214c6df2720794bd327a816dd54913d17930156a06ab"
+      },
+      "rekap_pajak_bulanan": {
+        "count": 1,
+        "sha256": "3d24283b86097de09cf948a56d2b72cf97bb099efec7d262c8917c69f4e90351"
+      }
+    },
+    "files": {
+      "tax/e-billing/01a190ea-44c1-7369-9bd2-1b3319a7ccd2.pdf": "922bf07aa5b850c11bcba9b2625adbaf0635b0b34775d5774878adcf5600d77a",
+      "tax/e-faktur/01a190ea-205e-729b-b1d4-5487aab66f6b.pdf": "f803d9c773a984ec1a237c8e7175327a78e705e3d0a48bbfe98081d0db2d9cbd",
+      "tax/payment-proof/01a190ea-44c1-7369-9bd2-1b3319a7ccd2-5vd78bpt.pdf": "b99f3e35b7e96bbac1f6cd29d9dee7381881a851fb6dff51195af8bcb34ea349"
+    }
+  },
+  "result": "PASS",
+  "finishedAtUtc": "2026-10-31T07:44:10.261Z"
+}

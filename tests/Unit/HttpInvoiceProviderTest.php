@@ -140,4 +140,44 @@ class HttpInvoiceProviderTest extends TestCase
     {
         $this->assertSame([], $this->provider()->catalog());
     }
+
+    public function test_struktur_terkait_resmi_d2_mempertahankan_id_proyek_tanpa_mengarang_klien(): void
+    {
+        $row = $this->invoiceArray();
+        unset($row['projectId'], $row['projectName']);
+        $row['terkait'] = ['projectId' => 'prj-demo-001', 'terminId' => 'trm-demo-sample'];
+        Http::fake([self::BASE.'/*' => Http::response(['status' => 'success', 'data' => $row])]);
+        $invoice = $this->provider()->find('inv-demo-001');
+        $this->assertSame('prj-demo-001', $invoice->projectId);
+        $this->assertNull($invoice->projectName);
+        $this->assertNull($invoice->clientId);
+    }
+
+    public function test_id_proyek_terkait_yang_salah_tipe_atau_bertentangan_ditolak(): void
+    {
+        foreach ([123, ['bad'], 'prj-salah'] as $value) {
+            $row = $this->invoiceArray();
+            $row['terkait'] = ['projectId' => $value];
+            Http::fake([self::BASE.'/*' => Http::response(['data' => $row])]);
+            try {
+                $this->provider()->find('inv-demo-001');
+                $this->fail('Respons tidak valid seharusnya ditolak');
+            } catch (ApiException $e) {
+                $this->assertSame('D2_UNAVAILABLE', $e->errorCode);
+            }
+        }
+    }
+
+    public function test_kesalahan_otorisasi_dan_redirect_d2_tidak_diberi_data_mock(): void
+    {
+        foreach ([401, 403, 302] as $status) {
+            Http::fake([self::BASE.'/*' => Http::response([], $status)]);
+            try {
+                $this->provider()->find('inv-demo-001');
+                $this->fail('Upstream gagal harus ditolak');
+            } catch (ApiException $e) {
+                $this->assertSame(503, $e->status);
+            }
+        }
+    }
 }
