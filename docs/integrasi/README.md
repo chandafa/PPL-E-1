@@ -1,5 +1,7 @@
 # Integrasi E-1 dengan repo F-1 dan D-2
 
+**Mode default terbaru:** `php artisan integration` menjalankan F-1 dan E-1 dengan dua invoice dari SQLite **dummy D-2 lokal**, beserta PDF pasangan. Server D-2 tidak diperlukan. Lihat [panduan dummy](../panduan/D2_SOURCE_DEMO.md). Bagian dan bukti di bawah khusus integrasi **HTTP D-2**, yang sekarang dipilih dengan `--d2=http`.
+
 [README proyek](../../README.md) · [Temuan upstream](TEMUAN_F1_D2.md) · [Bukti terbaru](bukti/2026-10-31T07-43-25-100Z/bukti-http.json) · [Koleksi Postman](../postman/DEP_D2_F1_Testing.postman_collection.json)
 
 Hasil **31 Oktober 2026, diperiksa ulang pada konfigurasi utama**: E-1 Laravel benar-benar memanggil server JWT demo F-1 dan backend database D-2 melalui HTTP. Login, pencatatan e-Faktur, relasi proyek, pembayaran, rekap, serta ekspor diuji. Ini integrasi lokal terhadap implementasi repo resmi, **belum deployment produksi, review dua arah, atau pengujian aplikasi E-2**. Kode upstream tetap bersih.
@@ -19,12 +21,12 @@ Konfigurasi .env utama sekarang memakai login/cek akun F-1 dan HttpInvoiceProvid
 Untuk menjalankan ketiga layanan pada Windows atau Linux dari folder PPL-E-1:
 
 ```powershell
-php artisan integration
+php artisan integration --d2=http
 ```
 
-Buka http://127.0.0.1:8087/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah `php artisan integration` boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan `php artisan integration:stop` untuk berhenti. Alias Composer `composer integration` dan `composer integration:stop` tetap tersedia. Windows memakai PowerShell; Linux memakai Bash/nvm, `setsid`, `nohup`, PHP `posix`, dan `/proc`. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
+Buka http://127.0.0.1:8087/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah `php artisan integration --d2=http` boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan `php artisan integration:stop` untuk berhenti. Alias Composer `composer integration -- --d2=http` dan `composer integration:stop` tetap tersedia. Windows memakai PowerShell; Linux memakai Bash/nvm, `setsid`, `nohup`, PHP `posix`, dan `/proc`. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
 
-Di Linux, pasang nvm pada akun pengguna dan siapkan versi `default` (`nvm alias default <versi-terpasang>`). Launcher memuat `$NVM_DIR/nvm.sh` atau `~/.nvm/nvm.sh`, mengikuti `.nvmrc` F-1/E-1 jika tersedia. Checkout `../PPL_F1` dan `../PPL-D-2` diprioritaskan jika ada; jika tidak, dipakai `../_integrasi/F1` dan `../_integrasi/D2` (di-clone bila belum ada). Gunakan `F1_PATH=/lokasi/F1 D2_PATH=/lokasi/D2 php artisan integration` untuk lokasi lain. Log dan PID tersimpan pada direktori runtime privat yang sama. Penghentian memeriksa identitas PID dari `/proc`, sehingga PID yang telah dipakai ulang tidak dihentikan. Instruksi PowerShell di bawah tetap khusus Windows; profil utama Linux menggunakan perintah Artisan di atas.
+Di Linux, pasang nvm pada akun pengguna dan siapkan versi `default` (`nvm alias default <versi-terpasang>`). Launcher memuat `$NVM_DIR/nvm.sh` atau `~/.nvm/nvm.sh`, mengikuti `.nvmrc` F-1/E-1 jika tersedia. Checkout `../PPL_F1` dan `../PPL-D-2` diprioritaskan jika ada; jika tidak, dipakai `../_integrasi/F1` dan `../_integrasi/D2` (di-clone bila belum ada). Gunakan `F1_PATH=/lokasi/F1 D2_PATH=/lokasi/D2 php artisan integration --d2=http` untuk lokasi lain. Log dan PID tersimpan pada direktori runtime privat yang sama. Penghentian memeriksa identitas PID dari `/proc`, sehingga PID yang telah dipakai ulang tidak dihentikan. Instruksi PowerShell di bawah tetap khusus Windows; profil utama Linux menggunakan perintah Artisan di atas.
 
 Persiapan awal E-1/dependensi/PostgreSQL tetap diperlukan pada laptop baru sebagaimana bagian Menyiapkan laptop di bawah. Launcher otomatis mengunduh checkout F-1/D-2 yang telah diuji ke `../_integrasi`, memasang dependensinya bila belum ada, lalu menjalankan ketiga layanan. enable-integration.php otomatis menyiapkan runtime bila belum ada, mengaktifkan hanya kunci F1_*/D2_*/E1_DEV_LOGIN pada .env, membuat cadangan privat, serta mempertahankan APP_ENV, APP_KEY, database, dan storage utama. Aktivasi demo ini ditolak di production. Jalankan php artisan migrate pada instalasi E-1 yang belum memiliki schema terbaru.
 
@@ -45,7 +47,7 @@ folder-kerja/
 ```
 
 1. Di E-1, jalankan `composer install`, `npm ci`, `npm run build`. Siapkan .env PostgreSQL dan APP_KEY sesuai README utama, lalu `php artisan config:clear`.
-2. Jalankan `composer integration` untuk aplikasi utama. Launcher otomatis clone F-1 dan D-2 ke struktur di atas (pada revisi pada tabel), memasang dependensi, lalu menjalankan ketiga layanan. Bila checkout tersebut sudah ada, launcher tidak mengubahnya. Jangan menyalin source F-1/D-2 ke app E-1.
+2. Jalankan `composer integration -- --d2=http` untuk aplikasi utama. Launcher otomatis clone F-1 dan D-2 ke struktur di atas (pada revisi pada tabel), memasang dependensi, lalu menjalankan ketiga layanan. Bila checkout tersebut sudah ada, launcher tidak mengubahnya. Jangan menyalin source F-1/D-2 ke app E-1.
 3. Untuk profil uji terpisah, dari E-1 jalankan:
 
 ```powershell
@@ -59,7 +61,7 @@ Port 4100/8026/8087 harus kosong; port 8080 tidak digunakan oleh launcher integr
 
 ## Mencoba melalui browser
 
-Untuk profil uji terpisah maupun aplikasi utama, buka http://127.0.0.1:8087/login. Gunakan akun seed demo resmi **super.admin / Password123!** (ADMIN) atau **yuril.salsabila / Password123!** (COO). Ini kredensial fiktif publik dari source F-1, bukan akun produksi. Login demo E-1 dimatikan pada profil ini.
+Untuk profil uji terpisah, buka http://127.0.0.1:8087/login. Untuk aplikasi utama, gunakan composer integration -- --d2=http dan port 8087. Gunakan akun seed demo resmi **super.admin / Password123!** (ADMIN) atau **yuril.salsabila / Password123!** (COO). Ini kredensial fiktif publik dari source F-1, bukan akun produksi. Login demo E-1 dimatikan pada profil ini.
 
 Di Catat e-Faktur, masukkan ID invoice D-2 **inv-demo-sample**. Invoice seed bertanggal **11 Oktober 2026**, DPP 100000000.00, PPN 11000000.00, proyek prj-demo-001. PDF pasangannya tersedia di [input bukti](bukti/2026-10-31T07-43-25-100Z/input/manifest.json), khususnya [efaktur.pdf](bukti/2026-10-31T07-43-25-100Z/input/efaktur.pdf). Invoice tersebut untuk jasa; PPnBM 0.00. Pilih masa **2026-10** ketika membaca rekap. Pada DB baru, lakukan Periksa PDF lalu Simpan Faktur.
 

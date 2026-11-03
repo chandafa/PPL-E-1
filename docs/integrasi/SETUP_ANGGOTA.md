@@ -1,6 +1,6 @@
 # Menjalankan E-1, F-1, dan D-2 di laptop anggota
 
-Satu perintah **composer integration** menyiapkan F-1 dan D-2 bila belum ada, memasang dependensi keduanya, lalu menyalakan ketiga layanan. Instalasi E-1 dan konfigurasi PostgreSQL tetap dilakukan sekali pada setiap laptop. Panduan ini untuk Windows/PowerShell; versi PHP, Composer, Node/npm, Git, dan PostgreSQL mengikuti [kebutuhan proyek](../../README.md#kebutuhan-sebelum-instalasi).
+Satu perintah **composer integration** menyiapkan F-1 lalu menyalakan F-1 dan E-1 dengan dua invoice dari SQLite dummy D-2 lokal dan PDF pasangan. Untuk menjalankan server D-2 HTTP, gunakan `php artisan integration --d2=http`; bagian repo D-2 di bawah hanya berlaku pada opsi HTTP tersebut. Instalasi E-1 dan konfigurasi PostgreSQL tetap dilakukan sekali pada setiap laptop. Panduan ini untuk Windows/PowerShell; versi PHP, Composer, Node/npm, Git, dan PostgreSQL mengikuti [kebutuhan proyek](../../README.md#kebutuhan-sebelum-instalasi).
 
 ## Siapkan kode terbaru
 
@@ -21,7 +21,7 @@ folder-kerja/
   PPL-E-1/
   _integrasi/
     F1/
-    D2/
+    D2/    # hanya --d2=http
 ```
 
 Launcher mengambil F-1 **0feb37a** dan D-2 **b93fc4d**, lalu menjalankan `npm ci --ignore-scripts` untuk F-1 dan `composer install` untuk D-2. Repo F-1 menyediakan server demo Node/JWT, sedangkan D-2 backend Laravel/database. Launcher memakai implementasi resmi tersebut; kode/kontrak/seed kedua kelompok tidak ditambal.
@@ -71,9 +71,9 @@ php artisan config:clear
 php artisan migrate
 ```
 
-Key cukup dibuat sekali. Untuk mode integrasi ini tidak perlu menjalankan DemoSeeder; invoice diambil melalui HTTP D-2. Data awal D-2 dipasang oleh launcher saat runtime pertama kali disiapkan. Siapkan database baru/kosong jika ingin mencoba pencatatan pertama tanpa bentrok dengan faktur yang sudah aktif.
+Key cukup dibuat sekali. Tidak perlu menjalankan DemoSeeder; dua invoice dari SQLite dummy sumber dan PDF dipasang otomatis oleh launcher tanpa membuat transaksi faktur/pembayaran E-1. Siapkan database baru/kosong jika ingin mencoba pencatatan pertama tanpa bentrok dengan faktur yang sudah aktif.
 
-## Jalankan ketiganya sekaligus
+## Jalankan aplikasi dan dummy
 
 Masih dari folder PPL-E-1:
 
@@ -86,11 +86,11 @@ composer integration
 | E-1 / login | http://127.0.0.1:8087/login |
 | Swagger E-1 | http://127.0.0.1:8087/docs |
 | F-1 | http://127.0.0.1:4100 |
-| D-2 | http://127.0.0.1:8026 |
+| D-2 dummy | Di dalam E-1; tidak memerlukan port/server sendiri |
 
-Akun seed fiktif F-1: **super.admin**, kata sandi **Password123!**. Launcher mengaktifkan F-1/D-2 pada .env E-1, mematikan login demo E-1, dan menjalankan server di background. Tidak perlu php artisan serve atau npm run dev tambahan. Jika composer integration dipanggil lagi, layanan yang sudah aktif dipertahankan; hanya layanan yang berhenti yang dinyalakan.
+Akun seed fiktif F-1: **super.admin**, kata sandi **Password123!**. Launcher mengaktifkan F-1 dan `D2_DRIVER=mock` pada .env E-1, mematikan login demo E-1, dan menjalankan server di background. Tidak perlu php artisan serve atau npm run dev tambahan. Jika composer integration dipanggil lagi, layanan yang sudah aktif dipertahankan; hanya layanan yang berhenti yang dinyalakan.
 
-Pada laptop baru, invoice seed D-2 adalah **inv-demo-sample**, tanggal **11 Oktober 2026**, masa **2026-10**. Gunakan [PDF pasangannya](bukti/2026-10-31T07-43-25-100Z/input/efaktur.pdf). Jangan menganggap ID invoice hasil generate di laptop lain otomatis ada pada database sendiri. Lihat [langkah uji kelompok](UJI_KELOMPOK.md) untuk proses Periksa PDF, Simpan, rekap, dan pembayaran.
+Invoice dummy adalah **inv-demo-001** dan **inv-demo-sample**, masa Oktober–November 2026. Gunakan PDF di `storage/app/private/d2-source-samples`; lihat [panduan dummy](../panduan/D2_SOURCE_DEMO.md). Invoice `inv-demo-sample` dan bukti HTTP lama hanya untuk mode `--d2=http`. Jangan menganggap ID invoice hasil generate di laptop lain otomatis ada pada database sendiri. Lihat [langkah uji kelompok](UJI_KELOMPOK.md) untuk proses Periksa PDF, Simpan, rekap, dan pembayaran.
 
 Untuk berhenti:
 

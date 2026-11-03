@@ -8,6 +8,11 @@ use Symfony\Component\Process\Process;
 $repo = dirname(__DIR__);
 require $repo.'/vendor/autoload.php';
 
+$d2Driver = $argv[1] ?? 'http';
+if (! in_array($d2Driver, ['mock', 'http'], true)) {
+    throw new RuntimeException('Driver D-2 harus mock atau http.');
+}
+
 /** @return list<int> */
 function occupiedIntegrationPorts(): array
 {
@@ -78,11 +83,13 @@ if (($profile['F1_JWT_SECRET'] ?? null) !== $runtime['jwtSecret']) {
     $profile = Dotenv::parse(file_get_contents($repo.'/.env.integration'));
 }
 $environment = file_get_contents($repo.'/.env');
+$profile['D2_DRIVER'] = $d2Driver;
+$profile['D2_MOCK_DATASET'] = 'sqlite';
 $keys = [
     'F1_API_ENABLED', 'F1_BASE_URL', 'F1_LOGIN_PATH', 'F1_ROLE_PATH', 'F1_CHECK_ACCOUNT', 'F1_TIMEOUT',
     'F1_JWT_ALGO', 'F1_JWT_SECRET', 'F1_JWT_PUBLIC_KEY_PATH', 'F1_JWT_ISSUER', 'F1_JWT_AUDIENCE', 'F1_JWT_LEEWAY',
     'F1_CLAIM_AKUN_ID', 'F1_CLAIM_ROLE', 'E1_DEV_LOGIN',
-    'D2_DRIVER', 'D2_BASE_URL', 'D2_INVOICE_PATH', 'D2_TIMEOUT',
+    'D2_DRIVER', 'D2_MOCK_DATASET', 'D2_BASE_URL', 'D2_INVOICE_PATH', 'D2_TIMEOUT',
 ];
 foreach ($keys as $key) {
     $value = (string) ($profile[$key] ?? '');
@@ -106,5 +113,5 @@ if ($environment === file_get_contents($repo.'/.env')) {
 $backup = $runtime['directory'].'/main-before-enable-'.date('Ymd_His').'-'.bin2hex(random_bytes(3)).'.env';
 copy($repo.'/.env', $backup);
 file_put_contents($repo.'/.env', $environment);
-echo 'Koneksi F-1/D-2 aktif pada .env E-1: login F-1, cek akun aktif, invoice HTTP. Login demo E-1 mati.'.PHP_EOL;
+echo 'Koneksi aktif: login/cek akun F-1; D-2 '.($d2Driver === 'mock' ? 'dummy lokal (2 invoice SQLite)' : 'HTTP').'. Login demo E-1 mati.'.PHP_EOL;
 echo 'Database, storage, dan APP_KEY utama tetap. Cadangan .env tersimpan privat di runtime integrasi.'.PHP_EOL;

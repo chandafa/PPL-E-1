@@ -1,0 +1,194 @@
+{
+  "info": {
+    "name": "E-1 saja - snapshot D-2 database.sqlite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Jalankan php artisan demo:d2 dan composer serve. APP_ENV=local, D2_DRIVER=mock, D2_MOCK_DATASET=sqlite, E1_DEV_LOGIN=true, F1_API_ENABLED=false, F1_CHECK_ACCOUNT=false. Seluruh request hanya ke E-1. Pilih file PDF pasangan pada request multipart. Detail setelah penyimpanan menggunakan ID respons E-1. Pengiriman Simpan ulang tanpa penggantian ditolak bila faktur aktif sudah ada. Koleksi ini belum dieksekusi dengan runner Postman; alur setara diverifikasi melalui tes API dan browser."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "e1BaseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "key": "invoiceId",
+      "value": "inv-demo-001"
+    },
+    {
+      "key": "taxInvoiceId",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Login demo E-1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/dev/f1/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"akunId\": \"AKN-0002\", \"kodePeran\": \"Admin\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"token\", pm.response.json().data.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Semua invoice sumber simulasi",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/ui/d2/invoices/all"
+      }
+    },
+    {
+      "name": "03 Invoice siap dicatat",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/ui/d2/invoices"
+      }
+    },
+    {
+      "name": "04 Detail sumber lengkap",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/ui/d2/invoices/{{invoiceId}}"
+      }
+    },
+    {
+      "name": "05 Periksa PDF",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/v1/tax-invoices/extractions",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "invoiceId",
+              "type": "text",
+              "value": "{{invoiceId}}"
+            },
+            {
+              "key": "eFakturFile",
+              "type": "file",
+              "src": null,
+              "description": "Pilih storage/app/private/d2-source-samples/efaktur-inv-demo-001.pdf"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "06 Simpan Faktur",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/v1/tax-invoices/outgoing",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "invoiceId",
+              "type": "text",
+              "value": "{{invoiceId}}"
+            },
+            {
+              "key": "eFakturFile",
+              "type": "file",
+              "src": null,
+              "description": "Pilih storage/app/private/d2-source-samples/efaktur-inv-demo-001.pdf"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"taxInvoiceId\", pm.response.json().data.taxInvoiceId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Detail hasil E-1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{e1BaseUrl}}/api/v1/tax-invoices/{{taxInvoiceId}}"
+      }
+    }
+  ]
+}

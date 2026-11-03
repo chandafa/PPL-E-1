@@ -2,8 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Services\Auth\DevTokenIssuer;
 use App\Models\Invoice;
+use App\Services\Auth\DevTokenIssuer;
+use Database\Seeders\ModulD2Seeder;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -24,7 +25,7 @@ class DemoInvoiceCatalogTest extends TestCase
         $this->assertDatabaseCount('tax_parameters', 1);
         $this->assertDatabaseCount('invoices', 1);
         $this->assertDatabaseCount('invoice_histories', 1);
-        $this->assertNotContains('project_name', Schema::getColumnListing('contracts'));
+        $this->assertContains('project_name', Schema::getColumnListing('contracts'));
         $this->assertNotContains('client_id', Schema::getColumnListing('invoices'));
         $this->assertNotContains('client_name', Schema::getColumnListing('invoices'));
         $this->assertDatabaseHas('invoices', [
@@ -33,7 +34,7 @@ class DemoInvoiceCatalogTest extends TestCase
             'dpp_amount' => 100000000,
             'ppn_amount' => 11000000,
         ]);
-        $this->seed(\Database\Seeders\ModulD2Seeder::class);
+        $this->seed(ModulD2Seeder::class);
         $this->assertDatabaseCount('contracts', 3);
         $this->assertDatabaseCount('termins', 4);
         $this->assertDatabaseCount('invoices', 1);

@@ -1,0 +1,145 @@
+{
+    "source": {
+        "file": "database.sqlite",
+        "sha256": "98557394b4aebef3dfbcf1e674cb6715e8f6febdcbee9fbb924d361a43c9221e"
+    },
+    "tables": {
+        "contracts": [
+            {
+                "contract_id": "ktr-demo-001",
+                "project_id": "prj-demo-001",
+                "contract_number": "KTR/2026/001",
+                "contract_value": "500000000.00",
+                "created_by": "emp-demo-007",
+                "created_at": "2026-10-08 03:15:00",
+                "updated_at": "2026-10-28 03:00:24"
+            },
+            {
+                "contract_id": "ktr-demo-004",
+                "project_id": "prj-demo-002",
+                "contract_number": "KTR/2026/004",
+                "contract_value": "80000000.00",
+                "created_by": "emp-demo-007",
+                "created_at": "2026-10-08 03:15:00",
+                "updated_at": "2026-10-28 03:00:24"
+            },
+            {
+                "contract_id": "ktr-demo-sample",
+                "project_id": "prj-demo-001",
+                "contract_number": "KTR/2026/SAMPLE",
+                "contract_value": "200000000.00",
+                "created_by": "emp-demo-007",
+                "created_at": "2026-10-01 00:00:00",
+                "updated_at": "2026-10-28 03:00:24"
+            }
+        ],
+        "termins": [
+            {
+                "termin_id": "trm-demo-001",
+                "contract_id": "ktr-demo-001",
+                "termin_number": 1,
+                "termin_value": "100000000.00",
+                "due_date": "2026-10-15",
+                "status": "SIAP_DITAGIH",
+                "created_at": "2026-10-28 03:00:24",
+                "updated_at": "2026-10-28 03:00:24"
+            },
+            {
+                "termin_id": "trm-demo-002",
+                "contract_id": "ktr-demo-001",
+                "termin_number": 2,
+                "termin_value": "150000000.00",
+                "due_date": "2026-12-15",
+                "status": "SUDAH_DITAGIHKAN",
+                "created_at": "2026-10-28 03:00:24",
+                "updated_at": "2026-10-28 03:23:30"
+            },
+            {
+                "termin_id": "trm-demo-003",
+                "contract_id": "ktr-demo-004",
+                "termin_number": 1,
+                "termin_value": "80000000.00",
+                "due_date": "2026-10-20",
+                "status": "SIAP_DITAGIH",
+                "created_at": "2026-10-28 03:00:24",
+                "updated_at": "2026-10-28 03:00:24"
+            },
+            {
+                "termin_id": "trm-demo-sample",
+                "contract_id": "ktr-demo-sample",
+                "termin_number": 1,
+                "termin_value": "100000000.00",
+                "due_date": "2026-10-10",
+                "status": "SUDAH_DITAGIHKAN",
+                "created_at": "2026-10-28 03:00:24",
+                "updated_at": "2026-10-28 03:00:24"
+            }
+        ],
+        "tax_parameters": [
+            {
+                "tax_param_id": "pjk-demo-001",
+                "contract_id": null,
+                "ppn_rate": "11.00",
+                "pph_rate": "2.00",
+                "effective_from": "2026-01-01",
+                "effective_to": null,
+                "created_at": "2026-10-28 03:00:24",
+                "updated_at": "2026-10-28 03:00:24"
+            }
+        ],
+        "invoices": [
+            {
+                "invoice_id": "inv-demo-001",
+                "invoice_number": "INV-2026-0002",
+                "termin_id": "trm-demo-002",
+                "tax_param_id": "pjk-demo-001",
+                "invoice_date": "2026-10-28",
+                "dpp_amount": "150000000.00",
+                "ppn_amount": "16500000.00",
+                "pph_amount": "3000000.00",
+                "total_amount": "163500000.00",
+                "status": "TERTAGIH",
+                "created_by": "emp-demo-012",
+                "created_at": "2026-10-28 03:23:30",
+                "updated_at": "2026-10-28 03:23:30"
+            },
+            {
+                "invoice_id": "inv-demo-sample",
+                "invoice_number": "INV-2026-SAMPLE",
+                "termin_id": "trm-demo-sample",
+                "tax_param_id": "pjk-demo-001",
+                "invoice_date": "2026-10-11",
+                "dpp_amount": "100000000.00",
+                "ppn_amount": "11000000.00",
+                "pph_amount": "2000000.00",
+                "total_amount": "109000000.00",
+                "status": "TERTAGIH",
+                "created_by": "emp-demo-012",
+                "created_at": "2026-10-11 02:00:00",
+                "updated_at": "2026-10-28 03:00:24"
+            }
+        ],
+        "invoice_histories": [
+            {
+                "id": 1,
+                "invoice_id": "inv-demo-sample",
+                "status": "TERTAGIH",
+                "changed_at": "2026-10-11 02:00:00",
+                "changed_by": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan",
+                "created_at": "2026-10-28 03:00:24",
+                "updated_at": "2026-10-28 03:00:24"
+            },
+            {
+                "id": 2,
+                "invoice_id": "inv-demo-001",
+                "status": "TERTAGIH",
+                "changed_at": "2026-10-28 03:23:30",
+                "changed_by": "emp-demo-012",
+                "note": "Invoice diterbitkan oleh petugas keuangan",
+                "created_at": "2026-10-28 03:23:30",
+                "updated_at": "2026-10-28 03:23:30"
+            }
+        ]
+    }
+}

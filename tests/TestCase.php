@@ -20,6 +20,8 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
+        config(['e1.d2.mock_dataset' => 'legacy']);
+
         $this->seed(ModulD2Seeder::class);
 
         Storage::fake('local');

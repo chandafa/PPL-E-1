@@ -21,6 +21,9 @@ class Contract extends Model
     protected $fillable = [
         'contract_id',
         'project_id',
+        'project_name',
+        'client_id',
+        'client_name',
         'contract_number',
         'contract_value',
         'created_by',

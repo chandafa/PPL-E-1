@@ -124,13 +124,14 @@ php artisan demo:samples
 | `php artisan key:generate` | Mengisi `APP_KEY` pada `.env` |
 | `php artisan config:clear` | Memuat konfigurasi `.env` terbaru |
 | `php artisan migrate` | Membuat tabel yang diperlukan aplikasi |
-| `php artisan db:seed` | Mengisi referensi snapshot D-2 lokal: 3 kontrak, 4 termin, 1 parameter pajak, dan invoice `inv-demo-sample` |
-| `php artisan db:seed --class=DemoSeeder` | Membuat 32 faktur pajak, 5 pembayaran, dan 5 masa pajak demo |
+| `php artisan db:seed` | Mengisi referensi snapshot D-2 lokal: 3 kontrak, 4 termin, 1 parameter pajak, dan dua invoice `inv-demo-sample` / `inv-demo-001` dari SQLite |
+| `php artisan demo:d2` | Memasang snapshot SQLite dan PDF pasangan tanpa menjalankan server lain |
+| `php artisan db:seed --class=DemoSeeder` | Dataset legacy pada database terpisah dengan `D2_MOCK_DATASET=legacy`; ditolak jika bentrok snapshot |
 | `php artisan demo:samples` | Membuat PDF contoh dan memeriksa kembali hasil ekstraksinya |
 
 PDF tersedia di **`docs/postman/samples/`**. Gunakan `manifest.json` untuk mencocokkan PDF dengan invoice, tanggal, dan masa pajak. Hasil pemeriksaannya tercatat di `validation.json`.
 
-Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Untuk mencoba pencatatan baru, gunakan database baru setelah `db:seed` tanpa `DemoSeeder`, lalu pilih `inv-demo-sample` dan PDF pasangannya. `DemoSeeder` mengisi seluruh 32 faktur contoh, sehingga skenario berikutnya memakai koreksi/pengganti. Lihat [panduan data demo](docs/panduan/DEMO_SEEDER.md).
+Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Untuk mencoba pencatatan baru, gunakan database baru setelah `db:seed` tanpa `DemoSeeder`, lalu pilih `inv-demo-sample` dan PDF pasangannya. `DemoSeeder` adalah fixture legacy terpisah dan tidak dipakai untuk sumber SQLite ini. Lihat [panduan data demo](docs/panduan/DEMO_SEEDER.md).
 
 ### 6. Jalankan aplikasi
 
@@ -156,7 +157,7 @@ Jalankan dari folder `PPL-E-1`:
 
 ```bash
 php artisan integration
-# Hentikan ketiga layanan:
+# Hentikan layanan integrasi:
 php artisan integration:stop
 ```
 
@@ -168,11 +169,13 @@ Di Linux, Node.js/npm dijalankan melalui nvm, mengikuti `.nvmrc` F-1 atau E-1 ji
 F1_PATH=/lokasi/PPL_F1 D2_PATH=/lokasi/PPL-D-2 php artisan integration
 ```
 
-Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8087/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada `.env` utama, mengambil serta memasang F-1/D-2 jika belum ada di `../_integrasi`, dan menjalankan ketiga layanan. Port integrasi E-1 8087 terpisah dari `composer serve` pada 8080. Untuk berhenti, gunakan **composer integration:stop**.
+Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8087/login**. Perintah ini memakai login F-1 dan **dummy D-2 lokal**: migrasi tanpa reset, pengisian dua invoice dari SQLite, serta pembuatan PDF pasangan dilakukan otomatis. Server/repo D-2 tidak dibutuhkan pada mode default. PDF tersedia di `storage/app/private/d2-source-samples`. Untuk server D-2 HTTP, jalankan `php artisan integration --d2=http`. Untuk berhenti, gunakan **composer integration:stop**. Port integrasi 8087 terpisah dari `composer serve` pada 8080.
 
 [Langkah uji kelompok dan PDF siap pakai](docs/integrasi/UJI_KELOMPOK.md) tersedia agar tim langsung mencoba alurnya. [Panduan lengkap dan hasil pengujian](docs/integrasi/README.md) menjelaskan profil utama serta suite terpisah. [Temuan F-1/D-2](docs/integrasi/TEMUAN_F1_D2.md) dicatat tanpa mengubah kode kedua kelompok.
 
 `composer integration` boleh dipanggil ulang: jika layanan sudah aktif, perintah menampilkan status berhasil dan mempertahankan prosesnya. Jika hanya sebagian layanan berhenti, bagian tersebut dinyalakan kembali.
+
+Untuk menyimulasikan data D-2 yang sudah diterima dan hanya menjalankan E-1, gunakan `php artisan demo:d2` lalu `composer serve`. Pengaturan login demo lokal, API detail sumber, serta PDF pasangan dijelaskan dalam [panduan snapshot D-2](docs/panduan/D2_SOURCE_DEMO.md).
 
 ## Alur proses
 
@@ -241,4 +244,4 @@ Buka **Swagger UI** untuk melihat parameter, mengunggah PDF, dan mencoba API. Be
 | Ismail Abdul Fathan |
 | Raihan Azzani |
 
-Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. `composer integration` memakai layanan repo resmi melalui HTTP; mode mandiri `D2_DRIVER=mock` memakai snapshot lokal.
+Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. `composer integration` memakai F-1 melalui HTTP dan dua invoice dari SQLite dummy D-2 lokal. Gunakan `php artisan integration --d2=http` untuk memakai server D-2 melalui HTTP.

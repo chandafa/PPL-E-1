@@ -32,10 +32,13 @@ class IntegrationCommandTest extends TestCase
 
         Process::assertRanInOrder([
             [PHP_BINARY, 'artisan', 'config:clear'],
-            [PHP_BINARY, 'scripts/enable-integration.php'],
+            [PHP_BINARY, 'scripts/enable-integration.php', 'mock'],
+            [PHP_BINARY, 'artisan', 'migrate', '--force', '--no-interaction'],
+            [PHP_BINARY, 'artisan', 'db:seed', '--class=D2SourceDemoSeeder', '--force', '--no-interaction'],
+            [PHP_BINARY, 'artisan', 'demo:samples', '--dataset=d2-source', '--path=storage/app/private/d2-source-samples'],
             ['launcher'],
         ]);
-        Process::assertRanTimes(fn (PendingProcess $process) => $process->path === base_path() && $process->timeout === null, 3);
+        Process::assertRanTimes(fn (PendingProcess $process) => $process->path === base_path() && $process->timeout === null, 6);
     }
 
     public function test_setup_failure_prevents_start_and_preserves_exit_code(): void
@@ -49,8 +52,38 @@ class IntegrationCommandTest extends TestCase
 
         Process::assertRanInOrder([
             [PHP_BINARY, 'artisan', 'config:clear'],
-            [PHP_BINARY, 'scripts/enable-integration.php'],
+            [PHP_BINARY, 'scripts/enable-integration.php', 'mock'],
         ]);
+    }
+
+    public function test_http_mode_does_not_seed_local_dummy(): void
+    {
+        $this->launcher();
+        Process::fake();
+        $this->artisan('integration', ['--d2' => 'http'])->assertSuccessful();
+        Process::assertRanInOrder([
+            [PHP_BINARY, 'artisan', 'config:clear'],
+            [PHP_BINARY, 'scripts/enable-integration.php', 'http'],
+            ['launcher'],
+        ]);
+        Process::assertRanTimes(fn () => true, 3);
+    }
+
+    public function test_seed_failure_prevents_start(): void
+    {
+        $this->launcher();
+        Process::fake(['*' => Process::sequence()
+            ->push(Process::result())->push(Process::result())->push(Process::result())
+            ->push(Process::result(exitCode: 8))]);
+        $this->artisan('integration')->assertExitCode(8);
+        Process::assertRanTimes(fn () => true, 4);
+    }
+
+    public function test_invalid_driver_does_not_change_configuration(): void
+    {
+        Process::fake();
+        $this->artisan('integration', ['--d2' => 'unknown'])->assertFailed();
+        Process::assertNothingRan();
     }
 
     public function test_unsupported_platform_does_not_run_setup_or_stop(): void

@@ -1,4 +1,4 @@
-param([string]$F1Path = '', [string]$D2Path = '', [switch]$Main)
+param([string]$F1Path = '', [string]$D2Path = '', [switch]$Main, [ValidateSet('mock','http')][string]$D2Driver = 'http')
 $ErrorActionPreference = 'Stop'
 
 # Repo pendukung hanya diambil saat belum ada. Checkout yang sudah dibuat anggota
@@ -90,23 +90,31 @@ $parent = Split-Path $repo
 if (-not $F1Path) { $F1Path = Join-Path $parent '_integrasi/F1' }
 if (-not $D2Path) { $D2Path = Join-Path $parent '_integrasi/D2' }
 Ensure-IntegrationRepository 'F-1' $F1Path $F1Repository $F1Revision 'demo/local-server.js'
-Ensure-IntegrationRepository 'D-2' $D2Path $D2Repository $D2Revision 'artisan'
+if ($D2Driver -eq 'http') { Ensure-IntegrationRepository 'D-2' $D2Path $D2Repository $D2Revision 'artisan' }
 $F1Path = (Resolve-Path -LiteralPath $F1Path).Path
-$D2Path = (Resolve-Path -LiteralPath $D2Path).Path
+if ($D2Driver -eq 'http') { $D2Path = (Resolve-Path -LiteralPath $D2Path).Path }
 $runtimeFile = Join-Path $repo 'storage/app/private/integration/current.json'
 if (-not (Test-Path -LiteralPath $runtimeFile)) { throw 'Jalankan php scripts/prepare-integration.php dahulu.' }
 Ensure-F1Dependencies $F1Path
-Ensure-D2Dependencies $D2Path
+if ($D2Driver -eq 'http') { Ensure-D2Dependencies $D2Path }
 $runtime = Get-Content -Raw -LiteralPath $runtimeFile | ConvertFrom-Json
 $stateFile = Join-Path $runtime.directory 'processes.json'
 $setupMarker = Join-Path $runtime.directory 'd2-setup.complete'
 $e1Port = 8087
-$expectedPorts = @{ f1 = 4100; d2 = 8026; e1 = $e1Port }
+$expectedPorts = @{ f1 = 4100; e1 = $e1Port }
+if ($D2Driver -eq 'http') { $expectedPorts['d2'] = 8026 }
+$serviceNames = @('f1', 'e1')
+if ($D2Driver -eq 'http') { $serviceNames = @('f1', 'd2', 'e1') }
+$d2Label = if ($D2Driver -eq 'mock') { 'D-2 dummy lokal (2 invoice SQLite)' } else { 'D-2 8026' }
+$modeFile = Join-Path $runtime.directory 'd2-mode.txt'
+$previousMode = if (Test-Path -LiteralPath $modeFile) { (Get-Content -Raw -LiteralPath $modeFile).Trim() } else { 'http' }
 $existingRuntime = Test-Path -LiteralPath $stateFile
 $processes = @{}
 if ($existingRuntime) {
     $previousState = Get-Content -Raw -LiteralPath $stateFile | ConvertFrom-Json
-    foreach ($name in @('f1','d2','e1')) {
+    if ($previousMode -ne $D2Driver -and (Test-OwnedProcess $previousState.e1)) { Stop-OwnedProcess 'e1' $previousState.e1 }
+    if ($D2Driver -eq 'mock' -and (Test-OwnedProcess $previousState.d2)) { Stop-OwnedProcess 'd2' $previousState.d2 }
+    foreach ($name in $serviceNames) {
         $entry = $previousState.$name
         if (Test-OwnedListener $entry) {
             if ($entry.port -ne $expectedPorts[$name]) {
@@ -122,13 +130,13 @@ if ($existingRuntime) {
         }
     }
 }
-if ($processes.Count -eq 3) {
-    foreach ($name in @('f1','d2','e1')) { Wait-OwnedListener $name $processes[$name] }
-    Write-Output "Integrasi sudah berjalan: http://127.0.0.1:$e1Port/login; F-1 4100; D-2 8026."
+if ($processes.Count -eq $serviceNames.Count) {
+    foreach ($name in $serviceNames) { Wait-OwnedListener $name $processes[$name] }
+    Write-Output "Integrasi sudah berjalan: http://127.0.0.1:$e1Port/login; F-1 4100; $d2Label."
     Write-Output 'Layanan dan data tetap dipertahankan. Untuk restart penuh: composer integration:stop lalu composer integration.'
     return
 }
-foreach ($name in @('f1','d2','e1')) {
+foreach ($name in $serviceNames) {
     $port = $expectedPorts[$name]
     $listenerIds = @(Get-ListeningProcessIds $port)
     if ($listenerIds.Count -gt 0 -and (-not $processes.ContainsKey($name) -or @($listenerIds | Where-Object { $_ -ne $processes[$name].id }).Count -gt 0)) {
@@ -153,7 +161,7 @@ try {
     if (-not $processes.ContainsKey('f1')) {
         Start-Owned 'f1' (Get-Command node).Source @('--require', ('"' + (Join-Path $PSScriptRoot 'trace-f1.cjs') + '"'), 'demo/local-server.js') $F1Path 4100
     }
-    if (-not $processes.ContainsKey('d2')) {
+    if ($D2Driver -eq 'http' -and -not $processes.ContainsKey('d2')) {
         Set-ProcessEnv 'APP_ENV' 'local'
         Set-ProcessEnv 'APP_DEBUG' 'false'
         $keyBytes = New-Object byte[] 32
@@ -185,6 +193,7 @@ try {
         Start-Owned 'd2' (Get-Command php).Source @('-S', '127.0.0.1:8026', '-t', 'public', ('"' + (Join-Path $PSScriptRoot 'trace-d2.php') + '"')) $D2Path 8026
     }
     foreach ($key in @($saved.Keys)) { [Environment]::SetEnvironmentVariable($key, $saved[$key], 'Process') }
+    Set-ProcessEnv 'D2_DRIVER' $D2Driver
     if (-not $processes.ContainsKey('e1')) {
         if (-not $Main) {
             Set-ProcessEnv 'APP_ENV' 'integration'
@@ -194,15 +203,16 @@ try {
                 if ($LASTEXITCODE -ne 0) { throw 'Migrasi E-1 gagal; lihat e1-setup.log.' }
             } finally { Pop-Location }
         }
-        # -Main memakai .env utama yang sudah diaktifkan enable-integration.php;
-        # tidak memigrasikan, seeding, atau mereset database utama.
+        # Migrasi/seed dummy mode Main dijalankan Artisan sebelum launcher ini.
         Start-Owned 'e1' (Get-Command php).Source @('-d', 'upload_max_filesize=6M', '-d', 'post_max_size=16M', '-S', "127.0.0.1:$e1Port", '-t', 'public', 'server.php') $repo $e1Port
     }
     $processes | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $stateFile -Encoding UTF8
-    foreach ($name in @('f1','d2','e1')) { Wait-OwnedListener $name $processes[$name] }
-    Write-Output "Siap diuji: http://127.0.0.1:$e1Port/login; F-1 4100; D-2 8026."
+    foreach ($name in $serviceNames) { Wait-OwnedListener $name $processes[$name] }
+    [IO.File]::WriteAllText($modeFile, $D2Driver)
+    Write-Output "Siap diuji: http://127.0.0.1:$e1Port/login; F-1 4100; $d2Label."
     Write-Output ('Layanan yang dinyalakan: ' + (($started.Keys | Sort-Object) -join ', ') + '. Layanan lain tetap berjalan.')
-    if ($Main) { Write-Output 'E-1 memakai database utama yang dipertahankan; D-2 memakai database integrasi terpisah. Stop: composer integration:stop.' }
+    if ($Main -and $D2Driver -eq 'mock') { Write-Output 'Dummy D-2 berada di database E-1; tanpa server D-2. Stop: composer integration:stop.' }
+    elseif ($Main) { Write-Output 'E-1 memakai database utama yang dipertahankan; D-2 memakai database integrasi terpisah. Stop: composer integration:stop.' }
     else { Write-Output 'Profil pengujian terpisah; database utama tidak digunakan.' }
 } catch {
     foreach ($p in $started.Values) {
