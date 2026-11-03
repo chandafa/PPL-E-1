@@ -115,11 +115,11 @@ class F1ApiClient
         $data = $response->json();
         if (! $response->successful() || ! is_array($data)
             || ($data['accountId'] ?? null) !== $identity->akunId
-            || ! is_string($data['name'] ?? null) || trim($data['name']) === '') {
+            || ! is_string($data['username'] ?? null) || trim($data['username']) === '') {
             return $fallback;
         }
 
-        return trim($data['name']);
+        return trim($data['username']);
     }
 
     private function client(): PendingRequest

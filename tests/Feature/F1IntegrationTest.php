@@ -68,6 +68,29 @@ class F1IntegrationTest extends TestCase
             && $request->hasHeader('Authorization', 'Bearer '.$data['accessToken']));
     }
 
+    public function test_profil_menampilkan_username_dan_bukan_uuid_account_id(): void
+    {
+        Http::fake([
+            self::BASE.'/accounts/'.self::ACCOUNT.'/role' => Http::response([
+                'accountId' => self::ACCOUNT,
+                'roleCode' => 'ADMIN',
+                'status' => 'active',
+            ]),
+            self::BASE.'/identity/accounts/'.self::ACCOUNT => Http::response([
+                'accountId' => self::ACCOUNT,
+                'username' => 'yuril.salsabila',
+                'name' => self::ACCOUNT,
+            ]),
+        ]);
+
+        $this->getJson('/api/ui/profile', [
+            'Authorization' => 'Bearer '.$this->f1Token(),
+        ])->assertOk()
+            ->assertJsonPath('data.name', 'yuril.salsabila')
+            ->assertJsonPath('data.role', 'ADMIN')
+            ->assertJsonMissing(['name' => self::ACCOUNT]);
+    }
+
     public static function upstreamRejections(): array
     {
         return [[401, 401, 'INVALID_CREDENTIALS'], [403, 403, 'F1_ACCOUNT_BLOCKED'],

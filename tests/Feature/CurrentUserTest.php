@@ -45,11 +45,11 @@ class CurrentUserTest extends TestCase
     public function test_sidebar_profile_returns_f1_name_and_verified_role(): void
     {
         $this->responses(Http::response([
-            'accountId' => self::ACCOUNT, 'name' => 'Super Admin', 'roleCode' => 'CEO',
+            'accountId' => self::ACCOUNT, 'username' => 'super.admin', 'roleCode' => 'CEO',
         ]));
 
         $this->getJson('/api/ui/profile', $this->headers())->assertOk()
-            ->assertJsonPath('data.name', 'Super Admin')
+            ->assertJsonPath('data.name', 'super.admin')
             ->assertJsonPath('data.role', 'Admin')->assertDontSee(self::ACCOUNT);
         Http::assertSent(fn ($request) => $request->url() === 'http://f1.test/identity/accounts/'.self::ACCOUNT
             && $request->hasHeader('Authorization'));
