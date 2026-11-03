@@ -12,7 +12,7 @@ require $repo.'/vendor/autoload.php';
 function occupiedIntegrationPorts(): array
 {
     $occupied = [];
-    foreach ([4100, 8026, 8080, 8087] as $port) {
+    foreach ([4100, 8026, 8087] as $port) {
         $socket = @fsockopen('127.0.0.1', $port, $errorNumber, $errorMessage, 0.2);
         if ($socket !== false) {
             fclose($socket);

@@ -82,10 +82,15 @@ try {
         }
     }
     $processes = [];
-    foreach (['f1' => 4100, 'd2' => 8026, 'e1' => 8080] as $name => $port) {
+    foreach (['f1' => 4100, 'd2' => 8026, 'e1' => 8087] as $name => $port) {
         $entry = $state[$name] ?? [];
         if ($manager->owned($entry)) {
             if ($entry['port'] !== $port) {
+                if ($name === 'e1' && $entry['port'] === 8080 && $port === 8087) {
+                    $manager->stop($entry);
+
+                    continue;
+                }
                 throw new RuntimeException('Profil/port berbeda. Jalankan php artisan integration:stop dahulu.');
             }
             if ($manager->listening($port, $entry['id'])) {
@@ -100,7 +105,7 @@ try {
         }
     }
     if (count($processes) === 3) {
-        echo 'Integrasi sudah berjalan: http://127.0.0.1:8080/login; F-1 4100; D-2 8026.'.PHP_EOL;
+        echo 'Integrasi sudah berjalan: http://127.0.0.1:8087/login; F-1 4100; D-2 8026.'.PHP_EOL;
         exit(0);
     }
 
@@ -139,8 +144,8 @@ try {
         'f1' => [[$finder->find('node'), '--require', $repo.'/scripts/trace-f1.cjs', 'demo/local-server.js'],
             $f1, 4100, $common + ['E1_DEPENDENCY_TRACE' => $directory.'/f1-requests.ndjson']],
         'd2' => [[PHP_BINARY, '-S', '127.0.0.1:8026', '-t', 'public', $repo.'/scripts/trace-d2.php'], $d2, 8026, $d2Env],
-        'e1' => [[PHP_BINARY, '-d', 'upload_max_filesize=6M', '-d', 'post_max_size=16M', '-S', '127.0.0.1:8080',
-            '-t', 'public', 'server.php'], $repo, 8080, []],
+        'e1' => [[PHP_BINARY, '-d', 'upload_max_filesize=6M', '-d', 'post_max_size=16M', '-S', '127.0.0.1:8087',
+            '-t', 'public', 'server.php'], $repo, 8087, []],
     ];
     foreach ($specifications as $name => [$command, $cwd, $port, $env]) {
         if (! isset($processes[$name])) {
@@ -151,7 +156,7 @@ try {
         }
         $manager->wait($name, $processes[$name], $directory);
     }
-    echo 'Siap diuji: http://127.0.0.1:8080/login; F-1 4100; D-2 8026.'.PHP_EOL;
+    echo 'Siap diuji: http://127.0.0.1:8087/login; F-1 4100; D-2 8026.'.PHP_EOL;
     echo 'Stop: php artisan integration:stop. Database utama E-1 dipertahankan.'.PHP_EOL;
 } catch (Throwable $error) {
     foreach ($started as $entry) {

@@ -21,3 +21,5 @@ Build frontend berhasil; empat tes JavaScript lulus. Tampilan login F-1 diperiks
 OBS-02 tentang koreksi pajak setelah pembayaran yang menghasilkan selisih positif tetap memerlukan keputusan kebijakan; status CONFIRMED mengikuti kelengkapan dokumen. Tidak ditambahkan larangan koreksi sah atau aturan hak objek yang belum disepakati. Pengujian tidak membuktikan beban produksi, DJP, bank, aplikasi E-2, atau persetujuan pasangan.
 
 Pemeriksaan ulang: .env utama semula masih mock dan empat migrasi E-1 tertinggal. Kini koneksi HTTP aktif pada alamat utama 8080, migrasi diterapkan tanpa mengubah data lama, dan composer integration / integration:stop menjalankan serta menghentikan ketiga layanan. Restart tidak menjalankan seed ulang D-2. Bukti: [aktif-utama.json](bukti/2026-10-31T07-43-25-100Z/aktif-utama.json) dan [langkah kelompok](UJI_KELOMPOK.md).
+
+Untuk menghindari konflik dengan service lokal yang memakai port 8080, launcher integrasi saat ini menggunakan port 8087 di Windows dan Linux. `composer serve` tetap menggunakan 8080.

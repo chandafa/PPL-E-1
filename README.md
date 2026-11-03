@@ -168,11 +168,11 @@ Di Linux, Node.js/npm dijalankan melalui nvm, mengikuti `.nvmrc` F-1 atau E-1 ji
 F1_PATH=/lokasi/PPL_F1 D2_PATH=/lokasi/PPL-D-2 php artisan integration
 ```
 
-Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8080/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada `.env` utama, mengambil serta memasang F-1/D-2 jika belum ada di `../_integrasi`, dan menjalankan ketiga layanan. Untuk berhenti, gunakan **composer integration:stop**.
+Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8087/login**. Perintah ini mengaktifkan koneksi F-1/D-2 pada `.env` utama, mengambil serta memasang F-1/D-2 jika belum ada di `../_integrasi`, dan menjalankan ketiga layanan. Port integrasi E-1 8087 terpisah dari `composer serve` pada 8080. Untuk berhenti, gunakan **composer integration:stop**.
 
 [Langkah uji kelompok dan PDF siap pakai](docs/integrasi/UJI_KELOMPOK.md) tersedia agar tim langsung mencoba alurnya. [Panduan lengkap dan hasil pengujian](docs/integrasi/README.md) menjelaskan profil utama serta suite terpisah. [Temuan F-1/D-2](docs/integrasi/TEMUAN_F1_D2.md) dicatat tanpa mengubah kode kedua kelompok.
 
-`composer integration` boleh dipanggil ulang: jika layanan sudah aktif, perintah menampilkan status berhasil dan mempertahankan prosesnya. Jika hanya sebagian layanan berhenti, bagian tersebut dinyalakan kembali. Tidak perlu menjalankan `composer serve` bersamaan pada port 8080.
+`composer integration` boleh dipanggil ulang: jika layanan sudah aktif, perintah menampilkan status berhasil dan mempertahankan prosesnya. Jika hanya sebagian layanan berhenti, bagian tersebut dinyalakan kembali.
 
 ## Alur proses
 

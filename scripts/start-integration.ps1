@@ -67,7 +67,7 @@ function Test-OwnedListener($entry) {
 }
 function Stop-OwnedProcess([string]$name, $entry) {
     if (-not (Test-OwnedProcess $entry)) { return }
-    Write-Output "Proses $name masih ada tetapi port $($entry.port) tidak siap; menjalankan ulang layanan tersebut."
+    Write-Output "Proses $name perlu dimulai ulang pada port $($entry.port); menghentikan proses milik runtime ini."
     Stop-Process -Id ([int]$entry.id) -Force -ErrorAction Stop
 }
 function Wait-OwnedListener([string]$name, $entry) {
@@ -100,7 +100,7 @@ Ensure-D2Dependencies $D2Path
 $runtime = Get-Content -Raw -LiteralPath $runtimeFile | ConvertFrom-Json
 $stateFile = Join-Path $runtime.directory 'processes.json'
 $setupMarker = Join-Path $runtime.directory 'd2-setup.complete'
-$e1Port = if ($Main) { 8080 } else { 8087 }
+$e1Port = 8087
 $expectedPorts = @{ f1 = 4100; d2 = 8026; e1 = $e1Port }
 $existingRuntime = Test-Path -LiteralPath $stateFile
 $processes = @{}
@@ -109,7 +109,13 @@ if ($existingRuntime) {
     foreach ($name in @('f1','d2','e1')) {
         $entry = $previousState.$name
         if (Test-OwnedListener $entry) {
-            if ($entry.port -ne $expectedPorts[$name]) { throw 'E-1 berjalan dengan profil/port berbeda. Jalankan composer integration:stop sebelum mengganti profil.' }
+            if ($entry.port -ne $expectedPorts[$name]) {
+                if ($name -eq 'e1' -and $entry.port -eq 8080 -and $expectedPorts[$name] -eq 8087) {
+                    Stop-OwnedProcess $name $entry
+                    continue
+                }
+                throw 'E-1 berjalan dengan profil/port berbeda. Jalankan composer integration:stop sebelum mengganti profil.'
+            }
             $processes[$name] = $entry
         } elseif (Test-OwnedProcess $entry) {
             Stop-OwnedProcess $name $entry
