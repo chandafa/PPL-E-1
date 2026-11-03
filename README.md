@@ -124,14 +124,14 @@ php artisan demo:samples
 | `php artisan key:generate` | Mengisi `APP_KEY` pada `.env` |
 | `php artisan config:clear` | Memuat konfigurasi `.env` terbaru |
 | `php artisan migrate` | Membuat tabel yang diperlukan aplikasi |
-| `php artisan db:seed` | Mengisi referensi snapshot D-2 lokal: 3 kontrak, 4 termin, 1 parameter pajak, dan dua invoice `inv-demo-sample` / `inv-demo-001` dari SQLite |
+| `php artisan db:seed` | Mengisi referensi invoice dari snapshot D-2 lokal; tidak membuat e-Faktur atau pembayaran |
 | `php artisan demo:d2` | Memasang snapshot SQLite dan PDF pasangan tanpa menjalankan server lain |
 | `php artisan db:seed --class=DemoSeeder` | Dataset legacy pada database terpisah dengan `D2_MOCK_DATASET=legacy`; ditolak jika bentrok snapshot |
 | `php artisan demo:samples` | Membuat PDF contoh dan memeriksa kembali hasil ekstraksinya |
 
 PDF tersedia di **`docs/postman/samples/`**. Gunakan `manifest.json` untuk mencocokkan PDF dengan invoice, tanggal, dan masa pajak. Hasil pemeriksaannya tercatat di `validation.json`.
 
-Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Untuk mencoba pencatatan baru, gunakan database baru setelah `db:seed` tanpa `DemoSeeder`, lalu pilih `inv-demo-sample` dan PDF pasangannya. `DemoSeeder` adalah fixture legacy terpisah dan tidak dipakai untuk sumber SQLite ini. Lihat [panduan data demo](docs/panduan/DEMO_SEEDER.md).
+Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Pada snapshot SQLite, invoice `inv-demo-sample` tersedia untuk dicatat secara terpisah melalui fitur e-Faktur; `db:seed` tidak mencatat transaksi e-Faktur atau pembayaran. `DemoSeeder` adalah fixture legacy terpisah dan tidak dipakai untuk sumber SQLite ini. Lihat [panduan data demo](docs/panduan/DEMO_SEEDER.md).
 
 ### 6. Jalankan aplikasi
 

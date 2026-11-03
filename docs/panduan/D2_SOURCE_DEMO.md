@@ -21,7 +21,7 @@ php artisan config:clear
 php artisan demo:d2
 ```
 
-Perintah tersebut menjalankan migrasi tanpa reset, memasang seeder `D2SourceDemoSeeder`, dan membuat PDF pasangan di `storage/app/private/d2-source-samples`. Seeder juga menjadi sumber default `php artisan db:seed` pada mode mock SQLite. `php artisan integration` tetap menyiapkan snapshot yang sama secara otomatis dan menjalankan login F-1.
+Perintah tersebut menjalankan migrasi tanpa reset, memasang seeder `D2SourceDemoSeeder`, dan membuat PDF pasangan di `storage/app/private/d2-source-samples`. `php artisan db:seed` memasang referensi invoice saja; e-Faktur dan pembayaran tidak disimpan otomatis. `php artisan integration` juga menyiapkan snapshot tanpa menanam transaksi E-1.
 
 Untuk menjalankan hanya E-1 dengan login demo lokal, gunakan pula `E1_DEV_LOGIN=true`, `F1_API_ENABLED=false`, dan `F1_CHECK_ACCOUNT=false`; pertahankan konfigurasi database, APP_KEY, dan kunci JWT lokal sesuai README, lalu jalankan `composer serve`. Hentikan runtime sebelumnya dengan `php artisan integration:stop` jika port 8080 masih dipakai.
 
@@ -31,10 +31,10 @@ Terdapat 3 kontrak, 4 termin, 1 parameter pajak, 2 invoice, dan 2 riwayat penerb
 
 | ID invoice | Nomor invoice | Termin | Tanggal | DPP | PPN | PPh | Total komersial |
 |---|---|---|---|---:|---:|---:|---:|
-| inv-demo-sample | INV-2026-SAMPLE | trm-demo-sample | 2026-10-11 | 100.000.000 | 11.000.000 | 2.000.000 | 109.000.000 |
+| inv-demo-sample | INV-2026-SAMPLE | trm-demo-sample | 2026-11-01 | 100.000.000 | 11.000.000 | 2.000.000 | 109.000.000 |
 | inv-demo-001 | INV-2026-0002 | trm-demo-002 | 2026-10-28 | 150.000.000 | 16.500.000 | 3.000.000 | 163.500.000 |
 
-Keduanya berstatus `TERTAGIH`, proyek `prj-demo-001`, dan masa Oktober 2026. `trm-demo-002` berstatus `SUDAH_DITAGIHKAN`, dengan jatuh tempo 15 Desember 2026 sebagaimana sumber; tanggal ini tidak disamakan dengan tanggal invoice.
+Keduanya berstatus `TERTAGIH` dan proyek `prj-demo-001`; `inv-demo-sample` berada pada masa November 2026 dan `inv-demo-001` pada masa Oktober 2026. `trm-demo-002` berstatus `SUDAH_DITAGIHKAN`, dengan jatuh tempo 15 Desember 2026 sebagaimana sumber; tanggal ini tidak disamakan dengan tanggal invoice.
 
 Nama proyek, identitas/nama klien, dan rincian jasa tidak tersedia di SQLite. API mengembalikan metadata tersebut sebagai `null` serta `items=[]`. Tidak menambahkan klien/nama proyek/rincian jasa fiktif ke sumber. PPN 11% dan PPh 2% mengikuti parameter pada snapshot.
 
@@ -56,11 +56,11 @@ Detail memakai `data.source=SQLITE_SNAPSHOT` dan menyertakan `sourceSha256`. ID 
 
 ## Memproses dengan fungsi E-1
 
-1. Pilih `inv-demo-001` atau `inv-demo-sample` pada Catat e-Faktur.
-2. Unggah `efaktur-<invoiceId>.pdf`, klik **Periksa PDF**, lalu **Simpan Faktur**. Ulangi untuk invoice kedua.
+1. Pilih `inv-demo-sample` pada Catat e-Faktur; invoice seed bertanggal 1 November 2026, DPP Rp100.000.000, dan PPN Rp11.000.000.
+2. Unggah PDF e-Faktur yang sesuai, klik **Periksa PDF**, lalu **Simpan Faktur** untuk mencatatnya secara terpisah dari seeding.
 3. Untuk faktur pengganti, gunakan `efaktur-<invoiceId>-pengganti.pdf`; PDF diperiksa saat penyimpanan.
-4. Buka rekap Oktober 2026. Setelah kedua faktur tercatat, jumlah invoice aktif adalah 2 dan total PPN **Rp27.500.000**.
-5. Untuk pembayaran penuh gunakan `e-billing-2026-10-001.pdf`, `bukti-pembayaran-2026-10-001.pdf`, jumlah setor `27500000.00`, ID billing `BILL-DEMO-202610-001`, serta NTPN `NTPN-DEMO-202610-001`. Sesudah konfirmasi, selisih nol.
+4. Rekap November berisi `inv-demo-sample` dengan PPN **Rp11.000.000**; rekap Oktober berisi `inv-demo-001` dengan PPN **Rp16.500.000**.
+5. Untuk e-Billing, gunakan PDF `e-billing-2026-11-001.pdf`; pembayaran baru tersimpan setelah dicatat melalui fitur pembayaran.
 
 PDF adalah dokumen pengujian fiktif, bukan dokumen DJP/bank. Karena sumber tidak memiliki rincian item, PDF memakai satu baris berlabel **Item uji E-1 (bukan data D-2)**; baris ini tidak dimasukkan ke snapshot sumber. PPnBM nol merupakan nilai dokumen pengujian, bukan field dari SQLite. Empat PDF e-Faktur dan dua lampiran pembayaran dibaca ulang; `manifest.json` dan `validation.json` mencatat pemetaan, nominal, masa, NSFP dan hash.
 

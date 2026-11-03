@@ -21,13 +21,18 @@ class D2SourceDemoTest extends TestCase
     {
         parent::setUp();
         config(['e1.d2.mock_dataset' => 'sqlite']);
+        DB::table('invoice_histories')->where('invoice_id', 'inv-demo-sample')->delete();
+        DB::table('invoices')->where('invoice_id', 'inv-demo-sample')->delete();
     }
 
     public function test_default_database_seeder_installs_the_sqlite_snapshot(): void
     {
         $this->seed(DatabaseSeeder::class);
         $this->assertDatabaseCount('invoices', 2);
-        $this->assertDatabaseHas('invoices', ['invoice_id' => 'inv-demo-001', 'invoice_number' => 'INV-2026-0002']);
+        $this->assertDatabaseHas('invoices', ['invoice_id' => 'inv-demo-001', 'invoice_number' => 'INV-2026-0002', 'invoice_date' => '2026-10-28']);
+        $this->assertDatabaseHas('invoices', ['invoice_id' => 'inv-demo-sample', 'invoice_date' => '2026-11-01']);
+        $this->assertDatabaseCount('faktur_pajak', 0);
+        $this->assertDatabaseCount('pembayaran_pajak', 0);
     }
 
     public function test_stale_reference_already_used_by_e1_is_not_overwritten(): void
@@ -149,19 +154,20 @@ class D2SourceDemoTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_generated_documents_support_both_invoices_replacement_and_october_payment(): void
+    public function test_generated_documents_support_both_invoices_replacement_and_monthly_payments(): void
     {
         $this->seed(D2SourceDemoSeeder::class);
         $relative = 'storage/framework/testing/d2-sqlite-'.Str::uuid();
         $directory = base_path($relative);
         try {
             $this->artisan('demo:samples', ['--dataset' => 'd2-source', '--path' => $relative])->assertSuccessful();
-            $this->assertCount(6, glob($directory.'/*.pdf'));
+            $this->assertCount(8, glob($directory.'/*.pdf'));
             $manifest = json_decode(file_get_contents($directory.'/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
             $this->assertCount(4, $manifest);
             $this->assertCount(4, array_unique(array_column($manifest, 'nsfp')));
             foreach ($manifest as $sample) {
-                $this->assertSame('2026-10', $sample['taxPeriod']);
+                $expectedPeriod = $sample['invoiceId'] === 'inv-demo-sample' ? '2026-11' : '2026-10';
+                $this->assertSame($expectedPeriod, $sample['taxPeriod']);
                 $this->assertSame(1, $sample['itemCount']);
                 $this->assertSame(hash_file('sha256', $directory.'/'.$sample['file']), $sample['sha256']);
                 if ($sample['flow'] !== 'create') {
@@ -178,13 +184,22 @@ class D2SourceDemoTest extends TestCase
                 }
             }
             $this->post('/api/v1/tax-payments', [
-                'taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '27500000.00',
+                'taxPeriod' => '2026-10', 'taxYear' => 2026, 'amountPaid' => '16500000.00',
                 'billingId' => 'BILL-DEMO-202610-001', 'ntpn' => 'NTPN-DEMO-202610-001',
                 'eBillingFile' => $this->pdfUpload(file_get_contents($directory.'/e-billing-2026-10-001.pdf')),
                 'paymentProofFile' => $this->pdfUpload(file_get_contents($directory.'/bukti-pembayaran-2026-10-001.pdf')),
             ], $this->auth())->assertOk();
             $this->getJson('/api/v1/tax-recaps/2026-10', $this->auth())->assertOk()
-                ->assertJsonPath('data.recap.invoiceCount', 2)->assertJsonPath('data.recap.totalPpn', '27500000.00')
+                ->assertJsonPath('data.recap.invoiceCount', 1)->assertJsonPath('data.recap.totalPpn', '16500000.00')
+                ->assertJsonPath('data.recap.paymentDifference', '0.00')->assertJsonPath('data.recap.paymentStatus', 'CONFIRMED');
+            $this->post('/api/v1/tax-payments', [
+                'taxPeriod' => '2026-11', 'taxYear' => 2026, 'amountPaid' => '11000000.00',
+                'billingId' => 'BILL-DEMO-202611-002', 'ntpn' => 'NTPN-DEMO-202611-002',
+                'eBillingFile' => $this->pdfUpload(file_get_contents($directory.'/e-billing-2026-11-002.pdf')),
+                'paymentProofFile' => $this->pdfUpload(file_get_contents($directory.'/bukti-pembayaran-2026-11-002.pdf')),
+            ], $this->auth())->assertOk();
+            $this->getJson('/api/v1/tax-recaps/2026-11', $this->auth())->assertOk()
+                ->assertJsonPath('data.recap.invoiceCount', 1)->assertJsonPath('data.recap.totalPpn', '11000000.00')
                 ->assertJsonPath('data.recap.paymentDifference', '0.00')->assertJsonPath('data.recap.paymentStatus', 'CONFIRMED');
         } finally {
             File::deleteDirectory($directory);
@@ -200,7 +215,7 @@ class D2SourceDemoTest extends TestCase
         file_put_contents($directory.'/old.pdf', 'previous sample');
         try {
             $this->artisan('demo:d2', ['--path' => $relative])->assertSuccessful();
-            $this->assertCount(6, glob($directory.'/*.pdf'));
+            $this->assertCount(8, glob($directory.'/*.pdf'));
             $archives = glob($directory.'-legacy-*');
             $this->assertCount(1, $archives);
             $this->assertSame('previous sample', file_get_contents($archives[0].'/old.pdf'));
@@ -220,7 +235,7 @@ class D2SourceDemoTest extends TestCase
             $this->app['env'] = $environment;
             config(['e1.d2.driver' => $environment === 'testing' ? 'http' : 'mock']);
             $this->artisan('demo:d2')->assertFailed();
-            $this->assertDatabaseCount('invoices', 1);
+            $this->assertDatabaseCount('invoices', 0);
         }
     }
 }

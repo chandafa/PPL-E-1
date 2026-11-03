@@ -82,7 +82,7 @@
             "exec": [
               "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
               "pm.test('Proyek nested D-2',()=>pm.expect(pm.response.json().data.terkait.projectId).to.eql('prj-demo-001'));",
-              "pm.test('Tanggal invoice seed',()=>pm.expect(pm.response.json().data.invoiceDate).to.eql('2026-10-11'));"
+              "pm.test('Tanggal invoice seed',()=>pm.expect(pm.response.json().data.invoiceDate).to.eql('2026-11-01'));"
             ]
           }
         }
