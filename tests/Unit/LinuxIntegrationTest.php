@@ -25,6 +25,7 @@ class LinuxIntegrationTest extends TestCase
         $launcher = new Launcher($finder);
 
         $this->assertSame(['bash', 'scripts/start-integration.sh', PHP_BINARY], $launcher->command());
+        $this->assertSame(['bash', 'scripts/start-integration.sh', PHP_BINARY, 'mock'], $launcher->command(false, 'mock'));
         $this->assertSame([PHP_BINARY, 'scripts/linux-integration.php', 'stop'], $launcher->command(true));
     }
 

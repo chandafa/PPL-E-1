@@ -23,6 +23,7 @@ Route::post('auth/f1/login', F1LoginController::class)->middleware('throttle:10,
 Route::get('ui/profile', CurrentUserController::class)->middleware('f1.auth');
 Route::get('ui/d2/invoices', DemoInvoiceController::class)->middleware('f1.auth');
 Route::get('ui/d2/invoices/all', D2InvoiceController::class)->middleware('f1.auth');
+Route::get('ui/d2/invoices/{invoiceId}', [D2InvoiceController::class, 'show'])->middleware('f1.auth');
 Route::get('ui/tax-recap-periods', [TaxRecapController::class, 'periods'])->middleware('f1.auth');
 
 Route::prefix('v1')->group(function () {

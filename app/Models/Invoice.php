@@ -55,4 +55,9 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceHistory::class, 'invoice_id', 'invoice_id')->orderBy('changed_at', 'asc');
     }
+
+    public function sourceItems(): HasMany
+    {
+        return $this->hasMany(SourceInvoiceItem::class, 'invoice_id', 'invoice_id')->orderBy('line_number');
+    }
 }

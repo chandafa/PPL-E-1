@@ -1318,7 +1318,7 @@ async function paymentPage() {
         $("#save-payment").innerHTML = `${icon("check")}Konfirmasi Pembayaran`;
     }
     const billingInput = $("#billingId");
-    billingInput.addEventListener("input", clearNotice);
+    billingInput.addEventListener("input", () => clearNotice());
     const ntpnInput = $("#ntpn");
     function clearNtpnError() {
         if (!ntpnInput) return;

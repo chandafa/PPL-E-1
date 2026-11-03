@@ -9,6 +9,7 @@ use App\Models\TaxParameter;
 use App\Models\Termin;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class ModulD2Seeder extends Seeder
 {
@@ -17,6 +18,14 @@ class ModulD2Seeder extends Seeder
      */
     public function run(): void
     {
+        if (config('e1.d2.driver') === 'mock' && config('e1.d2.mock_dataset') === 'sqlite') {
+            $this->call(D2SourceDemoSeeder::class);
+
+            return;
+        }
+        if (Invoice::query()->whereKey('inv-demo-001')->where('invoice_number', 'INV-2026-0002')->exists()) {
+            throw new RuntimeException('Konflik snapshot SQLite: seed dasar legacy tidak boleh mengubah referensi invoice canonical.');
+        }
         TaxParameter::updateOrCreate(
             ['tax_param_id' => 'pjk-demo-001'],
             [

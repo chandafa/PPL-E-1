@@ -64,6 +64,7 @@ return [
     */
     'd2' => [
         'driver' => env('D2_DRIVER', 'mock'),
+        'mock_dataset' => env('D2_MOCK_DATASET', 'sqlite'),
         'base_url' => env('D2_BASE_URL'),
         'invoice_path' => env('D2_INVOICE_PATH', '/api/v1/invoices/{invoiceId}'),
         'timeout' => (int) env('D2_TIMEOUT', 5),

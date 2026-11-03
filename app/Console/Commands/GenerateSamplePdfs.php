@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\EFaktur\EFakturPdfParser;
+use Database\Seeders\Support\D2SourceDataset;
 use Database\Seeders\Support\DemoDataset;
 use Database\Seeders\Support\DemoSampleValidator;
 use Database\Seeders\Support\FakeEFakturPdf;
@@ -14,7 +15,7 @@ use Throwable;
 
 class GenerateSamplePdfs extends Command
 {
-    protected $signature = 'demo:samples {--path=docs/postman/samples : folder keluaran relatif terhadap akar proyek}';
+    protected $signature = 'demo:samples {--path=docs/postman/samples : folder keluaran relatif terhadap akar proyek} {--dataset= : d2-source untuk dua invoice snapshot SQLite}';
 
     protected $description = 'Buat dan periksa PDF demo, tanggal invoice/e-Faktur, serta lampiran per masa pajak';
 
@@ -26,9 +27,17 @@ class GenerateSamplePdfs extends Command
             return self::FAILURE;
         }
         try {
+            $dataset = $this->option('dataset');
+            if ($dataset !== null && $dataset !== 'd2-source') {
+                throw new RuntimeException('Dataset tidak dikenal: '.$dataset);
+            }
+            $invoiceIds = $dataset === 'd2-source' ? array_column(D2SourceDataset::rows(), 'invoiceId') : null;
+            if ($invoiceIds !== null && count(DemoDataset::invoices(invoiceIds: $invoiceIds)) !== count($invoiceIds)) {
+                throw new RuntimeException('Jalankan D2SourceDemoSeeder terlebih dahulu; dua invoice snapshot SQLite harus tersedia.');
+            }
             $manifest = $binaries = $attachments = [];
             $numbers = [];
-            $samples = DemoDataset::samples();
+            $samples = DemoDataset::samples($invoiceIds);
             if ($samples === []) {
                 throw new RuntimeException('Katalog D-2 belum berisi invoice untuk dibuatkan sampel.');
             }
@@ -50,7 +59,7 @@ class GenerateSamplePdfs extends Command
                     'sha256' => $result['sha256'], 'validation' => $result['validation'],
                 ];
             }
-            foreach (DemoDataset::paymentDocuments() as $name => $document) {
+            foreach (DemoDataset::paymentDocuments($invoiceIds) as $name => $document) {
                 $binary = FakeEFakturPdf::attachment($document['title'], $document['fields']);
                 $text = (new Parser)->parseContent($binary)->getText();
                 foreach ($document['fields'] as $value) {
@@ -63,6 +72,16 @@ class GenerateSamplePdfs extends Command
             }
             // Publikasikan hanya setelah seluruh PDF lolos pembacaan ulang.
             $dir = base_path((string) $this->option('path'));
+            if ($invoiceIds !== null && is_dir($dir)) {
+                $unexpected = array_filter(File::files($dir), fn ($file) => $file->getExtension() === 'pdf' && ! isset($binaries[$file->getFilename()]));
+                if ($unexpected !== []) {
+                    $archive = $dir.'-legacy-'.now()->format('Ymd-His').'-'.bin2hex(random_bytes(3));
+                    if (! File::moveDirectory($dir, $archive)) {
+                        throw new RuntimeException('Gagal memisahkan PDF dataset lama.');
+                    }
+                    $this->line('PDF lama dipertahankan di '.$archive);
+                }
+            }
             File::ensureDirectoryExists($dir);
             foreach ($binaries as $name => $binary) {
                 File::replace($dir.DIRECTORY_SEPARATOR.$name, $binary);

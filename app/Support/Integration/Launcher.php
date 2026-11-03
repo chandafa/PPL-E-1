@@ -9,12 +9,12 @@ class Launcher
 {
     public function __construct(private ExecutableFinder $finder) {}
 
-    public function command(bool $stop = false): array
+    public function command(bool $stop = false, string $d2Driver = 'http'): array
     {
         if (PHP_OS_FAMILY === 'Linux') {
             return $stop
                 ? [PHP_BINARY, 'scripts/linux-integration.php', 'stop']
-                : ['bash', 'scripts/start-integration.sh', PHP_BINARY];
+                : array_merge(['bash', 'scripts/start-integration.sh', PHP_BINARY], $d2Driver === 'mock' ? ['mock'] : []);
         }
 
         $powershell = $this->finder->find('powershell');
@@ -25,6 +25,6 @@ class Launcher
         return array_merge([
             $powershell, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
             $stop ? 'scripts/stop-integration.ps1' : 'scripts/start-integration.ps1',
-        ], $stop ? [] : ['-Main']);
+        ], $stop ? [] : array_merge(['-Main'], $d2Driver === 'mock' ? ['-D2Driver', 'mock'] : []));
     }
 }

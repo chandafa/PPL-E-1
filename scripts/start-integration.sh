@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 php_binary="${1:-php}"
+d2_driver="${2:-http}"
 parent="$(dirname -- "$repo")"
 f1_path="${F1_PATH:-$parent/_integrasi/F1}"
 d2_path="${D2_PATH:-$parent/_integrasi/D2}"
@@ -28,4 +29,4 @@ else
 fi
 set -u
 cd -- "$repo"
-exec "$php_binary" scripts/linux-integration.php start "$f1_path" "$d2_path"
+exec "$php_binary" scripts/linux-integration.php start "$f1_path" "$d2_path" "$d2_driver"

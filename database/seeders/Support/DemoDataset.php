@@ -10,10 +10,11 @@ use RuntimeException;
 /** Builds E-1 demo documents from the current D-2 invoice records. */
 final class DemoDataset
 {
-    public static function invoices(bool $includeManual = false): array
+    public static function invoices(bool $includeManual = false, ?array $invoiceIds = null): array
     {
         return Invoice::query()
-            ->with('termin.contract')
+            ->with(['termin.contract', 'sourceItems'])
+            ->when($invoiceIds !== null, fn ($query) => $query->whereIn('invoice_id', $invoiceIds))
             ->orderBy('invoice_id')
             ->get()
             ->mapWithKeys(function (Invoice $invoice): array {
@@ -29,20 +30,22 @@ final class DemoDataset
                     'invoiceDate' => $date->format('Y-m-d'),
                     'taxPeriod' => $date->format('Y-m'),
                     'manualUploadOnly' => false,
-                    'file' => 'efaktur-' . $id . '.pdf',
+                    'file' => 'efaktur-'.$id.'.pdf',
                     'pdf' => [
                         'nsfp' => sprintf('010.000-%s.%08d', $date->format('y'), $serial),
                         'date' => $date->locale('id')->translatedFormat('j F Y'),
                         'invoiceNumber' => $number,
-                        'items' => [[
+                        'items' => $invoice->sourceItems->isNotEmpty() ? $invoice->sourceItems->map(fn ($item) => [
+                            'code' => $item->code, 'name' => $item->description, 'amount' => (string) $item->amount,
+                        ])->all() : [[
                             'code' => '620100',
-                            'name' => 'Jasa demo ' . $number,
+                            'name' => config('e1.d2.mock_dataset') === 'sqlite' ? 'Item uji E-1 (bukan data D-2)' : 'Jasa demo '.$number,
                             'amount' => $dpp,
                         ]],
                         'dpp' => $dpp,
                         'ppn' => $ppn,
                         'ppnbm' => '0.00',
-                        'buyer' => $invoice->termin?->contract?->project_id ?? 'Referensi D-2',
+                        'buyer' => $invoice->termin?->contract?->client_name ?? $invoice->termin?->contract?->project_id ?? 'Referensi D-2',
                     ],
                 ];
 
@@ -69,7 +72,7 @@ final class DemoDataset
 
     private static function replacementFor(array $fixture): array
     {
-        $fixture['file'] = 'efaktur-' . $fixture['invoiceId'] . '-pengganti.pdf';
+        $fixture['file'] = 'efaktur-'.$fixture['invoiceId'].'-pengganti.pdf';
         $fixture['pdf']['nsfp'] = sprintf(
             '010.001-%s.%08d',
             substr($fixture['invoiceDate'], 2, 2),
@@ -79,10 +82,10 @@ final class DemoDataset
         return $fixture;
     }
 
-    public static function samples(): array
+    public static function samples(?array $invoiceIds = null): array
     {
         $samples = [];
-        foreach (self::invoices() as $id => $fixture) {
+        foreach (self::invoices(invoiceIds: $invoiceIds) as $id => $fixture) {
             $samples[$fixture['file']] = $fixture + ['seeded' => true, 'flow' => 'create'];
             $replacement = self::replacementFor($fixture);
             $samples[$replacement['file']] = $replacement + ['seeded' => false, 'flow' => 'replace'];
@@ -91,10 +94,10 @@ final class DemoDataset
         return $samples;
     }
 
-    public static function payments(): array
+    public static function payments(?array $invoiceIds = null): array
     {
         $totals = [];
-        foreach (self::invoices() as $invoice) {
+        foreach (self::invoices(invoiceIds: $invoiceIds) as $invoice) {
             $period = $invoice['taxPeriod'];
             $totals[$period] = isset($totals[$period])
                 ? Money::add($totals[$period], $invoice['pdf']['ppn'])
@@ -127,7 +130,7 @@ final class DemoDataset
             'Masa pajak' => $payment['taxPeriod'],
             'Tahun pajak' => (string) $payment['taxYear'],
             'ID Billing' => $payment['billingId'],
-            'Jumlah setor' => 'Rp ' . Money::display($payment['amountPaid']),
+            'Jumlah setor' => 'Rp '.Money::display($payment['amountPaid']),
         ];
         if ($proof) {
             $fields['NTPN'] = $payment['ntpn'];
@@ -139,10 +142,10 @@ final class DemoDataset
         return $fields;
     }
 
-    public static function paymentDocuments(): array
+    public static function paymentDocuments(?array $invoiceIds = null): array
     {
         $documents = [];
-        foreach (self::payments() as $sequence => $payment) {
+        foreach (self::payments($invoiceIds) as $sequence => $payment) {
             $types = ['e-billing' => 'e-Billing Demo'];
             if (isset($payment['ntpn'])) {
                 $types['bukti-pembayaran'] = 'Bukti Pembayaran Demo';

@@ -18,6 +18,13 @@ class ModulD2DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        if (config('e1.d2.mock_dataset') !== 'legacy') {
+            throw new RuntimeException('Dataset legacy hanya tersedia dengan D2_MOCK_DATASET=legacy pada database terpisah.');
+        }
+        $canonical = Invoice::query()->find('inv-demo-001');
+        if ($canonical !== null && $canonical->invoice_number !== 'INV-2026-0001') {
+            throw new RuntimeException('Konflik inv-demo-001: invoice snapshot SQLite tidak boleh ditimpa dataset legacy.');
+        }
         if (app()->isProduction() || config('e1.d2.driver') !== 'mock') {
             $this->command?->warn('ModulD2DemoSeeder hanya tersedia di luar production dengan D2_DRIVER=mock.');
 
