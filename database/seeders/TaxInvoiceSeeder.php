@@ -12,7 +12,7 @@ use RuntimeException;
 
 class TaxInvoiceSeeder extends Seeder
 {
-    public function run(DemoFixtureWriter $writer): void
+    public function run(): void
     {
         if (! app()->environment(['local', 'testing'])) {
             $this->command?->warn('TaxInvoiceSeeder hanya tersedia di local/testing.');
@@ -35,6 +35,8 @@ class TaxInvoiceSeeder extends Seeder
                 config(['e1.d2.integration_catalog' => true]);
             }
             $fixtures = DemoDataset::fromReferences(app(InvoiceProvider::class)->catalog());
+            // Resolve after authentication: the writer's invoice client captures the current Bearer token.
+            $writer = app(DemoFixtureWriter::class);
             $counts = $writer->write($fixtures, [], $actor);
             $this->command?->info("Demo E-1: {$counts['invoices']} faktur ditambahkan; data yang sudah ada dipertahankan.");
         } finally {

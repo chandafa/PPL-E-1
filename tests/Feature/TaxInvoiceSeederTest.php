@@ -110,6 +110,29 @@ class TaxInvoiceSeederTest extends TestCase
         }
     }
 
+    public function test_every_http_request_including_invoice_creation_uses_the_fresh_token(): void
+    {
+        $this->httpSource();
+        request()->headers->set('Authorization', 'Bearer stale-token');
+        Http::fake(['http://127.0.0.1:8026/*' => function ($request) {
+            if (! $request->hasHeader('Authorization', 'Bearer current-token')) {
+                return Http::response([], 401);
+            }
+
+            return Http::response(['data' => [
+                'invoiceId' => 'live-source-invoice', 'invoiceNumber' => 'INV-LIVE-2027',
+                'invoiceDate' => '2027-03-15', 'dppAmount' => '250000000.00', 'ppnAmount' => '27500000.00',
+                'status' => 'TERTAGIH', 'projectId' => 'live-project',
+            ]]);
+        }]);
+        $this->artisan('db:seed', ['--class' => TaxInvoiceSeeder::class, '--force' => true])->assertSuccessful();
+        Http::assertSentCount(2);
+        Http::assertNotSent(fn ($request) => ! $request->hasHeader('Authorization', 'Bearer current-token'));
+        $this->assertDatabaseHas('faktur_pajak', ['invoice_id' => 'live-source-invoice', 'created_by_akun_id' => 'f1-admin-current']);
+        $this->assertSame('Bearer stale-token', request()->headers->get('Authorization'));
+        $this->assertFalse(config('e1.d2.integration_catalog'));
+    }
+
     public function test_original_demo_seeder_entry_point_also_restores_http_tax_invoices(): void
     {
         $this->httpSource();
