@@ -106,7 +106,7 @@ Untuk PostgreSQL lokal tanpa container, gunakan port instalasinya (umumnya `5432
 
 Biarkan konfigurasi lainnya mengikuti `.env.example`. `composer integration` akan mengatur koneksi F-1/D-2 dan mematikan login tiruan E-1. Nilai `APP_KEY` disiapkan pada langkah berikutnya.
 
-### 4. Jalankan PostgreSQL melalui Podman
+### 4. Jalankan PostgreSQL melalui Podman (Jika Menggunakan Postgre didalam Container Docker atau Podman jika tidak Skip saja)
 
 ```bash
 podman compose config --quiet
@@ -278,9 +278,9 @@ Buka **Swagger UI** untuk melihat parameter, mengunggah PDF, dan mencoba API. Be
 | Anggota |
 |---|
 | Raden Indra Prawirajaya |
-| Aidil |
-| Candra |
+| Muhammad Aidil Fikri |
+| Candra Kirana |
 | Ismail Abdul Fathan |
-| Raihan Azzani |
+| Raihan Azzani Helmawan |
 
 Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. `composer integration` menyiapkan kedua repo, migrasi, dan seed; `composer integration run` menjalankan F-1 dan D-2 melalui HTTP bersama E-1. Mode dummy tersedia dengan `--d2=mock`.
