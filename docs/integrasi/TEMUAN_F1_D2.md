@@ -39,7 +39,7 @@ Temuan historis dari Oktober sebelumnya tidak otomatis berlaku pada commit baru.
 
 ## Cara mengulang temuan
 
-Ikuti [panduan integrasi](README.md) dan jalankan `node scripts/test-integration.mjs` pada runtime baru. Skrip membedakan **pemeriksaan E-1 yang harus lulus** dari **observasi kontrak upstream**: lima kasus D2-04/05/06 dan F1-GAP-01/02 sengaja merekam harapan yang belum terpenuhi, bukan melabeli respons 200 sebagai lulus keamanan. Pengujian hanya dilakukan pada server dan database lokal yang dibuat launcher.
+Runner bukti lama dipindahkan ke [arsip integrasi](../arsip/integrasi-lama/README.md). Gunakan `composer test` dan `npm run test:ui` untuk regresi aktif. Skrip membedakan **pemeriksaan E-1 yang harus lulus** dari **observasi kontrak upstream**: lima kasus D2-04/05/06 dan F1-GAP-01/02 sengaja merekam harapan yang belum terpenuhi, bukan melabeli respons 200 sebagai lulus keamanan. Pengujian hanya dilakukan pada server dan database lokal yang dibuat launcher.
 
 ## Uji ulang pada konfigurasi utama E-1
 

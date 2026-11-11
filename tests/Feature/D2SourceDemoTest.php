@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Services\Invoices\MockInvoiceProvider;
 use Database\Seeders\D2SourceDemoSeeder;
 use Database\Seeders\DatabaseSeeder;
-use Database\Seeders\ModulD2DemoSeeder;
+use Database\Seeders\RestoredD2DemoSeeder;
 use Database\Seeders\Support\D2SourceDataset;
 use Database\Seeders\Support\DemoDataset;
 use Illuminate\Support\Facades\DB;
@@ -87,7 +87,7 @@ class D2SourceDemoTest extends TestCase
     public function test_conflicting_legacy_data_rolls_back_the_whole_import(): void
     {
         config(['e1.d2.mock_dataset' => 'legacy']);
-        $this->seed(ModulD2DemoSeeder::class);
+        $this->seed(RestoredD2DemoSeeder::class);
         $before = [];
         foreach (['contracts', 'termins', 'invoices', 'invoice_histories'] as $table) {
             $before[$table] = DB::table($table)->get()->toJson();
@@ -104,16 +104,11 @@ class D2SourceDemoTest extends TestCase
         }
     }
 
-    public function test_legacy_seeder_cannot_overwrite_canonical_invoice(): void
+    public function test_restoring_demo_preserves_canonical_invoice(): void
     {
         $this->seed(D2SourceDemoSeeder::class);
         config(['e1.d2.mock_dataset' => 'legacy']);
-        try {
-            $this->seed(ModulD2DemoSeeder::class);
-            $this->fail('Expected legacy collision rejection');
-        } catch (RuntimeException $error) {
-            $this->assertStringContainsString('Konflik inv-demo-001', $error->getMessage());
-        }
+        $this->seed(RestoredD2DemoSeeder::class);
         $this->assertDatabaseHas('invoices', ['invoice_id' => 'inv-demo-001', 'dpp_amount' => '150000000.00']);
     }
 

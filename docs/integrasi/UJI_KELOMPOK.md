@@ -10,17 +10,20 @@ Dari folder PPL-E-1 di Windows:
 
 ```powershell
 composer integration
+composer integration run
 ```
 
-Buka **http://127.0.0.1:8080/login**. Akun fiktif resmi F-1: **super.admin**, kata sandi **Password123!**. Login ini memanggil server F-1 pada 4100. Invoice dibaca melalui HTTP D-2 pada 8026. Form/endpoint akun demo E-1 dimatikan.
+Buka **http://127.0.0.1:8087/login**. Akun fiktif resmi F-1: **super.admin**, kata sandi **Password123!**. Login ini memanggil server F-1 pada 4100. Invoice dibaca melalui HTTP D-2 pada 8026. Form/endpoint akun demo E-1 dimatikan.
 
-Jika ketiga layanan sudah berjalan, composer integration menampilkan status berhasil; langsung buka alamat tersebut. Layanan yang masih aktif tidak direstart, dan hanya layanan yang berhenti yang dinyalakan. Untuk berhenti: composer integration:stop. Setelah berhenti, composer integration memakai database yang sama dan tidak menanam ulang seed D-2. Pada laptop baru, ikuti [setup anggota](SETUP_ANGGOTA.md).
+Jika ketiga layanan sudah berjalan, composer integration run menampilkan status berhasil; langsung buka alamat tersebut. Layanan yang masih aktif tidak direstart, dan hanya layanan yang berhenti yang dinyalakan. Untuk berhenti: composer integration:stop. Setelah berhenti, composer integration run memakai database yang sama, memulihkan baris seed yang hilang, dan mempertahankan nilai/status baris lama. Pada laptop baru, ikuti [setup anggota](SETUP_ANGGOTA.md).
 
-## Contoh siap diuji di laptop ini
+Untuk instalasi baru, seed D-2 menyediakan `inv-demo-sample`. Contoh dan PDF di bawah berasal dari runtime lama; ID hasil generate tidak otomatis tersedia pada database baru. Untuk alur dummy SQLite beserta PDF pasangan, gunakan `--d2=mock` pada kedua perintah dan ikuti [panduan snapshot](../panduan/D2_SOURCE_DEMO.md).
+
+## Contoh pada bukti pengujian terdahulu
 
 | Masukan | Nilai |
 |---|---|
-| ID invoice D-2 | inv-6ae59e3b342a5 |
+| ID invoice D-2 pada bukti lama | inv-6ae59e3b342a5 |
 | Tanggal invoice dan e-Faktur | 15 Desember 2026 |
 | Masa pajak | 2026-12 |
 | Proyek | prj-demo-001 |

@@ -136,9 +136,34 @@ class HttpInvoiceProviderTest extends TestCase
         $this->assertNotNull($this->provider(null)->find('inv-demo-001'));
     }
 
-    public function test_katalog_d2_http_kosong_tanpa_endpoint_daftar(): void
+    public function test_catalog_fetches_current_http_values_for_known_reference_ids(): void
     {
-        $this->assertSame([], $this->provider()->catalog());
+        $row = $this->invoiceArray();
+        $row['invoiceId'] = 'inv-demo-sample';
+        $row['dppAmount'] = '999.00';
+        Http::fake([self::BASE.'/*' => Http::response(['data' => $row])]);
+        $catalog = $this->provider()->catalog();
+        $this->assertCount(1, $catalog);
+        $this->assertSame('999.00', $catalog[0]['dppAmount']);
+        $this->assertDatabaseHas('invoices', ['invoice_id' => 'inv-demo-sample', 'dpp_amount' => '100000000.00']);
+        Http::assertSent(fn ($request) => $request->hasHeader('Authorization', 'Bearer token-pemanggil-e1'));
+    }
+
+    public function test_catalog_can_discover_new_source_ids_and_omit_deleted_invoices(): void
+    {
+        Http::fake([
+            self::BASE.'/api/v1/invoices/new-source-id' => Http::response(['data' => array_replace($this->invoiceArray(), ['invoiceId' => 'new-source-id'])]),
+            self::BASE.'/api/v1/invoices/deleted-id' => Http::response([], 404),
+        ]);
+        $provider = new HttpInvoiceProvider(self::BASE, '/api/v1/invoices/{invoiceId}', 5, 'token', fn () => ['new-source-id', 'deleted-id']);
+        $this->assertSame(['new-source-id'], array_column($provider->catalog(), 'invoiceId'));
+    }
+
+    public function test_catalog_does_not_return_local_amounts_when_upstream_fails(): void
+    {
+        Http::fake([self::BASE.'/*' => Http::response([], 503)]);
+        $this->expectException(ApiException::class);
+        $this->provider()->catalog();
     }
 
     public function test_struktur_terkait_resmi_d2_mempertahankan_id_proyek_tanpa_mengarang_klien(): void

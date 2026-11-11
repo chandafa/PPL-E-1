@@ -15,16 +15,22 @@ class StopIntegration extends Command
 
     public function handle(Launcher $launcher): int
     {
+        $lock = null;
         try {
             $stop = $launcher->command(true);
+            $lock = $launcher->lock();
+
+            return Process::path(base_path())->forever()->run($stop, function (string $type, string $output): void {
+                $this->output->write($output);
+            })->exitCode() ?? self::FAILURE;
         } catch (RuntimeException $error) {
             $this->error($error->getMessage());
 
             return self::FAILURE;
+        } finally {
+            if (is_resource($lock)) {
+                fclose($lock);
+            }
         }
-
-        return Process::path(base_path())->forever()->run($stop, function (string $type, string $output): void {
-            $this->output->write($output);
-        })->exitCode() ?? self::FAILURE;
     }
 }

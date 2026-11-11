@@ -1,54 +1,12 @@
-# Menjalankan E-1, F-1, dan D-2 di laptop anggota
+# Setup integrasi E-1, F-1, dan D-2
 
-Satu perintah **composer integration** menyiapkan F-1 lalu menyalakan F-1 dan E-1 dengan dua invoice dari SQLite dummy D-2 lokal dan PDF pasangan. Untuk menjalankan server D-2 HTTP, gunakan `php artisan integration --d2=http`; bagian repo D-2 di bawah hanya berlaku pada opsi HTTP tersebut. Instalasi E-1 dan konfigurasi PostgreSQL tetap dilakukan sekali pada setiap laptop. Panduan ini untuk Windows/PowerShell; versi PHP, Composer, Node/npm, Git, dan PostgreSQL mengikuti [kebutuhan proyek](../../README.md#kebutuhan-sebelum-instalasi).
+Jalankan semua perintah dari folder `PPL-E-1`. Setup dan menjalankan layanan menggunakan dua perintah terpisah.
 
-## Siapkan kode terbaru
+## Prasyarat
 
-Gunakan E-1 yang sudah memuat perbaikan ini. Periksa dari folder PPL-E-1:
+Pasang PHP dan ekstensi sesuai `composer.json`, Composer, Git, PostgreSQL, serta Node.js/npm melalui nvm. Linux memerlukan Bash, `setsid`/`nohup` dan PHP `posix`. Windows memakai PowerShell dan nvm-windows; aktifkan versi Node melalui nvm sebelum setup. Ikuti `.nvmrc` bila tersedia.
 
-```powershell
-composer run-script --list
-```
-
-Daftarnya harus memuat **integration** dan **integration:stop**. Ambil commit E-1 yang memuat launcher otomatis ini sebelum mencoba. Jika sudah mempunyai folder berisi pekerjaan sendiri, simpan pekerjaan itu sebelum mengganti kode; jangan menimpa `.env` yang sudah dikonfigurasi.
-
-## Repo pendukung disiapkan otomatis
-
-Saat pertama kali `composer integration` dijalankan, launcher otomatis membuat struktur berikut di samping folder E-1:
-
-```text
-folder-kerja/
-  PPL-E-1/
-  _integrasi/
-    F1/
-    D2/    # hanya --d2=http
-```
-
-Launcher mengambil F-1 **0feb37a** dan D-2 **b93fc4d**, lalu menjalankan `npm ci --ignore-scripts` untuk F-1 dan `composer install` untuk D-2. Repo F-1 menyediakan server demo Node/JWT, sedangkan D-2 backend Laravel/database. Launcher memakai implementasi resmi tersebut; kode/kontrak/seed kedua kelompok tidak ditambal.
-
-Jika anggota telah memiliki folder `_integrasi/F1` atau `_integrasi/D2`, launcher memakainya apa adanya dan **tidak** melakukan clone, pull, checkout, atau menimpa pekerjaan lokal. Folder tersebut harus checkout repo yang benar dan memiliki `demo/local-server.js` (F-1) atau `artisan` (D-2).
-
-## Pasang dependensi E-1
-
-Di folder `PPL-E-1`, pasang dependensi dan build aplikasi ini sekali:
-
-```powershell
-composer install
-npm ci
-npm run build
-```
-
-## Siapkan PostgreSQL dan .env E-1
-
-Di pgAdmin, buat database **e1_pajak** dengan owner **postgres** pada server lokal. Akun PostgreSQL yang dipakai harus boleh membuat database karena launcher menyiapkan database D-2 dan pengujian terpisah. Akun postgres lokal sudah memiliki hak tersebut.
-
-Dari folder PPL-E-1, buat .env jika belum tersedia:
-
-```powershell
-if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-```
-
-Edit .env melalui VS Code, sesuaikan:
+Pasang dependensi E-1 dengan `composer install`. Untuk build antarmuka, gunakan Node melalui nvm lalu `npm ci` dan `npm run build`. Persiapkan database utama E-1 dan `.env`:
 
 ```dotenv
 APP_ENV=local
@@ -58,27 +16,33 @@ DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_DATABASE=e1_pajak
 DB_USERNAME=postgres
-DB_PASSWORD="password_postgresql_di_laptop_anda"
+DB_PASSWORD="password_postgresql_lokal"
 ```
 
-DB_PORT harus mengikuti instalasi PostgreSQL masing-masing, bukan otomatis port Docker 15439 pada .env.example. Password di atas adalah password akun PostgreSQL, bukan master password pgAdmin. Jangan menyalin .env, .env.integration, atau storage/app/private/integration dari laptop anggota lain.
+Salin `.env.example` hanya jika `.env` belum ada, sesuaikan koneksi, lalu jalankan `php artisan key:generate` sekali. Akun PostgreSQL harus memiliki izin CREATE DATABASE. Jangan menyalin `.env`, `.env.integration`, atau direktori runtime dari laptop lain.
 
-Pada instalasi baru, isi APP_KEY, lalu buat schema E-1:
+## Setup
 
-```powershell
-php artisan key:generate
-php artisan config:clear
-php artisan migrate
-```
-
-Key cukup dibuat sekali. Tidak perlu menjalankan DemoSeeder; dua invoice dari SQLite dummy sumber dan PDF dipasang otomatis oleh launcher tanpa membuat transaksi faktur/pembayaran E-1. Siapkan database baru/kosong jika ingin mencoba pencatatan pertama tanpa bentrok dengan faktur yang sudah aktif.
-
-## Jalankan aplikasi dan dummy
-
-Masih dari folder PPL-E-1:
-
-```powershell
+```bash
 composer integration
+```
+
+Perintah ini:
+
+1. Clone branch `main` F-1 ke `../_integrasi/F1` dan branch `main` D-2 ke `../_integrasi/D2`, jika belum ada. Clone baru mengikuti `main` saat itu tanpa patokan commit.
+2. Pasang dependensi F-1/D-2 sesuai lockfile.
+3. Siapkan profil lokal dan database D-2 terpisah; database utama E-1 tetap dari `.env`.
+4. Migrasi E-1/D-2 tanpa reset, seed referensi contoh E-1 dan seed resmi D-2. F-1 menggunakan seed JSON saat server dimulai.
+5. Simpan status setup dan selesai tanpa menyalakan layanan.
+
+Checkout terkelola harus berada pada branch `main`; SHA hanya dicatat sebagai informasi versi yang digunakan. Checkout lama dengan detached HEAD atau branch lain ditolak tanpa diubah. Pindahkan checkout lama secara manual atau tentukan `F1_PATH` dan `D2_PATH` secara eksplisit untuk memakai checkout sendiri. Setup tidak melakukan pull/reset pada checkout yang sudah ada. Lokasi override disimpan, sehingga tidak perlu ditentukan lagi saat `run`.
+
+Setup dan `run` memeriksa data seed setiap kali. Baris yang hilang dipulihkan meskipun penanda setup masih ada, sedangkan nilai dan status baris lama dipertahankan dalam transaksi. Konflik seed E-1 menampilkan tabel/ID terkait dan membatalkan transaksi. Periksa data konflik; jangan menghapus database untuk melewati kesalahan tersebut.
+
+## Jalankan dan hentikan layanan
+
+```bash
+composer integration run
 ```
 
 | Layanan | Alamat |
@@ -86,37 +50,37 @@ composer integration
 | E-1 / login | http://127.0.0.1:8087/login |
 | Swagger E-1 | http://127.0.0.1:8087/docs |
 | F-1 | http://127.0.0.1:4100 |
-| D-2 dummy | Di dalam E-1; tidak memerlukan port/server sendiri |
+| D-2 | http://127.0.0.1:8026 |
 
-Akun seed fiktif F-1: **super.admin**, kata sandi **Password123!**. Launcher mengaktifkan F-1 dan `D2_DRIVER=mock` pada .env E-1, mematikan login demo E-1, dan menjalankan server di background. Tidak perlu php artisan serve atau npm run dev tambahan. Jika composer integration dipanggil lagi, layanan yang sudah aktif dipertahankan; hanya layanan yang berhenti yang dinyalakan.
+Login fiktif F-1: **super.admin** / **Password123!**. Invoice contoh HTTP D-2: **inv-demo-sample**. Runtime lokal membaca ID invoice langsung dari database D-2 secara read-only, lalu memverifikasi detail dan nilai komersial melalui HTTP. Invoice tampil pada halaman Invoice D-2 dan pilihan pada form Catat e-Faktur.
 
-Invoice dummy adalah **inv-demo-001** dan **inv-demo-sample**, masa Oktober–November 2026. Gunakan PDF di `storage/app/private/d2-source-samples`; lihat [panduan dummy](../panduan/D2_SOURCE_DEMO.md). Invoice `inv-demo-sample` dan bukti HTTP lama hanya untuk mode `--d2=http`. Jangan menganggap ID invoice hasil generate di laptop lain otomatis ada pada database sendiri. Lihat [langkah uji kelompok](UJI_KELOMPOK.md) untuk proses Periksa PDF, Simpan, rekap, dan pembayaran.
+`run` memeriksa migrasi dan memulihkan baris seed yang hilang sebelum menyalakan layanan dari setup yang lengkap. Setelah layanan siap, `TaxInvoiceSeeder` membuat faktur demo untuk invoice sumber yang belum mempunyai faktur. PDF, item, audit, dan rekap dibuat melalui layanan E-1; pembayaran tetap dicatat manual. Perintah ini tidak melakukan clone, instalasi, atau reset database. Pemanggilan ulang mempertahankan proses sehat dan menyalakan layanan yang berhenti. Untuk berhenti atau restart:
 
-Untuk berhenti:
-
-```powershell
+```bash
 composer integration:stop
+composer integration run
 ```
 
-Untuk restart penuh:
+Database dan faktur yang sudah ada dipertahankan; faktur yang dibatalkan tidak dibuat ulang oleh seeder. Faktur demo tampil pada halaman Faktur Pajak. Form Catat e-Faktur hanya menawarkan invoice yang belum memiliki faktur aktif, sehingga invoice yang baru di-seed tidak lagi muncul di pilihan tersebut. F-1 memuat ulang seed JSON setiap prosesnya dimulai ulang. Sebelum mengulang setup atau mengganti mode, hentikan layanan terlebih dahulu.
 
-```powershell
-composer integration:stop
-composer integration
+## Mode dummy opsional
+
+```bash
+composer integration -- --d2=mock
+composer integration run -- --d2=mock
 ```
 
-Data PostgreSQL tetap. F-1 mengembalikan data memorinya ke seed saat prosesnya benar-benar direstart, sesuai implementasi kelompok F-1.
+Mode ini memakai F-1 serta dua invoice snapshot SQLite di database E-1, tanpa server D-2. PDF pasangan tersedia di `storage/app/private/d2-source-samples`. Ikuti [panduan dummy](../panduan/D2_SOURCE_DEMO.md) dan [langkah uji kelompok](UJI_KELOMPOK.md).
 
-## Jika ada pesan kesalahan
+## Pemulihan
 
-| Pesan | Tindakan |
+| Pesan/kondisi | Tindakan |
 |---|---|
-| Integrasi sudah berjalan | Status berhasil. Langsung buka alamat E-1; tidak perlu start lagi. |
-| Composer tidak mengenali integration | Kode E-1 belum memuat perbaikan terbaru; gunakan paket terbaru atau branch dev setelah perubahan tersedia. |
-| Clone/pemasangan F-1 atau D-2 gagal | Pastikan Git, Node/npm, Composer, dan koneksi internet tersedia. Jalankan ulang `composer integration`; folder checkout yang valid tidak akan diunduh ulang. |
-| `processes.json` tidak ditemukan atau profil/runtime berbeda | Aman dijalankan ulang pada kode terbaru: `composer integration:stop`, kemudian `composer integration`. Stop akan berhasil tanpa proses yang dicatat; startup membuat runtime baru bila port 4100, 8026, dan 8087 kosong. |
-| Port dipakai proses di luar runtime | Hentikan sendiri server lama pada port tersebut, misalnya composer serve atau php artisan serve. Launcher tidak mematikan proses lain. |
-| Profil/port berbeda | Jalankan composer integration:stop, kemudian composer integration. |
-| Tidak dapat membuat database | Periksa PostgreSQL, DB_HOST/PORT/USERNAME/PASSWORD, dan hak CREATE DATABASE akun lokal. |
+| Setup belum lengkap / konfigurasi berubah | Hentikan layanan, lalu ulang `composer integration`. |
+| Port terpakai | Gunakan `composer integration:stop` untuk proses runtime ini; tangani sendiri proses lain. |
+| Clone/dependensi gagal | Periksa koneksi dan prasyarat, lalu ulang setup. |
+| Tahap database gagal | Periksa log privat `storage/logs/integration-setup.log` pada E-1, konfigurasi PostgreSQL, dan izin CREATE DATABASE. |
+| Checkout bukan branch main | Pindahkan checkout lama atau gunakan override path secara eksplisit. |
+| Konflik seed | Periksa tabel/ID yang disebutkan; data lama tidak ditimpa. |
 
-Setiap laptop memakai server, database, key, dan PID sendiri. Menjalankan proyek secara bersamaan pada laptop berbeda tidak menimbulkan bentrok port antarlaptop. Panduan ini bukan konfigurasi satu database bersama atau akses melalui jaringan kampus.
+Alias Artisan tersedia: `php artisan integration`, `php artisan integration run`, dan `php artisan integration:stop`. Konfigurasi privat tersimpan di `storage/app/private/integration`; jangan ikut memasukkannya ke Git atau bukti pengujian.

@@ -23,6 +23,8 @@ Pasang perangkat berikut terlebih dahulu. Untuk Composer, pasang PHP lebih dulu 
 | **pgAdmin 4** | Versi yang mendukung PostgreSQL terpasang | Membuat dan melihat database melalui antarmuka grafis | [Download pgAdmin](https://www.pgadmin.org/download/) |
 | **Git** | Versi stabil | Mengambil kode dari repositori | [Download Git](https://git-scm.com/downloads/) |
 
+Gunakan Node.js/npm melalui **nvm** pada Linux atau **nvm-windows** pada Windows. Aktifkan versi Node sebelum menjalankan perintah npm dan ikuti `.nvmrc` bila tersedia. Pada Linux, integrasi juga memerlukan Bash, `setsid`, `nohup`, dan ekstensi PHP `posix`; pada Windows, integrasi memakai PowerShell.
+
 Saat memasang PostgreSQL di Windows, pilih **PostgreSQL Server** dan **pgAdmin 4**. Catat password akun `postgres` serta port yang dipilih; keduanya dipakai saat mengisi `.env`.
 
 PHP memerlukan ekstensi `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `filter`, `gd`, `mbstring`, `openssl`, `pdo`, `pdo_pgsql`, `session`, `tokenizer`, `xml`, `xmlreader`, `xmlwriter`, dan `zip`. Jika Composer menyebut ekstensi belum tersedia, aktifkan ekstensi tersebut pada `php.ini` yang digunakan PHP CLI. Lokasinya dapat dilihat dengan `php --ini`.
@@ -46,11 +48,11 @@ Jika folder proyek sudah tersedia, cukup buka folder tersebut.
 
 ```bash
 composer install
-npm install
+npm ci
 npm run build
 ```
 
-`composer install` memasang paket Laravel/PHP. `npm install` memasang paket frontend dan Swagger UI. `npm run build` menyiapkan CSS serta JavaScript untuk tampilan aplikasi.
+`composer install` memasang paket Laravel/PHP E-1. Jalankan npm melalui nvm: `npm ci` memasang paket frontend sesuai lockfile, lalu `npm run build` menyiapkan CSS serta JavaScript. Dependensi repo F-1 dan D-2 akan dipasang otomatis oleh `composer integration`.
 
 ### 3. Buat database melalui pgAdmin
 
@@ -60,7 +62,7 @@ Langkah ini dilakukan melalui tampilan pgAdmin, tanpa perintah SQL di terminal:
 2. Pada panel kiri, buka **Servers → server PostgreSQL Anda**.
 3. Klik kanan **Databases → Create → Database…**.
 4. Isi **Database** dengan `e1_pajak` dan **Owner** dengan `postgres`.
-5. Klik **Save**. Database `e1_pajak` sekarang tersedia; tabelnya akan dibuat oleh Laravel pada langkah migrasi.
+5. Klik **Save**. Database `e1_pajak` sekarang tersedia; tabelnya akan dibuat otomatis saat menjalankan `composer integration`.
 
 Jika database tersebut sudah ada, gunakan database yang tersedia. Panduan menu tersedia pada [dokumentasi pgAdmin](https://www.pgadmin.org/docs/pgadmin4/latest/database_dialog.html).
 
@@ -75,7 +77,7 @@ Isi atau sesuaikan baris berikut:
 APP_NAME="E-1 Pajak Proyek"
 APP_ENV=local
 APP_DEBUG=true
-APP_URL=http://127.0.0.1:8080
+APP_URL=http://127.0.0.1:8087
 
 # Database PostgreSQL yang dibuat melalui pgAdmin
 DB_CONNECTION=pgsql
@@ -85,9 +87,6 @@ DB_DATABASE=e1_pajak
 DB_USERNAME=postgres
 DB_PASSWORD="password_postgresql_anda"
 
-# Demo lokal
-D2_DRIVER=mock
-E1_DEV_LOGIN=true
 ```
 
 **Ganti `password_postgresql_anda` dengan password akun PostgreSQL Anda.** Contoh ini menggunakan akun `postgres` untuk menjalankan demo lokal di laptop masing-masing. Jika memakai akun lain, sesuaikan `DB_USERNAME` dan pemilik database.
@@ -97,85 +96,68 @@ E1_DEV_LOGIN=true
 | `DB_HOST` | `127.0.0.1` | PostgreSQL berjalan di laptop sendiri |
 | `DB_PORT` | `5432` | Sesuaikan dengan port yang dipilih saat instalasi PostgreSQL |
 | `DB_DATABASE` | `e1_pajak` | Harus sama dengan nama database di pgAdmin |
-| `DB_USERNAME` | `postgres` | Akun yang mempunyai akses ke database |
+| `DB_USERNAME` | `postgres` | Akun yang mempunyai akses ke database dan izin CREATE DATABASE untuk D-2 |
 | `DB_PASSWORD` | Password PostgreSQL Anda | Password akun database, bukan master password pgAdmin |
-| `D2_DRIVER` | `mock` | Memakai invoice contoh untuk demo lokal |
-| `E1_DEV_LOGIN` | `true` | Mengaktifkan login akun demo |
 
 **Perhatikan port:** `.env.example` berisi port `15439` untuk konfigurasi Docker. Pada panduan PostgreSQL lokal melalui pgAdmin ini, ubah menjadi `5432` atau port instalasi Anda.
 
-Biarkan konfigurasi lainnya mengikuti `.env.example` untuk demo lokal. Nilai `APP_KEY` akan diisi otomatis pada langkah berikutnya.
+Biarkan konfigurasi lainnya mengikuti `.env.example`. `composer integration` akan mengatur koneksi F-1/D-2 dan mematikan login tiruan E-1. Nilai `APP_KEY` disiapkan pada langkah berikutnya.
 
-### 5. Buat key, tabel, data demo, dan PDF
+### 5. Siapkan key aplikasi
 
-Untuk instalasi baru, jalankan berurutan:
+Untuk instalasi baru dengan `APP_KEY` yang belum terisi:
 
 ```bash
 php artisan key:generate
-php artisan config:clear
-php artisan migrate
-php artisan db:seed
-php artisan db:seed --class=DemoSeeder
-php artisan demo:samples
 ```
 
-| Perintah | Hasil |
-|---|---|
-| `php artisan key:generate` | Mengisi `APP_KEY` pada `.env` |
-| `php artisan config:clear` | Memuat konfigurasi `.env` terbaru |
-| `php artisan migrate` | Membuat tabel yang diperlukan aplikasi |
-| `php artisan db:seed` | Mengisi referensi invoice dari snapshot D-2 lokal; tidak membuat e-Faktur atau pembayaran |
-| `php artisan demo:d2` | Memasang snapshot SQLite dan PDF pasangan tanpa menjalankan server lain |
-| `php artisan db:seed --class=DemoSeeder` | Dataset legacy pada database terpisah dengan `D2_MOCK_DATASET=legacy`; ditolak jika bentrok snapshot |
-| `php artisan demo:samples` | Membuat PDF contoh dan memeriksa kembali hasil ekstraksinya |
+Jika `APP_KEY` sudah tersedia, lanjutkan ke setup integrasi.
 
-PDF tersedia di **`docs/postman/samples/`**. Gunakan `manifest.json` untuk mencocokkan PDF dengan invoice, tanggal, dan masa pajak. Hasil pemeriksaannya tercatat di `validation.json`.
-
-Seeder dapat dijalankan ulang dan mempertahankan perubahan pengguna yang sudah tersimpan. Pada snapshot SQLite, invoice `inv-demo-sample` tersedia untuk dicatat secara terpisah melalui fitur e-Faktur; `db:seed` tidak mencatat transaksi e-Faktur atau pembayaran. `DemoSeeder` adalah fixture legacy terpisah dan tidak dipakai untuk sumber SQLite ini. Lihat [panduan data demo](docs/panduan/DEMO_SEEDER.md).
-
-### 6. Jalankan aplikasi
+### 6. Setup dan jalankan integrasi
 
 ```bash
-composer serve
+# Siapkan repo F-1/D-2, dependensi, konfigurasi, migrasi, dan seed
+composer integration
+
+# Jalankan F-1, D-2, dan E-1; buat faktur demo dari invoice sumber
+composer integration run
 ```
 
-Biarkan terminal tersebut berjalan, lalu buka:
+Setup memerlukan port **4100, 8026, dan 8087** yang kosong. E-1 memakai database utama pada `.env`; D-2 memakai database terpisah yang dibuat otomatis. Migrasi dan seed dijalankan oleh integrasi, sehingga tidak perlu dijalankan manual.
+
+Setelah layanan siap, buka:
 
 | Halaman | Alamat |
 |---|---|
-| **Login aplikasi** | http://127.0.0.1:8080/login |
-| **Swagger UI** | http://127.0.0.1:8080/docs |
-| **Kontrak OpenAPI** | http://127.0.0.1:8080/docs/openapi.yaml |
+| **Login aplikasi** | http://127.0.0.1:8087/login |
+| **Swagger UI** | http://127.0.0.1:8087/docs |
+| **Kontrak OpenAPI** | http://127.0.0.1:8087/docs/openapi.yaml |
 
-`composer serve` sudah mengatur batas unggah PHP agar PDF hingga 5 MB dapat diterima aplikasi. Untuk menghentikan server, tekan **Ctrl+C**.
+Login menggunakan akun demo F-1: **`super.admin` / `Password123!`**. Faktur demo beserta PDF dibuat setelah layanan berjalan; pembayaran dicatat melalui aplikasi.
 
-## Integrasi dengan repo F-1 dan D-2
-
-Untuk anggota yang baru memasang proyek, ikuti [setup integrasi di laptop masing-masing](docs/integrasi/SETUP_ANGGOTA.md). Perintah `php artisan integration` memasang dependensi F-1/D-2 lalu menjalankan tiga layanan. Di Linux, checkout tetangga `../PPL_F1` dan `../PPL-D-2` dipakai jika tersedia; jika belum ada, repo diambil ke `../_integrasi`. Checkout yang sudah ada tidak diubah revisinya. Diperlukan Git, Node.js/npm, Composer, serta PostgreSQL yang sudah siap. Windows memakai PowerShell; Linux memakai Bash, nvm (`$NVM_DIR/nvm.sh` atau `~/.nvm/nvm.sh`), `setsid`/`nohup`, dan ekstensi PHP `posix`.
-
-Jalankan dari folder `PPL-E-1`:
+### 7. Pemakaian berikutnya dan menghentikan layanan
 
 ```bash
-php artisan integration
-# Hentikan layanan integrasi:
-php artisan integration:stop
+# Jalankan kembali integrasi yang sudah disiapkan
+composer integration run
+
+# Hentikan layanan integrasi
+composer integration:stop
 ```
 
-`composer integration` dan `composer integration:stop` tetap tersedia sebagai alias perintah Artisan tersebut.
+Data yang sudah tersimpan dipertahankan. Jika konfigurasi koneksi berubah, hentikan layanan lalu ulangi `composer integration` sebelum menjalankan `composer integration run`.
 
-Di Linux, Node.js/npm dijalankan melalui nvm, mengikuti `.nvmrc` F-1 atau E-1 jika tersedia; tanpa `.nvmrc`, digunakan versi `default` nvm. Lokasi checkout dapat ditentukan lewat `F1_PATH` dan `D2_PATH`:
+### Alternatif: integrasi dengan D-2 mock
 
 ```bash
-F1_PATH=/lokasi/PPL_F1 D2_PATH=/lokasi/PPL-D-2 php artisan integration
+composer integration:stop
+composer integration -- --d2=mock
+composer integration run -- --d2=mock
 ```
 
-Setelah dependensi E-1 dan PostgreSQL siap, jalankan **composer integration** dari folder PPL-E-1, lalu buka **http://127.0.0.1:8087/login**. Perintah ini memakai login F-1 dan **dummy D-2 lokal**: migrasi tanpa reset, pengisian dua invoice dari SQLite, serta pembuatan PDF pasangan dilakukan otomatis. Server/repo D-2 tidak dibutuhkan pada mode default. PDF tersedia di `storage/app/private/d2-source-samples`. Untuk server D-2 HTTP, jalankan `php artisan integration --d2=http`. Untuk berhenti, gunakan **composer integration:stop**. Port integrasi 8087 terpisah dari `composer serve` pada 8080.
+Mode ini menjalankan F-1 pada **4100** dan E-1 pada **8087**, dengan referensi snapshot D-2 lokal tanpa server D-2. Gunakan mode yang sama pada setup dan `run`.
 
-[Langkah uji kelompok dan PDF siap pakai](docs/integrasi/UJI_KELOMPOK.md) tersedia agar tim langsung mencoba alurnya. [Panduan lengkap dan hasil pengujian](docs/integrasi/README.md) menjelaskan profil utama serta suite terpisah. [Temuan F-1/D-2](docs/integrasi/TEMUAN_F1_D2.md) dicatat tanpa mengubah kode kedua kelompok.
-
-`composer integration` boleh dipanggil ulang: jika layanan sudah aktif, perintah menampilkan status berhasil dan mempertahankan prosesnya. Jika hanya sebagian layanan berhenti, bagian tersebut dinyalakan kembali.
-
-Untuk menyimulasikan data D-2 yang sudah diterima dan hanya menjalankan E-1, gunakan `php artisan demo:d2` lalu `composer serve`. Pengaturan login demo lokal, API detail sumber, serta PDF pasangan dijelaskan dalam [panduan snapshot D-2](docs/panduan/D2_SOURCE_DEMO.md).
+Panduan tambahan: [setup anggota](docs/integrasi/SETUP_ANGGOTA.md), [data demo](docs/panduan/DEMO_SEEDER.md), dan [snapshot D-2](docs/panduan/D2_SOURCE_DEMO.md).
 
 ## Alur proses
 
@@ -244,4 +226,4 @@ Buka **Swagger UI** untuk melihat parameter, mengunggah PDF, dan mencoba API. Be
 | Ismail Abdul Fathan |
 | Raihan Azzani |
 
-Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. `composer integration` memakai F-1 melalui HTTP dan dua invoice dari SQLite dummy D-2 lokal. Gunakan `php artisan integration --d2=http` untuk memakai server D-2 melalui HTTP.
+Dependensi: **F-1** untuk identitas dan hak akses, **D-2** untuk invoice proyek. Konsumen ringkasan pajak: **E-2**. `composer integration` menyiapkan kedua repo, migrasi, dan seed; `composer integration run` menjalankan F-1 dan D-2 melalui HTTP bersama E-1. Mode dummy tersedia dengan `--d2=mock`.

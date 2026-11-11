@@ -7,9 +7,13 @@ use Database\Seeders\Support\FakeEFakturPdf;
 use Illuminate\Contracts\Console\Kernel;
 use Smalot\PdfParser\Parser;
 
+if (getenv('E1_ENABLE_LEGACY_SUITE') !== '1') {
+    throw new RuntimeException('Skrip ini diarsipkan. Baca docs/arsip/integrasi-lama/README.md.');
+}
+
 // Input adalah JSON respons detail invoice D-2 yang sudah diamati melalui HTTP.
-require dirname(__DIR__).'/vendor/autoload.php';
-$app = require dirname(__DIR__).'/bootstrap/app.php';
+require dirname(__DIR__, 3).'/vendor/autoload.php';
+$app = require dirname(__DIR__, 3).'/bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 $input = json_decode(file_get_contents($argv[1]), true, flags: JSON_THROW_ON_ERROR);
 $row = $input['data'] ?? $input;

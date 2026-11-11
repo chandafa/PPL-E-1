@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\CurrentUserController;
 use App\Http\Controllers\Api\D2InvoiceController;
-use App\Http\Controllers\Api\DemoInvoiceController;
 use App\Http\Controllers\Api\DevLoginController;
 use App\Http\Controllers\Api\F1LoginController;
 use App\Http\Controllers\Api\V1\TaxInvoiceController;
@@ -21,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('dev/f1/login', DevLoginController::class);
 Route::post('auth/f1/login', F1LoginController::class)->middleware('throttle:10,1');
 Route::get('ui/profile', CurrentUserController::class)->middleware('f1.auth');
-Route::get('ui/d2/invoices', DemoInvoiceController::class)->middleware('f1.auth');
+Route::get('ui/d2/invoices', [D2InvoiceController::class, 'available'])->middleware('f1.auth');
 Route::get('ui/d2/invoices/all', D2InvoiceController::class)->middleware('f1.auth');
 Route::get('ui/d2/invoices/{invoiceId}', [D2InvoiceController::class, 'show'])->middleware('f1.auth');
 Route::get('ui/tax-recap-periods', [TaxRecapController::class, 'periods'])->middleware('f1.auth');

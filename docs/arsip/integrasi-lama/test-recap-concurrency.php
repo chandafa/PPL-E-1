@@ -16,7 +16,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Process\Process;
 
-$repo = dirname(__DIR__);
+if (getenv('E1_ENABLE_LEGACY_SUITE') !== '1') {
+    throw new RuntimeException('Skrip ini diarsipkan. Baca docs/arsip/integrasi-lama/README.md.');
+}
+
+$repo = dirname(__DIR__, 3);
 require $repo.'/vendor/autoload.php';
 $app = require $repo.'/bootstrap/app.php';
 $app->loadEnvironmentFrom('.env.integration');

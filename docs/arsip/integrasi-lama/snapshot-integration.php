@@ -5,8 +5,8 @@ use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-require dirname(__DIR__).'/vendor/autoload.php';
-$app = require dirname(__DIR__).'/bootstrap/app.php';
+require dirname(__DIR__, 3).'/vendor/autoload.php';
+$app = require dirname(__DIR__, 3).'/bootstrap/app.php';
 $app->loadEnvironmentFrom('.env.integration');
 $app->make(Kernel::class)->bootstrap();
 if (! str_starts_with((string) config('database.connections.pgsql.database'), 'e1_integrasi_')) {

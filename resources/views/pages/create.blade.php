@@ -6,9 +6,9 @@
 <div id="replacement-info" class="notice mb-5" hidden></div>
 <form id="invoice-form" class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
     <div class="min-w-0 space-y-6"><x-ui.card title="1. Invoice proyek">
-        @if(config('e1.d2.driver') === 'mock')
+        @if(config('e1.d2.driver') === 'mock' || config('e1.d2.integration_catalog'))
             <x-ui.select label="Invoice D-2" name="invoiceId" required disabled aria-describedby="invoiceId-help"><option value="">Memuat invoice D-2…</option></x-ui.select>
-            <p id="invoiceId-help" class="field-help">Data dummy D-2 untuk simulasi. Hanya invoice tanpa faktur keluaran aktif yang ditampilkan. Cari nomor, ID invoice, proyek, atau klien.</p>
+            <p id="invoiceId-help" class="field-help">@if(config('e1.d2.driver') === 'mock')Data dummy D-2 untuk simulasi. @endif Hanya invoice tanpa faktur keluaran aktif yang ditampilkan. Cari nomor, ID invoice, proyek, atau klien.</p>
             <div id="invoice-context" class="mt-4" aria-live="polite"><p class="text-sm text-muted">Memuat daftar invoice…</p></div>
             <x-ui.button id="retry-invoices" variant="secondary" class="mt-3" hidden>Muat Ulang Invoice</x-ui.button>
         @else

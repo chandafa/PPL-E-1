@@ -34,12 +34,12 @@ test('akses, filter, pagination, empty/error, dan login demo', async ({ page }) 
     await page.locator('#project').fill('prj-demo-002');
     await expect(page.locator('#taxPeriod option[value="2026-11"]')).toHaveText('November 2026');
     await page.locator('#taxPeriod').selectOption('2026-11');
-    await page.locator('#status').selectOption('REPLACEMENT');
+    await page.locator('#status').selectOption('NORMAL');
     await page.getByRole('button', { name: 'Cari', exact: true }).click();
-    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(1);
+    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(2);
     await page.reload();
     await expect(page.locator('#taxPeriod')).toHaveValue('2026-11');
-    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(1);
+    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(2);
     await page.locator('#client').fill('klien-tidak-ada');
     await page.getByRole('button', { name: 'Cari', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Data tidak ditemukan' })).toBeVisible();

@@ -21,7 +21,7 @@ php artisan config:clear
 php artisan demo:d2
 ```
 
-Perintah tersebut menjalankan migrasi tanpa reset, memasang seeder `D2SourceDemoSeeder`, dan membuat PDF pasangan di `storage/app/private/d2-source-samples`. `php artisan db:seed` memasang referensi invoice saja; e-Faktur dan pembayaran tidak disimpan otomatis. `php artisan integration` juga menyiapkan snapshot tanpa menanam transaksi E-1.
+Perintah tersebut menjalankan migrasi tanpa reset, memasang seeder `D2SourceDemoSeeder`, dan membuat PDF pasangan di `storage/app/private/d2-source-samples`. `php artisan db:seed` memasang referensi invoice saja; e-Faktur dan pembayaran tidak disimpan otomatis. `php artisan integration --d2=mock` menyiapkan snapshot tanpa menanam transaksi E-1; jalankan layanan dengan `php artisan integration run --d2=mock` untuk memakai login F-1.
 
 Untuk menjalankan hanya E-1 dengan login demo lokal, gunakan pula `E1_DEV_LOGIN=true`, `F1_API_ENABLED=false`, dan `F1_CHECK_ACCOUNT=false`; pertahankan konfigurasi database, APP_KEY, dan kunci JWT lokal sesuai README, lalu jalankan `composer serve`. Hentikan runtime sebelumnya dengan `php artisan integration:stop` jika port 8080 masih dipakai.
 

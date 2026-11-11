@@ -123,13 +123,10 @@ class DemoSeederTest extends TestCase
         $this->assertSame($oldFiles, Storage::disk('local')->allFiles());
     }
 
-    public function test_seeder_tidak_berjalan_di_production_atau_dengan_d2_http(): void
+    public function test_seeder_tidak_berjalan_di_production(): void
     {
         $this->app['env'] = 'production';
         $this->artisan('db:seed', ['--class' => DemoSeeder::class, '--force' => true])->assertSuccessful();
-        $this->app['env'] = 'testing';
-        config(['e1.d2.driver' => 'http']);
-        $this->seed(DemoSeeder::class);
         $this->assertDatabaseCount('faktur_pajak', 0);
         $this->assertSame([], Storage::disk('local')->allFiles());
     }

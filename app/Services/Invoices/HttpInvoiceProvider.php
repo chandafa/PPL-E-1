@@ -3,6 +3,8 @@
 namespace App\Services\Invoices;
 
 use App\Exceptions\ApiException;
+use App\Models\Invoice;
+use Closure;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -21,6 +23,7 @@ class HttpInvoiceProvider implements InvoiceProvider
         private readonly string $invoicePath,
         private readonly int $timeout,
         private readonly ?string $bearerToken = null,
+        private readonly ?Closure $catalogIds = null,
     ) {}
 
     public function find(string $invoiceId): ?InvoiceData
@@ -81,16 +84,21 @@ class HttpInvoiceProvider implements InvoiceProvider
         );
     }
 
-    /**
-     * D-2 tidak menyediakan endpoint daftar invoice (hanya detail per ID), sehingga
-     * Katalog tidak dapat diisi melalui layanan langsung tanpa mengubah D-2.
-     * Kembalikan daftar kosong; pemanggil bertanggung jawab menampilkan keterbatasan ini.
-     *
-     * @return list<array<string, mixed>>
-     */
+    /** @return list<array<string, mixed>> */
     public function catalog(): array
     {
-        return [];
+        $ids = $this->catalogIds !== null
+            ? ($this->catalogIds)()
+            : Invoice::query()->orderBy('invoice_id')->pluck('invoice_id')->all();
+        $invoices = [];
+        foreach (array_unique($ids) as $id) {
+            $invoice = $this->find($id);
+            if ($invoice !== null) {
+                $invoices[] = get_object_vars($invoice);
+            }
+        }
+
+        return $invoices;
     }
 
     // D-2 belum menyediakan pencarian proyek/klien; filter nama berdasar ID persis.
