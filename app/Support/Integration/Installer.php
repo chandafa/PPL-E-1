@@ -14,7 +14,32 @@ class Installer
 
     public function ready(string $repo, string $driver): array
     {
-        return Runtime::ready($repo, $driver);
+        $runtime = Runtime::ready($repo, $driver);
+        $this->prepareFrontend($repo);
+
+        return $runtime;
+    }
+
+    public function prepareFrontend(string $repo): void
+    {
+        $this->logDirectory = $repo.'/storage/logs';
+        if (is_file($repo.'/public/build/manifest.json')) {
+            return;
+        }
+        echo 'Menyiapkan CSS dan JavaScript melalui nvm...'.PHP_EOL;
+        $command = PHP_OS_FAMILY === 'Linux'
+            ? ['bash', 'scripts/integration-node.sh', $repo, 'build']
+            : ['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/integration-node.ps1', '-Repository', $repo, '-Build'];
+        $this->execute($command, $repo);
+        if (! is_file($repo.'/public/build/manifest.json')) {
+            throw new RuntimeException('Build frontend belum menghasilkan manifest. Aktifkan Node melalui nvm, lalu jalankan npm ci dan npm run build.');
+        }
+    }
+
+    public function verifyServices(string $repo, string $driver): void
+    {
+        $this->logDirectory = $repo.'/storage/logs';
+        $this->execute([PHP_BINARY, 'artisan', 'integration:verify', '--no-interaction'], $repo, Runtime::e1Environment($repo, $driver));
     }
 
     public function execute(array $command, string $cwd, array $env = [], bool $display = true): string
@@ -81,6 +106,7 @@ class Installer
         if (PHP_OS_FAMILY === 'Linux' && (! function_exists('posix_kill') || ! is_file((getenv('NVM_DIR') ?: getenv('HOME').'/.nvm').'/nvm.sh'))) {
             throw new RuntimeException('Linux memerlukan PHP posix dan nvm pada akun pengguna.');
         }
+        $this->prepareFrontend($repo);
         foreach ([4100, 8026, 8087] as $port) {
             $socket = @fsockopen('127.0.0.1', $port, $errno, $error, 0.2);
             if ($socket !== false) {

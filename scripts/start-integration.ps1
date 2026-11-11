@@ -80,7 +80,7 @@ if ($existingRuntime) {
 }
 if ($processes.Count -eq $serviceNames.Count) {
     foreach ($name in $serviceNames) { Wait-OwnedListener $name $processes[$name] }
-    Write-Output "Integrasi sudah berjalan: http://127.0.0.1:$e1Port/login; F-1 4100; $d2Label."
+    Write-Output "Proses integrasi sudah berjalan; pemeriksaan API dan seed faktur akan dilanjutkan. E-1 $e1Port; F-1 4100; $d2Label."
     Write-Output 'Layanan dan data tetap dipertahankan. Untuk restart penuh: composer integration:stop lalu composer integration run.'
     return
 }
@@ -142,7 +142,7 @@ try {
     $processes | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $stateFile -Encoding UTF8
     foreach ($name in $serviceNames) { Wait-OwnedListener $name $processes[$name] }
     [IO.File]::WriteAllText($modeFile, $D2Driver)
-    Write-Output "Siap diuji: http://127.0.0.1:$e1Port/login; F-1 4100; $d2Label."
+    Write-Output "Port layanan aktif; pemeriksaan API dan seed faktur akan dilanjutkan. E-1 $e1Port; F-1 4100; $d2Label."
     Write-Output ('Layanan yang dinyalakan: ' + (($started.Keys | Sort-Object) -join ', ') + '. Layanan lain tetap berjalan.')
     if ($D2Driver -eq 'mock') { Write-Output 'Dummy D-2 berada di database E-1; tanpa server D-2. Stop: composer integration:stop.' }
     else { Write-Output 'E-1 memakai database utama yang dipertahankan; D-2 memakai database integrasi terpisah. Stop: composer integration:stop.' }

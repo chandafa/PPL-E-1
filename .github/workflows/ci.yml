@@ -6,6 +6,34 @@ on:
   pull_request:
 
 jobs:
+  integration-preflight:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, mbstring, bcmath, gd, zip, fileinfo
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Uji pemeriksaan integrasi dan path berisi spasi
+        run: php vendor/bin/phpunit tests/Feature/ServiceReadinessTest.php tests/Feature/IntegrationCommandTest.php tests/Feature/IntegrationFrontendTest.php tests/Unit/IntegrationRuntimeTest.php
+      - name: Periksa sintaks PowerShell pada Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          foreach ($path in @('scripts/start-integration.ps1', 'scripts/integration-node.ps1')) {
+            $parseTokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path).Path, [ref]$parseTokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count -gt 0) { throw ($parseErrors | Out-String) }
+          }
+
   test:
     runs-on: ubuntu-latest
 

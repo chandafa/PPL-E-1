@@ -12,16 +12,20 @@ fi
 source "$NVM_DIR/nvm.sh"
 if [[ -f "$repository/.nvmrc" ]]; then
     cd -- "$repository"
-    nvm use || { [[ "$action" == install ]] && nvm install && nvm use; }
+    nvm use || { [[ "$action" == install || "$action" == build ]] && nvm install && nvm use; }
 elif [[ -f "$repo/.nvmrc" ]]; then
     cd -- "$repo"
-    nvm use || { [[ "$action" == install ]] && nvm install && nvm use; }
+    nvm use || { [[ "$action" == install || "$action" == build ]] && nvm install && nvm use; }
 else
     nvm use default
 fi
 node "$repo/scripts/check-integration-node.cjs"
 cd -- "$repository"
-if [[ "$action" == install ]]; then
+if [[ "$action" == build ]]; then
+    node "$repo/scripts/check-integration-node.cjs" --frontend
+    npm ci
+    npm run build
+elif [[ "$action" == install ]]; then
     npm ci --ignore-scripts
 else
     shift 2

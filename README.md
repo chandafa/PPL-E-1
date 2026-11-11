@@ -19,13 +19,14 @@ Pasang perangkat berikut terlebih dahulu. Untuk Composer, pasang PHP lebih dulu 
 | **PHP** | 8.4 atau 8.5 | Menjalankan Laravel dan perintah `php artisan` | [PHP](https://www.php.net/downloads.php) · [PHP Windows](https://windows.php.net/download/) |
 | **Composer** | 2.x | Memasang dependensi PHP proyek | [Download Composer](https://getcomposer.org/download/) |
 | **Node.js dan npm** | Disarankan Node.js **24 LTS**; Node 22 minimal 22.12 juga didukung | Memasang dependensi frontend dan membangun aset. npm sudah disertakan pada installer Node.js | [Download Node.js + npm](https://nodejs.org/en/download) |
-| **PostgreSQL** | 16 atau lebih baru; demo diuji pada 18 | Menyimpan data aplikasi | [Download PostgreSQL](https://www.postgresql.org/download/) |
-| **pgAdmin 4** | Versi yang mendukung PostgreSQL terpasang | Membuat dan melihat database melalui antarmuka grafis | [Download pgAdmin](https://www.pgadmin.org/download/) |
+| **Podman dan penyedia Compose** | Mendukung `podman compose` | Menjalankan PostgreSQL 16 melalui `compose.yaml` | [Podman](https://podman.io/) |
+| **PostgreSQL lokal (alternatif)** | 16 atau lebih baru | Dipakai jika tidak menggunakan container | [Download PostgreSQL](https://www.postgresql.org/download/) |
+| **pgAdmin 4 (opsional)** | Sesuai versi PostgreSQL | Melihat dan mengelola database | [Download pgAdmin](https://www.pgadmin.org/download/) |
 | **Git** | Versi stabil | Mengambil kode dari repositori | [Download Git](https://git-scm.com/downloads/) |
 
 Gunakan Node.js/npm melalui **nvm** pada Linux atau **nvm-windows** pada Windows. Aktifkan versi Node sebelum menjalankan perintah npm dan ikuti `.nvmrc` bila tersedia. Pada Linux, integrasi juga memerlukan Bash, `setsid`, `nohup`, dan ekstensi PHP `posix`; pada Windows, integrasi memakai PowerShell.
 
-Saat memasang PostgreSQL di Windows, pilih **PostgreSQL Server** dan **pgAdmin 4**. Catat password akun `postgres` serta port yang dipilih; keduanya dipakai saat mengisi `.env`.
+Pastikan `podman compose version` berhasil. Perintah ini memerlukan penyedia Compose seperti `podman-compose`. Jika memilih PostgreSQL lokal di Windows, catat password akun `postgres` serta port instalasinya untuk `.env`.
 
 PHP memerlukan ekstensi `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `filter`, `gd`, `mbstring`, `openssl`, `pdo`, `pdo_pgsql`, `session`, `tokenizer`, `xml`, `xmlreader`, `xmlwriter`, dan `zip`. Jika Composer menyebut ekstensi belum tersedia, aktifkan ekstensi tersebut pada `php.ini` yang digunakan PHP CLI. Lokasinya dapat dilihat dengan `php --ini`.
 
@@ -48,27 +49,30 @@ Jika folder proyek sudah tersedia, cukup buka folder tersebut.
 
 ```bash
 composer install
+```
+
+Pada Bash/Linux, aktifkan Node melalui nvm sebelum menjalankan npm:
+
+```bash
+source ~/.nvm/nvm.sh
+if [ -f .nvmrc ]; then
+    nvm install
+    nvm use
+else
+    nvm install 24
+    nvm use 24
+fi
 npm ci
 npm run build
 ```
 
-`composer install` memasang paket Laravel/PHP E-1. Jalankan npm melalui nvm: `npm ci` memasang paket frontend sesuai lockfile, lalu `npm run build` menyiapkan CSS serta JavaScript. Dependensi repo F-1 dan D-2 akan dipasang otomatis oleh `composer integration`.
+Pada Windows, aktifkan Node 24 melalui nvm-windows, lalu jalankan `npm ci` dan `npm run build` yang sama. `npm ci` mengikuti lockfile; build menghasilkan `public/build/manifest.json` beserta CSS dan JavaScript. Build harus selesai sebelum membuka aplikasi. Dependensi repo F-1 dan D-2 dipasang oleh `composer integration`.
 
-### 3. Buat database melalui pgAdmin
+Jika manifest belum ada saat `composer integration` atau `composer integration run`, perintah integrasi memasang dependensi frontend dan menjalankan build melalui nvm. Terminal tetap memerlukan akses internet untuk mengunduh paket. Build manual di atas juga dapat dipakai untuk memperbarui aset setelah perubahan kode.
 
-Langkah ini dilakukan melalui tampilan pgAdmin, tanpa perintah SQL di terminal:
+### 3. Siapkan konfigurasi .env
 
-1. Buka **pgAdmin 4** dan hubungkan ke server PostgreSQL lokal. Gunakan akun `postgres` serta password yang ditentukan saat instalasi PostgreSQL.
-2. Pada panel kiri, buka **Servers → server PostgreSQL Anda**.
-3. Klik kanan **Databases → Create → Database…**.
-4. Isi **Database** dengan `e1_pajak` dan **Owner** dengan `postgres`.
-5. Klik **Save**. Database `e1_pajak` sekarang tersedia; tabelnya akan dibuat otomatis saat menjalankan `composer integration`.
-
-Jika database tersebut sudah ada, gunakan database yang tersedia. Panduan menu tersedia pada [dokumentasi pgAdmin](https://www.pgadmin.org/docs/pgadmin4/latest/database_dialog.html).
-
-### 4. Siapkan konfigurasi .env
-
-Di Explorer VS Code, salin `.env.example`, lalu ubah nama salinannya menjadi `.env`. Jika `.env` sudah ada, edit file tersebut.
+Untuk instalasi baru, salin `.env.example` menjadi `.env` melalui Explorer VS Code atau `cp .env.example .env` pada Bash. Jika `.env` sudah ada, edit file tersebut tanpa menimpanya.
 
 Isi atau sesuaikan baris berikut:
 
@@ -79,29 +83,41 @@ APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://127.0.0.1:8087
 
-# Database PostgreSQL yang dibuat melalui pgAdmin
+# PostgreSQL melalui compose.yaml; Laravel berjalan di host
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=5432
+DB_PORT=15439
 DB_DATABASE=e1_pajak
-DB_USERNAME=postgres
-DB_PASSWORD="password_postgresql_anda"
-
+DB_USERNAME=e1_app
+DB_PASSWORD="ganti_dengan_password_lokal_anda"
 ```
 
-**Ganti `password_postgresql_anda` dengan password akun PostgreSQL Anda.** Contoh ini menggunakan akun `postgres` untuk menjalankan demo lokal di laptop masing-masing. Jika memakai akun lain, sesuaikan `DB_USERNAME` dan pemilik database.
+**Isi `DB_PASSWORD` sebelum menjalankan Compose.** Pada volume baru, Compose membuat database dan akun dari nilai `.env` tersebut.
 
 | Pengaturan | Isi untuk contoh ini | Penjelasan |
 |---|---|---|
-| `DB_HOST` | `127.0.0.1` | PostgreSQL berjalan di laptop sendiri |
-| `DB_PORT` | `5432` | Sesuaikan dengan port yang dipilih saat instalasi PostgreSQL |
-| `DB_DATABASE` | `e1_pajak` | Harus sama dengan nama database di pgAdmin |
-| `DB_USERNAME` | `postgres` | Akun yang mempunyai akses ke database dan izin CREATE DATABASE untuk D-2 |
-| `DB_PASSWORD` | Password PostgreSQL Anda | Password akun database, bukan master password pgAdmin |
+| `DB_HOST` | `127.0.0.1` | Laravel mengakses PostgreSQL dari host |
+| `DB_PORT` | `15439` | Port host yang diteruskan ke port `5432` container |
+| `DB_DATABASE` | `e1_pajak` | Database utama E-1 |
+| `DB_USERNAME` | `e1_app` | Akun yang dibuat saat inisialisasi volume baru |
+| `DB_PASSWORD` | Password lokal Anda | Dipakai oleh Laravel dan Compose |
 
-**Perhatikan port:** `.env.example` berisi port `15439` untuk konfigurasi Docker. Pada panduan PostgreSQL lokal melalui pgAdmin ini, ubah menjadi `5432` atau port instalasi Anda.
+Untuk PostgreSQL lokal tanpa container, gunakan port instalasinya (umumnya `5432`), akun yang tersedia (misalnya `postgres`), dan password akun tersebut. Buat database `e1_pajak` dengan akun itu sebagai pemilik melalui pgAdmin. Akun integrasi juga memerlukan izin membuat database untuk D-2. Lewati langkah Podman berikut jika memakai PostgreSQL lokal.
 
 Biarkan konfigurasi lainnya mengikuti `.env.example`. `composer integration` akan mengatur koneksi F-1/D-2 dan mematikan login tiruan E-1. Nilai `APP_KEY` disiapkan pada langkah berikutnya.
+
+### 4. Jalankan PostgreSQL melalui Podman
+
+```bash
+podman compose config --quiet
+podman compose up -d
+podman compose ps
+podman compose exec -T postgres sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1"'
+```
+
+Pastikan container berjalan dan perintah SQL menghasilkan `1`. Status `healthy` saja belum membuktikan akun database benar. Laravel, npm, F-1, dan D-2 dijalankan di host; Compose ini menjalankan PostgreSQL saja.
+
+Jika volume sudah berisi database, perubahan `DB_USERNAME` dan `DB_PASSWORD` di `.env` tidak membuat ulang akun di dalamnya. Gunakan kredensial yang sesuai dengan volume tersebut. Contohnya, volume lama yang memakai akun `postgres` memerlukan `DB_USERNAME=postgres` dan password akun itu. Jangan menghapus volume untuk mengatasi perbedaan kredensial karena data tersimpan di sana.
 
 ### 5. Siapkan key aplikasi
 
@@ -112,6 +128,12 @@ php artisan key:generate
 ```
 
 Jika `APP_KEY` sudah tersedia, lanjutkan ke setup integrasi.
+
+Setelah mengubah `.env`, bersihkan cache konfigurasi:
+
+```bash
+php artisan config:clear
+```
 
 ### 6. Setup dan jalankan integrasi
 
@@ -125,6 +147,26 @@ composer integration run
 
 Setup memerlukan port **4100, 8026, dan 8087** yang kosong. E-1 memakai database utama pada `.env`; D-2 memakai database terpisah yang dibuat otomatis. Migrasi dan seed dijalankan oleh integrasi, sehingga tidak perlu dijalankan manual.
 
+Di Windows dan Linux, `run` memeriksa halaman login serta autentikasi F-1 dan API invoice D-2 pada mode HTTP sebelum membuat faktur demo. Pemeriksaan berlaku juga untuk layanan yang sudah berjalan, dengan maksimal tiga percobaan untuk menunggu startup. Pesan `Integrasi siap` muncul setelah pemeriksaan dan seeding berhasil.
+
+Jika D-2 gagal, pesan membedakan kegagalan koneksi, status HTTP (misalnya 401/403/500), dan format respons. Seed faktur dihentikan; layanan yang sudah berjalan tetap tersedia untuk diperiksa. Lokasi log runtime ditampilkan tanpa menampilkan token atau password. Untuk memeriksa ulang tanpa membuat faktur, gunakan:
+
+```bash
+php artisan integration:verify
+```
+
+Pada PowerShell, baca log runtime dengan:
+
+```powershell
+$runtime = Get-Content -Raw .\storage\app\private\integration\current.json | ConvertFrom-Json
+Get-Content -LiteralPath (Join-Path $runtime.directory 'd2-requests.ndjson') -Tail 20
+Get-Content -LiteralPath (Join-Path $runtime.directory 'd2.err.log') -Tail 50
+```
+
+Status HTTP 500 memerlukan pemeriksaan log aplikasi D-2 di direktori storage yang ditunjuk oleh `$runtime.d2.storage`. Untuk status 401/403, periksa konfigurasi autentikasi F-1/D-2. Jika konfigurasi berubah, gunakan `composer integration:stop`, `composer integration`, lalu `composer integration run` agar proses memakai konfigurasi terbaru.
+
+CI menjalankan test pemeriksaan integrasi pada Windows dan Linux, termasuk argumen path berisi spasi, layanan yang sudah berjalan tetapi API gagal, penolakan autentikasi, respons tidak valid, retry startup, serta penghentian seeding ketika pemeriksaan gagal. Job Windows juga memeriksa sintaks script PowerShell. Test ini memakai API tiruan; instalasi lengkap dengan Podman/PostgreSQL, F-1, dan D-2 tetap perlu diuji pada mesin tujuan.
+
 Setelah layanan siap, buka:
 
 | Halaman | Alamat |
@@ -135,9 +177,22 @@ Setelah layanan siap, buka:
 
 Login menggunakan akun demo F-1: **`super.admin` / `Password123!`**. Faktur demo beserta PDF dibuat setelah layanan berjalan; pembayaran dicatat melalui aplikasi.
 
+Pastikan halaman login menampilkan formulir beserta tampilannya. Jika muncul `ViteManifestNotFoundException`, aktifkan Node melalui nvm lalu jalankan `npm ci` dan `npm run build` dari folder proyek, kemudian muat ulang halaman. Menjalankan Podman atau server PHP saja belum membangun aset frontend.
+
+Pada Bash/Linux, respons halaman dapat diperiksa dari terminal lain:
+
+```bash
+curl -s -o /dev/null -w 'HTTP %{http_code}\n' http://127.0.0.1:8087/login
+```
+
+Hasil yang diharapkan adalah `HTTP 200`. Biarkan proses `composer integration run` tetap berjalan selama aplikasi digunakan.
+
 ### 7. Pemakaian berikutnya dan menghentikan layanan
 
 ```bash
+# Pastikan database container berjalan (lewati untuk PostgreSQL lokal)
+podman compose up -d
+
 # Jalankan kembali integrasi yang sudah disiapkan
 composer integration run
 
@@ -146,6 +201,8 @@ composer integration:stop
 ```
 
 Data yang sudah tersimpan dipertahankan. Jika konfigurasi koneksi berubah, hentikan layanan lalu ulangi `composer integration` sebelum menjalankan `composer integration run`.
+
+Untuk menghentikan PostgreSQL tanpa menghapus datanya, jalankan `podman compose stop`. Setelah memperbarui kode frontend, aktifkan Node melalui nvm dan ulangi `npm ci` serta `npm run build` sebelum membuka aplikasi.
 
 ### Alternatif: integrasi dengan D-2 mock
 

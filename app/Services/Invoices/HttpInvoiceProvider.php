@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -18,6 +19,8 @@ use Illuminate\Support\Str;
  */
 class HttpInvoiceProvider implements InvoiceProvider
 {
+    private ?string $requestId = null;
+
     public function __construct(
         private readonly string $baseUrl,
         private readonly string $invoicePath,
@@ -33,7 +36,7 @@ class HttpInvoiceProvider implements InvoiceProvider
         try {
             $response = $this->client()->get(rtrim($this->baseUrl, '/').$path);
         } catch (ConnectionException) {
-            throw $this->unavailable();
+            throw $this->unavailable('connection');
         }
 
         if ($response->status() === 404) {
@@ -41,7 +44,7 @@ class HttpInvoiceProvider implements InvoiceProvider
         }
 
         if (! $response->successful()) {
-            throw $this->unavailable();
+            throw $this->unavailable('http', $response->status());
         }
 
         $json = $response->json();
@@ -122,14 +125,25 @@ class HttpInvoiceProvider implements InvoiceProvider
         // Jangan meneruskan Bearer ke tujuan redirect dari upstream.
         $client = Http::acceptJson()->withoutRedirecting()->timeout($this->timeout);
         $requestId = (string) request()->header('X-Request-ID', '');
-        $client = $client->withHeaders(['X-Request-ID' => preg_match('/^[A-Za-z0-9._:-]{1,100}$/D', $requestId) === 1
-            ? $requestId : (string) Str::uuid7()]);
+        $this->requestId = preg_match('/^[A-Za-z0-9._:-]{1,100}$/D', $requestId) === 1
+            ? $requestId : (string) Str::uuid7();
+        $client = $client->withHeaders(['X-Request-ID' => $this->requestId]);
 
         return $this->bearerToken !== null ? $client->withToken($this->bearerToken) : $client;
     }
 
-    private function unavailable(): ApiException
+    private function unavailable(string $reason = 'invalid_response', ?int $upstreamStatus = null): ApiException
     {
-        return ApiException::make(503, 'D2_UNAVAILABLE', 'Layanan D-2 tidak dapat dihubungi');
+        Log::warning('Permintaan invoice D-2 gagal', [
+            'reason' => $reason, 'upstream_status' => $upstreamStatus,
+            'request_id' => $this->requestId,
+        ]);
+        $message = match ($reason) {
+            'http' => 'Layanan D-2 mengembalikan HTTP '.$upstreamStatus,
+            'invalid_response' => 'Format respons invoice D-2 tidak sesuai kontrak',
+            default => 'Layanan D-2 tidak dapat dihubungi',
+        };
+
+        return ApiException::make(503, 'D2_UNAVAILABLE', $message);
     }
 }

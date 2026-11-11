@@ -95,7 +95,7 @@ try {
         }
     }
     if (count($processes) === count($ports)) {
-        echo 'Integrasi sudah berjalan: http://127.0.0.1:8087/login; F-1 4100; '.$d2Label.'.'.PHP_EOL;
+        echo 'Proses integrasi sudah berjalan; pemeriksaan API dan seed faktur akan dilanjutkan. E-1 8087; F-1 4100; '.$d2Label.'.'.PHP_EOL;
         exit(0);
     }
 
@@ -126,7 +126,7 @@ try {
         $manager->wait($name, $processes[$name], $directory);
     }
     file_put_contents($modeFile, $d2Driver);
-    echo 'Siap diuji: http://127.0.0.1:8087/login; F-1 4100; '.$d2Label.'.'.PHP_EOL;
+    echo 'Port layanan aktif; pemeriksaan API dan seed faktur akan dilanjutkan. E-1 8087; F-1 4100; '.$d2Label.'.'.PHP_EOL;
     echo 'Stop: php artisan integration:stop. Database utama E-1 dipertahankan.'.PHP_EOL;
 } catch (Throwable $error) {
     foreach ($started as $entry) {

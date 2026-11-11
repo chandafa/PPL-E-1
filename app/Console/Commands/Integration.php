@@ -43,7 +43,9 @@ class Integration extends Command
                 $this->output->write($output);
             });
             if ($result->successful()) {
+                $installer->verifyServices(base_path(), $driver);
                 $installer->seedTaxInvoices(base_path(), $driver);
+                $this->info('Integrasi siap: http://127.0.0.1:8087/login; pemeriksaan layanan dan seed faktur selesai.');
             }
 
             return $result->exitCode() ?? self::FAILURE;

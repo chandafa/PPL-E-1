@@ -38,7 +38,8 @@ class IntegrationCommandTest extends TestCase
         $installer = Mockery::mock(Installer::class);
         $installer->shouldReceive('ready')->once()->with(base_path(), 'http')->andReturn([]);
         $installer->shouldReceive('repair')->once()->with(base_path(), 'http');
-        $installer->shouldReceive('seedTaxInvoices')->once()->with(base_path(), 'http');
+        $installer->shouldReceive('verifyServices')->once()->with(base_path(), 'http')->ordered();
+        $installer->shouldReceive('seedTaxInvoices')->once()->with(base_path(), 'http')->ordered();
         $installer->shouldNotReceive('setup');
         $this->app->instance(Installer::class, $installer);
         Process::fake();
@@ -65,10 +66,27 @@ class IntegrationCommandTest extends TestCase
         $installer = Mockery::mock(Installer::class);
         $installer->shouldReceive('ready')->once()->andReturn([]);
         $installer->shouldReceive('repair')->once();
+        $installer->shouldNotReceive('verifyServices');
         $installer->shouldNotReceive('seedTaxInvoices');
         $this->app->instance(Installer::class, $installer);
         Process::fake(['*' => Process::result(exitCode: 9)]);
         $this->artisan('integration', ['action' => 'run'])->assertExitCode(9);
+    }
+
+    public function test_unhealthy_reused_services_prevent_seeding_and_success_message(): void
+    {
+        $this->launcher();
+        $installer = Mockery::mock(Installer::class);
+        $installer->shouldReceive('ready')->once()->andReturn([]);
+        $installer->shouldReceive('repair')->once();
+        $installer->shouldReceive('verifyServices')->once()->andThrow(new RuntimeException('D-2 HTTP 500', 1));
+        $installer->shouldNotReceive('seedTaxInvoices');
+        $this->app->instance(Installer::class, $installer);
+        Process::fake();
+        $this->artisan('integration', ['action' => 'run'])
+            ->expectsOutputToContain('D-2 HTTP 500')
+            ->doesntExpectOutputToContain('Integrasi siap:')
+            ->assertFailed();
     }
 
     public function test_setup_failure_preserves_exit_code_without_starting_services(): void
