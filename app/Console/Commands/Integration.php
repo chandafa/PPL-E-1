@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Integration\Installer;
 use App\Support\Integration\Launcher;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
@@ -9,11 +10,11 @@ use RuntimeException;
 
 class Integration extends Command
 {
-    protected $signature = 'integration {--d2=mock : mock untuk dummy lokal; http untuk server D-2}';
+    protected $signature = 'integration {action? : run untuk menjalankan layanan; kosong untuk setup} {--d2=http : http untuk server D-2; mock untuk dummy lokal}';
 
-    protected $description = 'Jalankan E-1 dan F-1 dengan dummy D-2 lokal (atau --d2=http)';
+    protected $description = 'Siapkan integrasi; gunakan integration run untuk menjalankan E-1, F-1, dan D-2';
 
-    public function handle(Launcher $launcher): int
+    public function handle(Launcher $launcher, Installer $installer): int
     {
         $driver = (string) $this->option('d2');
         if (! in_array($driver, ['mock', 'http'], true)) {
@@ -21,34 +22,40 @@ class Integration extends Command
 
             return self::FAILURE;
         }
-        try {
-            $start = $launcher->command(false, $driver);
-        } catch (RuntimeException $error) {
-            $this->error($error->getMessage());
+        $action = $this->argument('action');
+        if ($action !== null && $action !== 'run') {
+            $this->error('Gunakan composer integration untuk setup atau composer integration run untuk menjalankan layanan.');
 
             return self::FAILURE;
         }
+        $lock = null;
+        try {
+            $start = $launcher->command(false, $driver);
+            $lock = $launcher->lock();
+            if ($action === null) {
+                $installer->setup(base_path(), $driver);
 
-        $commands = [
-            [PHP_BINARY, 'artisan', 'config:clear'],
-            [PHP_BINARY, 'scripts/enable-integration.php', $driver],
-        ];
-        if ($driver === 'mock') {
-            $commands[] = [PHP_BINARY, 'artisan', 'migrate', '--force', '--no-interaction'];
-            $commands[] = [PHP_BINARY, 'artisan', 'db:seed', '--class=D2SourceDemoSeeder', '--force', '--no-interaction'];
-            $commands[] = [PHP_BINARY, 'artisan', 'demo:samples', '--dataset=d2-source', '--path=storage/app/private/d2-source-samples'];
-        }
-        $commands[] = $start;
-        foreach ($commands as $command) {
-            $result = Process::path(base_path())->env(['D2_DRIVER' => $driver, 'D2_MOCK_DATASET' => 'sqlite'])->forever()->run($command, function (string $type, string $output): void {
+                return self::SUCCESS;
+            }
+            $installer->ready(base_path(), $driver);
+            $installer->repair(base_path(), $driver);
+            $result = Process::path(base_path())->forever()->run($start, function (string $type, string $output): void {
                 $this->output->write($output);
             });
+            if ($result->successful()) {
+                $installer->seedTaxInvoices(base_path(), $driver);
+            }
 
-            if ($result->failed()) {
-                return $result->exitCode() ?? self::FAILURE;
+            return $result->exitCode() ?? self::FAILURE;
+        } catch (\Throwable $error) {
+            $this->error($error->getMessage());
+
+            return $error instanceof RuntimeException && $error->getCode() > 0 && $error->getCode() < 256
+                ? $error->getCode() : self::FAILURE;
+        } finally {
+            if (is_resource($lock)) {
+                fclose($lock);
             }
         }
-
-        return self::SUCCESS;
     }
 }

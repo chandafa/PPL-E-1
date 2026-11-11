@@ -3,35 +3,11 @@
 declare(strict_types=1);
 
 use App\Support\Integration\LinuxProcesses;
+use App\Support\Integration\Runtime;
 use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
 
 $repo = dirname(__DIR__);
 require $repo.'/vendor/autoload.php';
-
-function runIntegrationCommand(array $command, string $cwd, array $env = []): void
-{
-    $process = new Process($command, $cwd, $env, timeout: null);
-    $process->mustRun(static function (string $type, string $output): void {
-        fwrite($type === Process::ERR ? STDERR : STDOUT, $output);
-    });
-}
-
-function integrationRepository(string $path, string $url, string $revision, string $required): string
-{
-    if (! is_dir($path)) {
-        if (! is_dir(dirname($path))) {
-            mkdir(dirname($path), 0777, true);
-        }
-        runIntegrationCommand(['git', 'clone', $url, $path], dirname($path));
-        runIntegrationCommand(['git', 'checkout', '--detach', $revision], $path);
-    }
-    if (! is_file($path.'/'.$required)) {
-        throw new RuntimeException('Checkout tidak dapat dipakai: '.$path.' ('.$required.' tidak ditemukan).');
-    }
-
-    return realpath($path);
-}
 
 $started = [];
 $manager = new LinuxProcesses;
@@ -46,11 +22,6 @@ try {
     $root = $repo.'/storage/app/private/integration';
     if (! is_dir($root)) {
         mkdir($root, 0700, true);
-    }
-    // Descriptor tidak boleh diwariskan ke server background setelah launcher selesai.
-    $lock = fopen($root.'/launcher.lock', 'ce');
-    if ($lock === false || ! flock($lock, LOCK_EX | LOCK_NB)) {
-        throw new RuntimeException('Launcher integrasi lain sedang berjalan.');
     }
     $runtimeFile = $root.'/current.json';
     if (! is_file($runtimeFile) && $action === 'stop') {
@@ -77,10 +48,11 @@ try {
     }
 
     $finder = new ExecutableFinder;
-    $d2Driver = $argv[4] ?? 'http';
+    $d2Driver = $argv[2] ?? 'http';
     if (! in_array($d2Driver, ['mock', 'http'], true)) {
         throw new RuntimeException('Driver D-2 harus mock atau http.');
     }
+    $runtime = Runtime::ready($repo, $d2Driver);
     $mockD2 = $d2Driver === 'mock';
     $modeFile = $directory.'/d2-mode.txt';
     $previousMode = is_file($modeFile) ? trim(file_get_contents($modeFile)) : 'http';
@@ -127,43 +99,19 @@ try {
         exit(0);
     }
 
-    $parent = dirname($repo);
-    $f1 = integrationRepository($argv[2] ?? $parent.'/_integrasi/F1',
-        'https://github.com/Izra29/PPL_F1.git', '0feb37aafe9df9e871aaba9a5457093696ce38a0', 'demo/local-server.js');
-    $d2 = $mockD2 ? null : integrationRepository($argv[3] ?? $parent.'/_integrasi/D2',
-        'https://github.com/eldyfg/PPL-D-2.git', 'b93fc4dadcf7916995c9e6c2f981f95cc039dd97', 'artisan');
-    if (! is_file($f1.'/node_modules/jsonwebtoken/package.json')) {
-        runIntegrationCommand(['npm', 'ci', '--ignore-scripts'], $f1);
+    $f1 = $runtime['setup']['repositories']['f1']['path'];
+    $d2 = $mockD2 ? null : $runtime['setup']['repositories']['d2']['path'];
+    if (! is_file($f1.'/node_modules/jsonwebtoken/package.json') || (! $mockD2 && ! is_file($d2.'/vendor/autoload.php'))) {
+        throw new RuntimeException('Dependensi belum lengkap. Jalankan composer integration.');
     }
-    if (! $mockD2 && ! is_file($d2.'/vendor/autoload.php')) {
-        runIntegrationCommand(['composer', 'install', '--no-interaction', '--prefer-dist'], $d2);
-    }
-    $common = ['JWT_SECRET' => $runtime['jwtSecret'], 'JWT_EXPIRES_IN' => '3600'];
-    $d2Env = $common + [
-        'APP_ENV' => 'local', 'APP_DEBUG' => 'false', 'APP_KEY' => 'base64:'.base64_encode(random_bytes(32)),
-        'DB_CONNECTION' => 'pgsql', 'DB_URL' => '', 'DB_HOST' => (string) $runtime['db']['host'],
-        'DB_PORT' => (string) $runtime['db']['port'], 'DB_USERNAME' => $runtime['db']['username'],
-        'DB_PASSWORD' => $runtime['db']['password'], 'DB_DATABASE' => $runtime['d2']['database'],
-        'LARAVEL_STORAGE_PATH' => $runtime['d2']['storage'],
-        'APP_CONFIG_CACHE' => $directory.'/d2-config.php',
-        'CACHE_STORE' => 'array', 'SESSION_DRIVER' => 'array', 'LOG_CHANNEL' => 'single',
-        'E1_DEPENDENCY_TRACE' => $directory.'/d2-requests.ndjson', 'E1_DEPENDENCY_REPO' => $d2,
-    ];
-    if (! $mockD2 && ! isset($processes['d2'])) {
-        $migration = [PHP_BINARY, 'artisan', 'migrate', '--force', '--no-interaction'];
-        $marker = $directory.'/d2-setup.complete';
-        if (! is_file($marker)) {
-            $migration[] = '--seed';
-        }
-        runIntegrationCommand($migration, $d2, $d2Env);
-        file_put_contents($marker, gmdate('c'));
-    }
+    $common = ['JWT_SECRET' => $runtime['jwtSecret'], 'JWT_EXPIRES_IN' => '3600', 'PORT' => '4100'];
+    $d2Env = $mockD2 ? [] : Runtime::d2Environment($runtime);
     $specifications = [
         'f1' => [[$finder->find('node'), '--require', $repo.'/scripts/trace-f1.cjs', 'demo/local-server.js'],
             $f1, 4100, $common + ['E1_DEPENDENCY_TRACE' => $directory.'/f1-requests.ndjson']],
         'd2' => [[PHP_BINARY, '-S', '127.0.0.1:8026', '-t', 'public', $repo.'/scripts/trace-d2.php'], $d2, 8026, $d2Env],
         'e1' => [[PHP_BINARY, '-d', 'upload_max_filesize=6M', '-d', 'post_max_size=16M', '-S', '127.0.0.1:8087',
-            '-t', 'public', 'server.php'], $repo, 8087, ['D2_DRIVER' => $d2Driver]],
+            '-t', 'public', 'server.php'], $repo, 8087, Runtime::e1Environment($repo, $d2Driver)],
     ];
     if ($mockD2) {
         unset($specifications['d2']);

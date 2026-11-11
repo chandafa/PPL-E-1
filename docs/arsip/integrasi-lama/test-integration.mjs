@@ -6,7 +6,11 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 
-const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+if (process.env.E1_ENABLE_LEGACY_SUITE !== '1') {
+    throw new Error('Suite ini diarsipkan. Baca docs/arsip/integrasi-lama/README.md.');
+}
+
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const require = createRequire(path.join(repo, 'package.json'));
 const { chromium } = require('@playwright/test');
 const runtime = JSON.parse(fs.readFileSync(path.join(repo, 'storage/app/private/integration/current.json'), 'utf8'));
@@ -20,7 +24,7 @@ const redact = value => {
     return typeof value === 'string' ? value.replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[JWT REDACTED]') : value;
 };
 function check(name, actual) { assert.ok(actual, name); evidence.checks.push({ name, result: 'PASS' }); }
-function snapshot() { return JSON.parse(execFileSync('php', ['scripts/snapshot-integration.php'], { cwd: repo, encoding: 'utf8' })); }
+function snapshot() { return JSON.parse(execFileSync('php', ['docs/arsip/integrasi-lama/snapshot-integration.php'], { cwd: repo, encoding: 'utf8' })); }
 function sameState(id, before) {
     const after = snapshot();
     check(`${id}: database, audit dan berkas tidak berubah`, JSON.stringify(before) === JSON.stringify(after));
@@ -91,7 +95,7 @@ try {
     await req('D2-10', runtime.d2BaseUrl, '/api/v1/invoices', { method: 'POST', token: admin, body: { terminId: 'trm-demo-001', invoiceDate: '2026-11-01', dppAmount: '100000000.00' }, expected: 409 });
     fs.mkdirSync(path.join(out, 'input'));
     fs.writeFileSync(path.join(out, 'input/invoice-d2.json'), JSON.stringify(invoice.data, null, 2));
-    execFileSync('php', ['scripts/generate-integration-samples.php', path.join(out, 'input/invoice-d2.json'), path.join(out, 'input')], { cwd: repo });
+    execFileSync('php', ['docs/arsip/integrasi-lama/generate-integration-samples.php', path.join(out, 'input/invoice-d2.json'), path.join(out, 'input')], { cwd: repo });
 
     const edge = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
     browser = await chromium.launch({ headless: true,

@@ -3,6 +3,7 @@ import { browserEnvironment } from './tests/browser/environment.mjs';
 
 export default defineConfig({
     testDir: './tests/browser',
+    outputDir: './test-results/browser',
     globalSetup: './tests/browser/setup.mjs',
     workers: 1,
     timeout: 45000,

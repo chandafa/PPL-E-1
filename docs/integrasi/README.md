@@ -1,6 +1,6 @@
 # Integrasi E-1 dengan repo F-1 dan D-2
 
-**Mode default terbaru:** `php artisan integration` menjalankan F-1 dan E-1 dengan dua invoice dari SQLite **dummy D-2 lokal**, beserta PDF pasangan. Server D-2 tidak diperlukan. Lihat [panduan dummy](../panduan/D2_SOURCE_DEMO.md). Bagian dan bukti di bawah khusus integrasi **HTTP D-2**, yang sekarang dipilih dengan `--d2=http`.
+**Alur terbaru:** `composer integration` menyiapkan checkout branch `main`, dependensi, migrasi, dan seed E-1/D-2 tanpa menyalakan layanan. `composer integration run` menyalakan ketiga layanan dengan D-2 HTTP. Mode dummy SQLite dipilih eksplisit melalui `--d2=mock` pada setup dan run. Ikuti [panduan anggota](SETUP_ANGGOTA.md). Versi serta hasil pada tabel bukti di bawah merupakan catatan pengujian 31 Oktober, bukan bukti versi `main` saat ini.
 
 [README proyek](../../README.md) · [Temuan upstream](TEMUAN_F1_D2.md) · [Bukti terbaru](bukti/2026-10-31T07-43-25-100Z/bukti-http.json) · [Koleksi Postman](../postman/DEP_D2_F1_Testing.postman_collection.json)
 
@@ -14,80 +14,48 @@ Hasil **31 Oktober 2026, diperiksa ulang pada konfigurasi utama**: E-1 Laravel b
 
 ## Siap diuji dari aplikasi utama
 
-[Panduan anggota baru](SETUP_ANGGOTA.md) menjelaskan pemasangan E-1, PostgreSQL, serta satu perintah yang otomatis menyiapkan F-1/D-2 dan menjalankan ketiga layanan pada setiap laptop.
+[Panduan anggota baru](SETUP_ANGGOTA.md) menjelaskan pemasangan E-1, PostgreSQL, serta perintah terpisah untuk menyiapkan F-1/D-2 dan menjalankan ketiga layanan pada setiap laptop.
 
-Konfigurasi .env utama sekarang memakai login/cek akun F-1 dan HttpInvoiceProvider D-2; E1_DEV_LOGIN=false. Empat migrasi E-1 yang tertinggal sudah diterapkan pada laptop ini tanpa mengubah seluruh baris transaksi, rekap, audit, atau berkas lama. Composer serve juga membaca konfigurasi HTTP yang sama, tetapi hanya menjalankan E-1.
+Setup mengaktifkan login/cek akun F-1 dan HttpInvoiceProvider D-2 pada `.env` E-1, mempertahankan konfigurasi database utama, dan menanam referensi contoh tanpa membuat transaksi faktur/pembayaran.
 
 Untuk menjalankan ketiga layanan pada Windows atau Linux dari folder PPL-E-1:
 
 ```powershell
-php artisan integration --d2=http
+composer integration
+composer integration run
 ```
 
-Buka http://127.0.0.1:8087/login. Gunakan akun fiktif resmi super.admin / Password123!. Perintah `php artisan integration --d2=http` boleh dipanggil ulang ketika layanan aktif: status berhasil ditampilkan, PID dipertahankan, dan hanya layanan yang berhenti yang dinyalakan. Jalankan `php artisan integration:stop` untuk berhenti. Alias Composer `composer integration -- --d2=http` dan `composer integration:stop` tetap tersedia. Windows memakai PowerShell; Linux memakai Bash/nvm, `setsid`, `nohup`, PHP `posix`, dan `/proc`. Startup sesudah stop memakai database yang sama tanpa seed ulang D-2. Server F-1 tetap mereset data memorinya ketika proses F-1 benar-benar direstart, sesuai implementasi pemilik.
+Buka http://127.0.0.1:8087/login dan gunakan akun fiktif resmi super.admin / Password123!. `composer integration run` boleh diulang saat layanan aktif: proses sehat dipertahankan dan hanya layanan yang berhenti yang dimulai. Gunakan `composer integration:stop` untuk berhenti. Sebelum mengulang setup, hentikan layanan. Restart memakai database yang sama; pemeriksaan seed mengisi baris yang hilang dan mempertahankan baris lama; F-1 memuat ulang seed JSON saat prosesnya dimulai.
 
-Di Linux, pasang nvm pada akun pengguna dan siapkan versi `default` (`nvm alias default <versi-terpasang>`). Launcher memuat `$NVM_DIR/nvm.sh` atau `~/.nvm/nvm.sh`, mengikuti `.nvmrc` F-1/E-1 jika tersedia. Checkout `../PPL_F1` dan `../PPL-D-2` diprioritaskan jika ada; jika tidak, dipakai `../_integrasi/F1` dan `../_integrasi/D2` (di-clone bila belum ada). Gunakan `F1_PATH=/lokasi/F1 D2_PATH=/lokasi/D2 php artisan integration --d2=http` untuk lokasi lain. Log dan PID tersimpan pada direktori runtime privat yang sama. Penghentian memeriksa identitas PID dari `/proc`, sehingga PID yang telah dipakai ulang tidak dihentikan. Instruksi PowerShell di bawah tetap khusus Windows; profil utama Linux menggunakan perintah Artisan di atas.
+Setup clone branch `main` ke checkout terkelola `../_integrasi/F1` dan `../_integrasi/D2`, tanpa patokan commit. Checkout tetangga tidak dipilih otomatis. Untuk memakai checkout sendiri, tentukan `F1_PATH` dan `D2_PATH` saat setup. Lokasi disimpan untuk `run`; checkout terkelola pada branch lain, detached HEAD, atau dengan perubahan lokal ditolak tanpa reset/pull. Checkout yang sudah ada tidak di-pull otomatis.
 
-Persiapan awal E-1/dependensi/PostgreSQL tetap diperlukan pada laptop baru sebagaimana bagian Menyiapkan laptop di bawah. Launcher otomatis mengunduh checkout F-1/D-2 yang telah diuji ke `../_integrasi`, memasang dependensinya bila belum ada, lalu menjalankan ketiga layanan. enable-integration.php otomatis menyiapkan runtime bila belum ada, mengaktifkan hanya kunci F1_*/D2_*/E1_DEV_LOGIN pada .env, membuat cadangan privat, serta mempertahankan APP_ENV, APP_KEY, database, dan storage utama. Aktivasi demo ini ditolak di production. Jalankan php artisan migrate pada instalasi E-1 yang belum memiliki schema terbaru.
+E-1 memakai database utama `.env`; D-2 memakai database integrasi terpisah. Setup memigrasi dan menanam seed keduanya, tanpa reset. Node/npm dijalankan melalui nvm; gunakan `.nvmrc` F-1/E-1 bila tersedia, atau versi default nvm pada Linux dan versi aktif nvm-windows. Linux juga memerlukan PHP posix, Bash, setsid, dan nohup. Port 4100/8026/8087 harus kosong saat setup. Detail instalasi dan pemulihan ada pada [SETUP_ANGGOTA.md](SETUP_ANGGOTA.md).
 
-[Langkah uji kelompok](UJI_KELOMPOK.md) memuat invoice/PDF siap pakai di laptop ini. Bukti konfigurasi utama, login, dan pratinjau HTTP: [aktif-utama.json](bukti/2026-10-31T07-43-25-100Z/aktif-utama.json); pemulihan/restart tanpa seed ulang: [pemulihan.json](bukti/2026-10-31T07-43-25-100Z/pemulihan.json).
-
-## Menyiapkan laptop
-
-Siapkan PHP/Composer/Node/PostgreSQL sesuai README utama. PHP perlu pdo_pgsql. Akun PostgreSQL pada .env harus dapat membuat database (CREATEDB); script membuat tiga DB baru dan tidak menghapus/reset database mana pun. Mode ini tidak menulis data ke database .env utama.
-
-Struktur folder:
-
-```text
-folder-kerja/
-  PPL-E-1/
-  _integrasi/
-    F1/    # clone https://github.com/Izra29/PPL_F1
-    D2/    # clone https://github.com/eldyfg/PPL-D-2
-```
-
-1. Di E-1, jalankan `composer install`, `npm ci`, `npm run build`. Siapkan .env PostgreSQL dan APP_KEY sesuai README utama, lalu `php artisan config:clear`.
-2. Jalankan `composer integration -- --d2=http` untuk aplikasi utama. Launcher otomatis clone F-1 dan D-2 ke struktur di atas (pada revisi pada tabel), memasang dependensi, lalu menjalankan ketiga layanan. Bila checkout tersebut sudah ada, launcher tidak mengubahnya. Jangan menyalin source F-1/D-2 ke app E-1.
-3. Untuk profil uji terpisah, dari E-1 jalankan:
-
-```powershell
-php scripts/prepare-integration.php
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-integration.ps1
-```
-
-prepare-integration.php menggabungkan .env dengan [.env.integration.example](../../.env.integration.example), menghasilkan rahasia JWT acak khusus demo, tiga DB baru (E-1, D-2, tests), dan storage terpisah. Profil lama disalin sebagai cadangan di runtime privat. .env.integration dan storage privat diabaikan Git. Launcher memigrasikan E-1, memigrasikan/seed D-2, lalu menjalankan server resmi ketiganya. Database E-1 integrasi awal kosong; tidak menjalankan DemoSeeder agar sumber invoice benar-benar HTTP D-2.
-
-Port 4100/8026/8087 harus kosong; port 8080 tidak digunakan oleh launcher integrasi, sehingga service lain seperti PEM dapat tetap berjalan. Launcher tidak mematikan proses lain. Jika lokasi clone berbeda, gunakan parameter `-F1Path` dan `-D2Path`. Semua proses background memakai jendela tersembunyi. Stop hanya memeriksa PID, waktu mulai, dan port yang dimiliki runtime ini.
+[Langkah uji kelompok](UJI_KELOMPOK.md) dan arsip [aktif-utama.json](bukti/2026-10-31T07-43-25-100Z/aktif-utama.json) / [pemulihan.json](bukti/2026-10-31T07-43-25-100Z/pemulihan.json) menyimpan bukti konfigurasi terdahulu. Class `RuntimeSetup` menyiapkan runtime dan koneksi F-1/D-2 tanpa profil `.env.integration`; jangan memakai urutan prepare/start lama untuk menggantikan dua perintah di atas.
 
 ## Mencoba melalui browser
 
-Untuk profil uji terpisah, buka http://127.0.0.1:8087/login. Untuk aplikasi utama, gunakan composer integration -- --d2=http dan port 8087. Gunakan akun seed demo resmi **super.admin / Password123!** (ADMIN) atau **yuril.salsabila / Password123!** (COO). Ini kredensial fiktif publik dari source F-1, bukan akun produksi. Login demo E-1 dimatikan pada profil ini.
+Setelah setup dan run, buka http://127.0.0.1:8087/login. Akun seed fiktif F-1: **super.admin / Password123!** (ADMIN) atau **yuril.salsabila / Password123!** (COO). Login demo E-1 dimatikan pada profil ini.
 
-Di Catat e-Faktur, masukkan ID invoice D-2 **inv-demo-sample**. Invoice seed bertanggal **1 November 2026**, DPP 100000000.00, PPN 11000000.00, PPnBM jasa 0.00, proyek prj-demo-001. `db:seed` hanya mengisi invoice; e-Faktur dan pembayaran tidak disimpan otomatis. Catat e-Faktur secara manual setelah memeriksa PDF. PDF e-Billing contoh bernama `e-billing-2026-11-001.pdf`; pembayaran dicatat terpisah melalui fitur pembayaran. Arsip bukti pada [manifest](bukti/2026-10-31T07-43-25-100Z/input/manifest.json) adalah snapshot lama; buat PDF baru dari snapshot terkini untuk mencoba alur. Pilih masa **2026-11** ketika membaca rekap.
+Seed HTTP menyediakan ID **inv-demo-sample**, nomor **INV-2026-SAMPLE**, tanggal **11 Oktober 2026**, DPP **100000000.00**, PPN **11000000.00**, dan proyek **prj-demo-001**. Setup menyiapkan referensi. Setelah layanan berjalan, `TaxInvoiceSeeder` membuat faktur demo dari invoice sumber yang belum memiliki faktur; pembayaran tetap dicatat manual. D-2 belum menyediakan endpoint katalog resmi. Untuk runtime lokal, E-1 membaca ID dari database sumber secara read-only dan mengambil detail lewat HTTP; halaman daftar dan pemilihan invoice memakai hasil terverifikasi tersebut. Arsip PDF/bukti lama tidak otomatis sesuai dengan seed terbaru; cocokkan isi PDF dengan respons invoice aktual. Mode dummy beserta PDF pasangan tersedia dengan `--d2=mock` pada setup dan run.
 
-Tanggal e-Billing/bukti contoh berada 9/10 November 2026 untuk masa Oktober; semua fiktif. E-1 mencatat isi PDF dan tidak menerbitkan faktur/DJP atau menentukan klasifikasi barang mewah. Mode HTTP tidak menyediakan katalog palsu: daftar invoice belum tersedia dari D-2, maka form menerima ID langsung.
+Tanggal e-Billing/bukti contoh berada 9/10 November 2026 untuk masa Oktober; semua fiktif. E-1 mencatat isi PDF dan tidak menerbitkan faktur/DJP atau menentukan klasifikasi barang mewah. Nilai komersial pada katalog HTTP diambil dari respons detail D-2. Katalog lokal mencakup ID pada database sumber; di luar runtime lokal, katalog menggunakan ID referensi E-1 dan form tetap menerima ID langsung.
 
-`demo:samples` tetap generator snapshot lokal; untuk bukti HTTP ini PDF dibuat dari respons aktual D-2 oleh `scripts/generate-integration-samples.php`. Format PDF dan keterbacaan teks diverifikasi; keaslian transaksi/DJP tidak diklaim.
+`demo:samples` tetap generator snapshot lokal; untuk bukti HTTP ini PDF dibuat dari respons aktual D-2 oleh `docs/arsip/integrasi-lama/generate-integration-samples.php`. Format PDF dan keterbacaan teks diverifikasi; keaslian transaksi/DJP tidak diklaim.
 
 ## Menjalankan pengujian yang sama
 
-Suite otomatis memerlukan runtime baru/kosong. Hentikan aplikasi utama lebih dulu dengan composer integration:stop, kemudian jalankan prepare/start (tanpa -Main) seperti di atas agar memakai port 8087 dan DB terpisah. Lalu:
+Untuk regresi aplikasi, gunakan `composer test` dengan database tests terpisah sesuai `phpunit.xml`. Jangan mengarahkan suite RefreshDatabase ke database aplikasi.
 
-```powershell
-node scripts/test-integration.mjs
-php scripts/check-integration-evidence.php <folder-hasil-yang-dicetak>
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stop-integration.ps1
-```
+Suite browser `docs/arsip/integrasi-lama/test-integration.mjs` dan bukti 31 Oktober di bawah menggunakan profil pengujian lama, dengan E-1 pada `.env.integration`. Launcher terbaru memakai database utama E-1. Suite lama tersebut perlu disesuaikan sebelum digunakan kembali; jangan menjalankannya terhadap runtime aplikasi utama. Perintah prepare/start lama tidak lagi menyiapkan layanan secara mandiri.
 
-Skrip membutuhkan Chromium Playwright atau Microsoft Edge yang terpasang. Jika belum ada, jalankan `npx playwright install chromium`. Path browser khusus dapat diberikan lewat PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH.
-
-Skrip mencatat **42 kasus request dengan 57 pemeriksaan E-1 lulus**, tiga screenshot, hash keadaan DB/audit/berkas, input PDF, dan log produsen. Termasuk 11 operasi bisnis, PDF/XLSX, token hilang/rusak/expired, peran pegawai, akun locked/inactive, 404 invoice, retry 409, duplicate NTPN, dan lebih setor. Kasus terakhir sengaja mematikan proses D-2 dan F-1 milik runtime uji untuk memeriksa 503 tanpa data parsial. **Setelah skrip, layanan tersebut berhenti.** Buat runtime baru untuk mengulang demo dari awal. Jangan menjalankan pengujian pada DB yang sudah dipakai karena uji membutuhkan keadaan awal kosong.
+Catatan arsip: suite lama merekam **42 kasus request dengan 57 pemeriksaan E-1 lulus**, tiga screenshot, hash keadaan DB/audit/berkas, PDF, dan log produsen. Cakupannya meliputi 11 operasi bisnis, ekspor, autentikasi, konflik transaksi, serta gangguan upstream. Hasil itu tetap bukti versi pada tabel arsip, bukan validasi commit terbaru.
 
 Lima observasi upstream tidak memenuhi harapan kontrak; lihat temuan. PASS di ringkasan berarti E-1 menangani skenario yang diuji, bukan semua layanan upstream sudah aman.
 
 Regresi lengkap: **219/219 tes lulus, 1.824 assertions** ([hasil](bukti/2026-10-31T07-43-25-100Z/regresi.json)). Untuk mengulang, gunakan DB tests terpisah dan APP_ENV=testing sesuai phpunit.xml; jangan mengarahkan suite RefreshDatabase ke DB aplikasi.
 
-`php scripts/test-recap-concurrency.php <path-hasil.json>` memakai DB tests **baru/kosong** dari runtime yang sama, terpisah dari DB HTTP. Hasil [uji dua proses](bukti/2026-10-31T07-43-25-100Z/konkurensi.json): refresh menunggu lock sebelum compute dan dua pembayaran Rp6 juta terhadap total Rp9,9 juta menghasilkan satu 200 dan satu 400. Ini pengujian interleaving terkontrol, bukan stress test produksi.
+Runner konkurensi lama tersimpan di `docs/arsip/integrasi-lama/test-recap-concurrency.php` dan membutuhkan runtime lama. Untuk pengujian aktif, gunakan `php scripts/audit-recap-concurrency.php` pada database test sesuai `phpunit.xml`. Hasil [uji dua proses](bukti/2026-10-31T07-43-25-100Z/konkurensi.json): refresh menunggu lock sebelum compute dan dua pembayaran Rp6 juta terhadap total Rp9,9 juta menghasilkan satu 200 dan satu 400. Ini pengujian interleaving terkontrol, bukan stress test produksi.
 
 ## Konfigurasi penting
 

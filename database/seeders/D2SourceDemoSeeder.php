@@ -10,6 +10,8 @@ use RuntimeException;
 
 class D2SourceDemoSeeder extends Seeder
 {
+    protected bool $preserveExisting = false;
+
     public function run(): void
     {
         if (! app()->environment(['local', 'testing']) || config('e1.d2.driver') !== 'mock' || config('e1.d2.mock_dataset') !== 'sqlite') {
@@ -24,6 +26,21 @@ class D2SourceDemoSeeder extends Seeder
             foreach (['contracts' => 'contract_id', 'termins' => 'termin_id', 'tax_parameters' => 'tax_param_id', 'invoices' => 'invoice_id'] as $table => $key) {
                 foreach ($tables[$table] as $row) {
                     $existing = DB::table($table)->where($key, $row[$key])->first();
+                    if ($existing !== null && $this->preserveExisting) {
+                        $identity = match ($table) {
+                            'contracts' => ['project_id', 'contract_number'],
+                            'termins' => ['contract_id', 'termin_number'],
+                            'invoices' => ['invoice_number', 'termin_id', 'tax_param_id'],
+                            'tax_parameters' => ['contract_id'],
+                        };
+                        foreach ($identity as $field) {
+                            if ((string) $existing->$field !== (string) $row[$field]) {
+                                throw new RuntimeException("Konflik snapshot SQLite: {$table}.{$row[$key]}.{$field}; seluruh perubahan dibatalkan.");
+                            }
+                        }
+
+                        continue;
+                    }
                     if ($existing !== null) {
                         foreach ($row as $field => $value) {
                             if (in_array($field, ['created_at', 'updated_at'], true) || $this->same($existing->$field, $value)) {
@@ -56,12 +73,15 @@ class D2SourceDemoSeeder extends Seeder
                     'invoice_id' => $row['invoice_id'], 'status' => $row['status'], 'changed_at' => $row['changed_at'],
                 ];
                 $existing = DB::table('invoice_histories')->where($key)->first();
+                if ($existing !== null && $this->preserveExisting) {
+                    continue;
+                }
                 if ($existing === null || array_filter($row, fn ($value, $field) => ! $this->same($existing->$field, $value), ARRAY_FILTER_USE_BOTH) !== []) {
                     DB::table('invoice_histories')->updateOrInsert($key, $row);
                 }
             }
             $ids = array_column($tables['invoices'], 'invoice_id');
-            if (DB::table('d2_invoice_items')->whereIn('invoice_id', $ids)->exists()) {
+            if (! $this->preserveExisting && DB::table('d2_invoice_items')->whereIn('invoice_id', $ids)->exists()) {
                 throw new RuntimeException('Snapshot SQLite tidak memiliki rincian item; ditemukan item sumber tambahan.');
             }
         });

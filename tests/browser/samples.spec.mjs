@@ -56,7 +56,7 @@ test('kontrol koreksi siap ketika detail tampil walaupun riwayat belum menjawab'
     const login = await request.post('/api/dev/f1/login', { data: { akunId: 'AKN-0002', kodePeran: 'Admin' } });
     const { data } = await login.json();
     await page.addInitScript((token) => sessionStorage.setItem('e1.accessToken', token), data.accessToken);
-    const response = await request.get('/api/v1/tax-invoices?taxInvoiceNumber=010.000-26.12345678', {
+    const response = await request.get('/api/v1/tax-invoices?pageSize=1', {
         headers: { Authorization: 'Bearer ' + data.accessToken },
     });
     const id = (await response.json()).data.items[0].taxInvoiceId;

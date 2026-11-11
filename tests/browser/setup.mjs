@@ -9,8 +9,10 @@ export function prepareBrowser(env = process.env, run = execFileSync) {
     };
     if (!env.E1_UI_BASE_URL) {
         run('php', ['artisan', 'migrate:fresh', '--seed', '--force'], options);
+        run('php', ['artisan', 'db:seed', '--class=Tests\\Support\\BrowserDemoSeeder', '--force'], options);
+    } else {
+        run('php', ['artisan', 'demo:samples', '--path=storage/framework/testing/e1-browser-samples'], options);
     }
-    run('php', ['artisan', 'demo:samples', '--path=storage/framework/testing/e1-browser-samples'], options);
 }
 
 export default function setup() {

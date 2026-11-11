@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Auth\F1TokenVerifier;
 use App\Services\Invoices\HttpInvoiceProvider;
+use App\Services\Invoices\IntegrationCatalog;
 use App\Services\Invoices\InvoiceProvider;
 use App\Services\Invoices\MockInvoiceProvider;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Dibaca tiap resolusi (bukan singleton) agar konfigurasi uji dapat diubah.
         $this->app->bind(F1TokenVerifier::class, fn () => F1TokenVerifier::fromConfig());
+        $this->app->bind(IntegrationCatalog::class, fn () => new IntegrationCatalog(base_path()));
 
         $this->app->bind(InvoiceProvider::class, function ($app) {
             $config = (array) config('e1.d2');
@@ -29,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
                     invoicePath: (string) $config['invoice_path'],
                     timeout: (int) $config['timeout'],
                     bearerToken: $request->bearerToken(),
+                    catalogIds: ($config['integration_catalog'] ?? false) && $this->app->environment(['local', 'testing'])
+                        && ($config['base_url'] ?? '') === 'http://127.0.0.1:8026'
+                        ? fn () => $app->make(IntegrationCatalog::class)->ids() : null,
                 );
             }
 

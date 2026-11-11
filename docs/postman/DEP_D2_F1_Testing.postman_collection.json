@@ -2,7 +2,7 @@
   "info": {
     "name": "E-1 Integrasi repo F-1 v0.4 dan D-2 database",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Sumber instruksi docs/integrasi/README.md. Gunakan runtime terpisah. base URL dibedakan agar tidak keliru memanggil route tiruan E-1. Token dan password diisi lokal; tidak disimpan dalam Git. Runner CLI Postman tidak tersedia pada sesi ini; bukti eksekusi nyata berasal dari scripts/test-integration.mjs, bukan klaim menjalankan collection ini."
+    "description": "Sumber instruksi docs/integrasi/README.md. Gunakan runtime terpisah. base URL dibedakan agar tidak keliru memanggil route tiruan E-1. Token dan password diisi lokal; tidak disimpan dalam Git. Runner CLI Postman tidak tersedia pada sesi ini; bukti eksekusi nyata berasal dari docs/arsip/integrasi-lama/test-integration.mjs, bukan klaim menjalankan collection ini."
   },
   "variable": [
     {

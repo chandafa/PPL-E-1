@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { chooseInvoice } from '../browser/helpers.mjs';
 
-test('dua invoice snapshot SQLite diproses melalui E-1 sampai pembayaran Oktober', async ({ page }) => {
+test('dua invoice snapshot SQLite diproses sampai pembayaran Oktober dan November', async ({ page }) => {
     page.on('pageerror', error => { throw error; });
     await page.goto('/login');
     await page.locator('#kodePeran').selectOption('Admin');
@@ -41,9 +41,9 @@ test('dua invoice snapshot SQLite diproses melalui E-1 sampai pembayaran Oktober
     await page.locator('#project').fill('prj-demo-001');
     await page.locator('#taxPeriod').selectOption('2026-10');
     await page.getByRole('button', { name: 'Cari', exact: true }).click();
-    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(3);
+    await expect(page.locator('#invoice-list tbody tr')).toHaveCount(2);
 
-    for (const [period, amount, sequence] of [['2026-10', '27500000.00', '001']]) {
+    for (const [period, amount, sequence] of [['2026-10', '16500000.00', '001'], ['2026-11', '11000000.00', '002']]) {
         await page.goto('/tax-recaps/' + period + '/payments/create');
         await page.locator('#amountPaid').fill(amount);
         await page.locator('#billingId').fill('BILL-DEMO-' + period.replace('-', '') + '-' + sequence);

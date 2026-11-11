@@ -68,6 +68,12 @@ return [
         'base_url' => env('D2_BASE_URL'),
         'invoice_path' => env('D2_INVOICE_PATH', '/api/v1/invoices/{invoiceId}'),
         'timeout' => (int) env('D2_TIMEOUT', 5),
+        'integration_catalog' => (bool) env('D2_INTEGRATION_CATALOG', false),
+    ],
+
+    'demo' => [
+        'f1_username' => env('E1_DEMO_F1_USERNAME', 'super.admin'),
+        'f1_password' => env('E1_DEMO_F1_PASSWORD', 'Password123!'),
     ],
 
     /*

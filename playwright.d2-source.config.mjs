@@ -1,13 +1,14 @@
 import { defineConfig } from '@playwright/test';
 import { browserEnvironment } from './tests/browser/environment.mjs';
 
-const env = browserEnvironment({ ...process.env, E1_UI_TEST_DATABASE: process.env.E1_UI_TEST_DATABASE || 'e1_d2_source_ui_test' });
+const env = browserEnvironment({ ...process.env, D2_MOCK_DATASET: 'sqlite', E1_UI_TEST_DATABASE: process.env.E1_UI_TEST_DATABASE || 'e1_d2_source_ui_test' });
 if (!/^e1_d2_source_[a-z0-9_]+$/.test(env.DB_DATABASE)) {
     throw new Error('Gunakan database khusus dengan awalan e1_d2_source_; setup mengosongkan database tersebut.');
 }
 
 export default defineConfig({
     testDir: './tests/d2-source-browser',
+    outputDir: './test-results/d2-source',
     globalSetup: './tests/d2-source-browser/setup.mjs',
     workers: 1,
     timeout: 60000,

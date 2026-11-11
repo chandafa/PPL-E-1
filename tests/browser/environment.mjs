@@ -7,6 +7,7 @@ export function browserEnvironment(env = process.env) {
         DB_DATABASE: env.E1_UI_TEST_DATABASE || 'e1_pajak_ui_test',
         DB_URL: '',
         D2_DRIVER: 'mock',
+        D2_MOCK_DATASET: env.D2_MOCK_DATASET || 'legacy',
         F1_API_ENABLED: 'false',
         F1_CHECK_ACCOUNT: 'false',
         E1_DEV_LOGIN: 'true',

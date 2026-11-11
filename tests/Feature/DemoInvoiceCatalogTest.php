@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Invoice;
 use App\Services\Auth\DevTokenIssuer;
+use App\Services\Invoices\IntegrationCatalog;
 use Database\Seeders\ModulD2Seeder;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Mockery;
 use Tests\TestCase;
 
 class DemoInvoiceCatalogTest extends TestCase
@@ -82,13 +85,33 @@ class DemoInvoiceCatalogTest extends TestCase
             ->assertJsonFragment(['invoiceId' => 'inv-demo-sample']);
     }
 
-    public function test_http_driver_does_not_offer_dummy_invoices(): void
+    public function test_http_driver_offers_verified_references_and_keeps_manual_id_form(): void
     {
-        config(['e1.d2.driver' => 'http']);
-        $this->getJson('/api/ui/d2/invoices', $this->headers())->assertNotFound();
+        config(['e1.d2.driver' => 'http', 'e1.d2.base_url' => 'https://d2.test', 'e1.d2.integration_catalog' => false]);
+        Http::fake(['https://d2.test/*' => Http::response(['data' => [
+            'invoiceId' => 'inv-demo-sample', 'invoiceNumber' => 'FROM-D2', 'dppAmount' => '12.00',
+        ]])]);
+        $this->getJson('/api/ui/d2/invoices', $this->headers())->assertOk()
+            ->assertJsonPath('data.invoices.0.invoiceNumber', 'FROM-D2')
+            ->assertJsonPath('data.invoices.0.dppAmount', '12.00');
         $this->withoutVite()->get('/tax-invoices/create')
             ->assertOk()->assertSee('placeholder="Masukkan ID invoice"', false)
             ->assertDontSee('id="invoice-context"', false);
+    }
+
+    public function test_local_http_integration_lists_source_ids_and_renders_select(): void
+    {
+        config(['e1.d2.driver' => 'http', 'e1.d2.base_url' => 'http://127.0.0.1:8026', 'e1.d2.integration_catalog' => true]);
+        $catalog = Mockery::mock(IntegrationCatalog::class);
+        $catalog->shouldReceive('ids')->once()->andReturn(['new-in-d2']);
+        $this->app->instance(IntegrationCatalog::class, $catalog);
+        Http::fake(['http://127.0.0.1:8026/*' => Http::response(['data' => ['invoiceId' => 'new-in-d2', 'dppAmount' => '55.00']])]);
+        $this->getJson('/api/ui/d2/invoices/all', $this->headers())->assertOk()
+            ->assertJsonPath('data.invoices.0.invoiceId', 'new-in-d2')
+            ->assertJsonPath('data.invoices.0.dppAmount', '55.00');
+        $this->withoutVite()->get('/tax-invoices/create')->assertOk()
+            ->assertSee('<select id="invoiceId"', false)->assertSee('id="invoice-context"', false)
+            ->assertDontSee('Data dummy D-2');
     }
 
     public function test_mock_form_renders_a_required_invoice_select(): void

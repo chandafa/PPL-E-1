@@ -9,7 +9,7 @@ test('migrasi dan generator memakai DB uji yang sama dengan server browser', () 
     prepareBrowser(env, (...args) => calls.push(args));
 
     assert.deepEqual(calls.map(([command, args]) => [command, args[1]]), [
-        ['php', 'migrate:fresh'], ['php', 'demo:samples'],
+        ['php', 'migrate:fresh'], ['php', 'db:seed'],
     ]);
     for (const [, , options] of calls) {
         assert.deepEqual(options.env, browserEnvironment(env));

@@ -10,7 +10,7 @@ use RuntimeException;
 /** Builds E-1 demo documents from the current D-2 invoice records. */
 final class DemoDataset
 {
-    public static function invoices(bool $includeManual = false, ?array $invoiceIds = null): array
+    public static function invoices(?array $invoiceIds = null): array
     {
         return Invoice::query()
             ->with(['termin.contract', 'sourceItems'])
@@ -29,7 +29,6 @@ final class DemoDataset
                     'invoiceNumber' => $number,
                     'invoiceDate' => $date->format('Y-m-d'),
                     'taxPeriod' => $date->format('Y-m'),
-                    'manualUploadOnly' => false,
                     'file' => 'efaktur-'.$id.'.pdf',
                     'pdf' => [
                         'nsfp' => sprintf('010.000-%s.%08d', $date->format('y'), $serial),
@@ -54,20 +53,38 @@ final class DemoDataset
             ->all();
     }
 
-    public static function seededInvoices(): array
+    /** Build fictitious tax PDFs using the dates and commercial values returned by the active D-2 provider. */
+    public static function fromReferences(array $references): array
     {
-        return self::invoices();
-    }
-
-    public static function originalReplacement(): array
-    {
-        $invoices = self::invoices();
-        $fixture = reset($invoices);
-        if (! is_array($fixture)) {
-            throw new RuntimeException('Belum ada invoice D-2 untuk membuat PDF demo.');
+        $fixtures = [];
+        foreach ($references as $row) {
+            foreach (['invoiceId', 'invoiceNumber', 'invoiceDate', 'dppAmount', 'ppnAmount'] as $field) {
+                if (! is_string($row[$field] ?? null) || $row[$field] === '') {
+                    throw new RuntimeException('Invoice D-2 belum memiliki '.$field.' yang diperlukan untuk PDF demo.');
+                }
+            }
+            $id = $row['invoiceId'];
+            $date = CarbonImmutable::createFromFormat('!Y-m-d', $row['invoiceDate']);
+            if ($date->format('Y-m-d') !== $row['invoiceDate']) {
+                throw new RuntimeException('Tanggal invoice D-2 tidak valid: '.$id);
+            }
+            $serial = 10000000 + (hexdec(substr(hash('sha256', $id), 0, 7)) % 89999999);
+            $fixtures[$id] = [
+                'invoiceId' => $id, 'invoiceNumber' => $row['invoiceNumber'],
+                'invoiceDate' => $date->format('Y-m-d'), 'taxPeriod' => $date->format('Y-m'),
+                'file' => 'efaktur-'.$id.'.pdf',
+                'pdf' => [
+                    'nsfp' => sprintf('010.000-%s.%08d', $date->format('y'), $serial),
+                    'date' => $date->locale('id')->translatedFormat('j F Y'),
+                    'invoiceNumber' => $row['invoiceNumber'],
+                    'items' => [['code' => '620100', 'name' => 'Item uji E-1 (bukan rincian D-2)', 'amount' => Money::normalize($row['dppAmount'])]],
+                    'dpp' => Money::normalize($row['dppAmount']), 'ppn' => Money::normalize($row['ppnAmount']), 'ppnbm' => '0.00',
+                    'buyer' => $row['clientName'] ?? $row['projectName'] ?? $row['projectId'] ?? 'Referensi D-2',
+                ],
+            ];
         }
 
-        return self::replacementFor($fixture);
+        return $fixtures;
     }
 
     private static function replacementFor(array $fixture): array

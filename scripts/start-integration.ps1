@@ -1,52 +1,5 @@
-param([string]$F1Path = '', [string]$D2Path = '', [switch]$Main, [ValidateSet('mock','http')][string]$D2Driver = 'http')
+param([ValidateSet('mock','http')][string]$D2Driver = 'http')
 $ErrorActionPreference = 'Stop'
-
-# Repo pendukung hanya diambil saat belum ada. Checkout yang sudah dibuat anggota
-# tidak pernah diubah/diperbarui oleh launcher agar pekerjaan lokal mereka aman.
-$F1Repository = 'https://github.com/Izra29/PPL_F1.git'
-$F1Revision = '0feb37aafe9df9e871aaba9a5457093696ce38a0'
-$D2Repository = 'https://github.com/eldyfg/PPL-D-2.git'
-$D2Revision = 'b93fc4dadcf7916995c9e6c2f981f95cc039dd97'
-
-function Invoke-RequiredCommand([string]$name, [string[]]$arguments, [string]$failureMessage) {
-    $command = Get-Command $name -ErrorAction SilentlyContinue
-    if ($null -eq $command) { throw "Perintah $name tidak ditemukan. $failureMessage" }
-    & $command.Source @arguments
-    if ($LASTEXITCODE -ne 0) { throw "$failureMessage (perintah $name berakhir dengan kode $LASTEXITCODE)." }
-}
-
-function Ensure-IntegrationRepository([string]$name, [string]$path, [string]$repository, [string]$revision, [string]$requiredFile) {
-    if (Test-Path -LiteralPath $path -PathType Container) {
-        if (-not (Test-Path -LiteralPath (Join-Path $path $requiredFile) -PathType Leaf)) {
-            throw "Folder $name sudah ada, tetapi bukan checkout yang dapat dipakai (berkas $requiredFile tidak ditemukan). Periksa folder tersebut; launcher tidak menimpanya."
-        }
-        return
-    }
-
-    $container = Split-Path -Parent $path
-    New-Item -ItemType Directory -Force -Path $container | Out-Null
-    Write-Output "$name belum ada; mengunduh repo resmi ke $path..."
-    Invoke-RequiredCommand 'git' @('clone', $repository, $path) "Gagal mengunduh $name dari $repository. Pastikan Git dan koneksi internet tersedia"
-    Invoke-RequiredCommand 'git' @('-C', $path, 'checkout', '--detach', $revision) "Gagal memakai revisi $name yang telah diuji ($revision)"
-}
-
-function Ensure-F1Dependencies([string]$path) {
-    if (Test-Path -LiteralPath (Join-Path $path 'node_modules/jsonwebtoken/package.json') -PathType Leaf) { return }
-    Write-Output 'Memasang dependensi F-1 (npm ci)...'
-    Push-Location $path
-    try {
-        Invoke-RequiredCommand 'npm' @('ci', '--ignore-scripts') 'Pemasangan dependensi F-1 gagal'
-    } finally { Pop-Location }
-}
-
-function Ensure-D2Dependencies([string]$path) {
-    if (Test-Path -LiteralPath (Join-Path $path 'vendor/autoload.php') -PathType Leaf) { return }
-    Write-Output 'Memasang dependensi D-2 (composer install)...'
-    Push-Location $path
-    try {
-        Invoke-RequiredCommand 'composer' @('install', '--no-interaction', '--prefer-dist') 'Pemasangan dependensi D-2 gagal'
-    } finally { Pop-Location }
-}
 
 function Test-OwnedProcess($entry) {
     if ($null -eq $entry -or -not $entry.id -or -not $entry.startedAt) { return $false }
@@ -86,20 +39,15 @@ function Wait-OwnedListener([string]$name, $entry) {
     } while ($true)
 }
 $repo = Split-Path $PSScriptRoot
-$parent = Split-Path $repo
-if (-not $F1Path) { $F1Path = Join-Path $parent '_integrasi/F1' }
-if (-not $D2Path) { $D2Path = Join-Path $parent '_integrasi/D2' }
-Ensure-IntegrationRepository 'F-1' $F1Path $F1Repository $F1Revision 'demo/local-server.js'
-if ($D2Driver -eq 'http') { Ensure-IntegrationRepository 'D-2' $D2Path $D2Repository $D2Revision 'artisan' }
-$F1Path = (Resolve-Path -LiteralPath $F1Path).Path
-if ($D2Driver -eq 'http') { $D2Path = (Resolve-Path -LiteralPath $D2Path).Path }
-$runtimeFile = Join-Path $repo 'storage/app/private/integration/current.json'
-if (-not (Test-Path -LiteralPath $runtimeFile)) { throw 'Jalankan php scripts/prepare-integration.php dahulu.' }
-Ensure-F1Dependencies $F1Path
-if ($D2Driver -eq 'http') { Ensure-D2Dependencies $D2Path }
-$runtime = Get-Content -Raw -LiteralPath $runtimeFile | ConvertFrom-Json
+$runtimeJson = & php (Join-Path $PSScriptRoot 'integration-runtime.php') $D2Driver
+if ($LASTEXITCODE -ne 0) { throw 'Setup belum lengkap; jalankan composer integration.' }
+$runtime = $runtimeJson | ConvertFrom-Json
+$F1Path = $runtime.setup.repositories.f1.path
+$D2Path = if ($D2Driver -eq 'http') { $runtime.setup.repositories.d2.path } else { '' }
+if (-not (Test-Path (Join-Path $F1Path 'node_modules/jsonwebtoken/package.json'))) { throw 'Dependensi F-1 belum tersedia; jalankan composer integration.' }
+if ($D2Driver -eq 'http' -and -not (Test-Path (Join-Path $D2Path 'vendor/autoload.php'))) { throw 'Dependensi D-2 belum tersedia; jalankan composer integration.' }
+& (Join-Path $PSScriptRoot 'integration-node.ps1') -Repository $F1Path
 $stateFile = Join-Path $runtime.directory 'processes.json'
-$setupMarker = Join-Path $runtime.directory 'd2-setup.complete'
 $e1Port = 8087
 $expectedPorts = @{ f1 = 4100; e1 = $e1Port }
 if ($D2Driver -eq 'http') { $expectedPorts['d2'] = 8026 }
@@ -133,7 +81,7 @@ if ($existingRuntime) {
 if ($processes.Count -eq $serviceNames.Count) {
     foreach ($name in $serviceNames) { Wait-OwnedListener $name $processes[$name] }
     Write-Output "Integrasi sudah berjalan: http://127.0.0.1:$e1Port/login; F-1 4100; $d2Label."
-    Write-Output 'Layanan dan data tetap dipertahankan. Untuk restart penuh: composer integration:stop lalu composer integration.'
+    Write-Output 'Layanan dan data tetap dipertahankan. Untuk restart penuh: composer integration:stop lalu composer integration run.'
     return
 }
 foreach ($name in $serviceNames) {
@@ -153,10 +101,12 @@ function Start-Owned([string]$name, [string]$program, [string[]]$arguments, [str
     $p = Start-Process -FilePath $program -ArgumentList $arguments -WorkingDirectory $cwd -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $runtime.directory "$name.out.log") -RedirectStandardError (Join-Path $runtime.directory "$name.err.log")
     $processes[$name] = @{ id = $p.Id; startedAt = $p.StartTime.ToString('o'); port = $port }
     $started[$name] = $processes[$name]
+    [IO.File]::WriteAllText($stateFile, ($processes | ConvertTo-Json -Depth 5))
 }
 try {
     Set-ProcessEnv 'JWT_SECRET' $runtime.jwtSecret
     Set-ProcessEnv 'JWT_EXPIRES_IN' '3600'
+    Set-ProcessEnv 'PORT' '4100'
     Set-ProcessEnv 'E1_DEPENDENCY_TRACE' (Join-Path $runtime.directory 'f1-requests.ndjson')
     if (-not $processes.ContainsKey('f1')) {
         Start-Owned 'f1' (Get-Command node).Source @('--require', ('"' + (Join-Path $PSScriptRoot 'trace-f1.cjs') + '"'), 'demo/local-server.js') $F1Path 4100
@@ -164,10 +114,8 @@ try {
     if ($D2Driver -eq 'http' -and -not $processes.ContainsKey('d2')) {
         Set-ProcessEnv 'APP_ENV' 'local'
         Set-ProcessEnv 'APP_DEBUG' 'false'
-        $keyBytes = New-Object byte[] 32
-        $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
-        try { $rng.GetBytes($keyBytes) } finally { $rng.Dispose() }
-        Set-ProcessEnv 'APP_KEY' ('base64:' + [Convert]::ToBase64String($keyBytes))
+        Set-ProcessEnv 'APP_KEY' $runtime.d2.key
+        Set-ProcessEnv 'APP_CONFIG_CACHE' (Join-Path $runtime.directory 'd2-config.php')
         Set-ProcessEnv 'DB_CONNECTION' 'pgsql'
         Set-ProcessEnv 'DB_URL' ''
         Set-ProcessEnv 'DB_HOST' $runtime.db.host
@@ -179,31 +127,16 @@ try {
         Set-ProcessEnv 'CACHE_STORE' 'array'
         Set-ProcessEnv 'SESSION_DRIVER' 'array'
         Set-ProcessEnv 'LOG_CHANNEL' 'single'
-        Push-Location $D2Path
-        try {
-            $migrationArguments = @('artisan', 'migrate', '--force', '--no-interaction')
-            # Seed hanya pertama kali; restart tidak menimpa status/nominal invoice D-2.
-            if (-not $existingRuntime -and -not (Test-Path -LiteralPath $setupMarker)) { $migrationArguments += '--seed' }
-            & php @migrationArguments *> (Join-Path $runtime.directory 'd2-setup.log')
-            if ($LASTEXITCODE -ne 0) { throw 'Migrasi/seed D-2 gagal; lihat d2-setup.log. Kode D-2 tidak diubah.' }
-            [IO.File]::WriteAllText($setupMarker, (Get-Date).ToUniversalTime().ToString('o'))
-        } finally { Pop-Location }
         Set-ProcessEnv 'E1_DEPENDENCY_TRACE' (Join-Path $runtime.directory 'd2-requests.ndjson')
         Set-ProcessEnv 'E1_DEPENDENCY_REPO' $D2Path
         Start-Owned 'd2' (Get-Command php).Source @('-S', '127.0.0.1:8026', '-t', 'public', ('"' + (Join-Path $PSScriptRoot 'trace-d2.php') + '"')) $D2Path 8026
     }
     foreach ($key in @($saved.Keys)) { [Environment]::SetEnvironmentVariable($key, $saved[$key], 'Process') }
     Set-ProcessEnv 'D2_DRIVER' $D2Driver
+    foreach ($property in $runtime.e1Environment.PSObject.Properties) {
+        Set-ProcessEnv $property.Name ([string]$property.Value)
+    }
     if (-not $processes.ContainsKey('e1')) {
-        if (-not $Main) {
-            Set-ProcessEnv 'APP_ENV' 'integration'
-            Push-Location $repo
-            try {
-                & php artisan migrate --env=integration --force --no-interaction *> (Join-Path $runtime.directory 'e1-setup.log')
-                if ($LASTEXITCODE -ne 0) { throw 'Migrasi E-1 gagal; lihat e1-setup.log.' }
-            } finally { Pop-Location }
-        }
-        # Migrasi/seed dummy mode Main dijalankan Artisan sebelum launcher ini.
         Start-Owned 'e1' (Get-Command php).Source @('-d', 'upload_max_filesize=6M', '-d', 'post_max_size=16M', '-S', "127.0.0.1:$e1Port", '-t', 'public', 'server.php') $repo $e1Port
     }
     $processes | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $stateFile -Encoding UTF8
@@ -211,9 +144,8 @@ try {
     [IO.File]::WriteAllText($modeFile, $D2Driver)
     Write-Output "Siap diuji: http://127.0.0.1:$e1Port/login; F-1 4100; $d2Label."
     Write-Output ('Layanan yang dinyalakan: ' + (($started.Keys | Sort-Object) -join ', ') + '. Layanan lain tetap berjalan.')
-    if ($Main -and $D2Driver -eq 'mock') { Write-Output 'Dummy D-2 berada di database E-1; tanpa server D-2. Stop: composer integration:stop.' }
-    elseif ($Main) { Write-Output 'E-1 memakai database utama yang dipertahankan; D-2 memakai database integrasi terpisah. Stop: composer integration:stop.' }
-    else { Write-Output 'Profil pengujian terpisah; database utama tidak digunakan.' }
+    if ($D2Driver -eq 'mock') { Write-Output 'Dummy D-2 berada di database E-1; tanpa server D-2. Stop: composer integration:stop.' }
+    else { Write-Output 'E-1 memakai database utama yang dipertahankan; D-2 memakai database integrasi terpisah. Stop: composer integration:stop.' }
 } catch {
     foreach ($p in $started.Values) {
         $live = Get-Process -Id $p.id -ErrorAction SilentlyContinue
