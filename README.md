@@ -48,6 +48,7 @@ Jika folder proyek sudah tersedia, cukup buka folder tersebut.
 
 ```bash
 composer install
+npm install
 npm ci
 npm run build
 ```
