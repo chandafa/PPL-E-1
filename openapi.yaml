@@ -11,11 +11,211 @@ servers:
 security:
   - bearerAuth: []
 tags:
+  - name: Autentikasi
+    description: Login dan penerbitan token Bearer (F-1). Endpoint dev hanya untuk pengembangan lokal.
   - name: Faktur dan pembayaran
     description: "Operasi antarmuka web E-1 (internal): faktur, riwayat, rekap, pembayaran, ekspor."
   - name: Ringkasan pajak
     description: Data agregat pajak per masa pajak untuk modul lain; tanpa dokumen, rincian faktur, atau lampiran.
 paths:
+  /api/auth/f1/login:
+    post:
+      operationId: loginF1
+      tags:
+        - Autentikasi
+      summary: Login melalui F-1
+      description: "Login menggunakan kredensial F-1 (email/username dan kata sandi). E-1 meneruskan kredensial ke F-1, memverifikasi token yang diterbitkan, dan mengembalikan token Bearer untuk dipakai pada operasi bertanda kunci. Endpoint aktif bila E1_F1_API_ENABLED=true."
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/F1LoginRequest"
+            examples:
+              permintaan:
+                value:
+                  emailOrUsername: "admin@perusahaan.local"
+                  password: "kata-sandi-rahasia"
+      responses:
+        "200":
+          description: Login melalui F-1 berhasil
+          headers:
+            Cache-Control:
+              description: Respons tidak boleh disimpan cache.
+              schema:
+                type: string
+                examples:
+                  - no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/F1LoginResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Login melalui F-1 berhasil"
+                    data:
+                      accessToken: "<token-jwt-f1>"
+                      tokenType: Bearer
+                      expiresIn: 3600
+                      accountId: "AKN-0002"
+                      roleCode: "Admin"
+        "400":
+          description: "Permintaan tidak valid: emailOrUsername atau password kosong/terlalu panjang"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_LOGIN:
+                  summary: kredensial tidak lengkap atau tidak valid formatnya
+                  value:
+                    code: "400"
+                    message: "Email/username dan kata sandi wajib diisi dengan benar"
+                    data: null
+                    errorCode: INVALID_LOGIN
+        "401":
+          description: Kredensial F-1 salah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_CREDENTIALS:
+                  summary: email/username atau kata sandi salah
+                  value:
+                    code: "401"
+                    message: "Email/username atau kata sandi salah"
+                    data: null
+                    errorCode: INVALID_CREDENTIALS
+        "403":
+          description: Akun F-1 terkunci atau nonaktif
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                F1_ACCOUNT_BLOCKED:
+                  summary: akun terkunci/nonaktif
+                  value:
+                    code: "403"
+                    message: "Akun F-1 terkunci atau nonaktif"
+                    data: null
+                    errorCode: F1_ACCOUNT_BLOCKED
+        "404":
+          description: Endpoint tidak aktif (E1_F1_API_ENABLED=false)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                NOT_FOUND:
+                  summary: sumber daya tidak ditemukan
+                  value:
+                    code: "404"
+                    message: "Sumber daya tidak ditemukan"
+                    data: null
+                    errorCode: NOT_FOUND
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          description: Respons/token F-1 tidak sesuai kontrak atau token dari F-1 tidak lolos verifikasi E-1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                F1_INVALID_RESPONSE:
+                  summary: respons identitas F-1 tidak sesuai kontrak
+                  value:
+                    code: "502"
+                    message: "Respons identitas F-1 tidak sesuai kontrak"
+                    data: null
+                    errorCode: F1_INVALID_RESPONSE
+                F1_INVALID_TOKEN:
+                  summary: token dari F-1 tidak lolos verifikasi E-1
+                  value:
+                    code: "502"
+                    message: "Token dari F-1 tidak lolos verifikasi E-1"
+                    data: null
+                    errorCode: F1_INVALID_TOKEN
+        "503":
+          $ref: "#/components/responses/DependencyUnavailable"
+  /api/dev/f1/login:
+    post:
+      operationId: devLoginF1
+      tags:
+        - Autentikasi
+      summary: Login tiruan F-1 (pengembangan lokal)
+      description: "Menerbitkan token Bearer tiruan (HS256) untuk Postman/demo lokal. Di luar kontrak bisnis openapi utama; hanya aktif bila E1_DEV_LOGIN=true dan bukan production. Selain itu berperilaku seperti rute tidak ada (404 NOT_FOUND)."
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DevLoginRequest"
+            examples:
+              admin:
+                value:
+                  akunId: "AKN-0002"
+                  kodePeran: "Admin"
+                  ttl: 3600
+      responses:
+        "200":
+          description: Token pengembangan (F-1 tiruan)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DevLoginResponse"
+              examples:
+                sukses:
+                  value:
+                    code: "200"
+                    message: "Token pengembangan (F-1 tiruan, hanya untuk lokal)"
+                    data:
+                      accessToken: "<token-jwt-tiruan>"
+                      tokenType: Bearer
+                      expiresIn: 3600
+                      akunId: "AKN-0002"
+                      kodePeran: "Admin"
+        "400":
+          description: "Permintaan tidak valid: akunId/kodePeran kosong atau terlalu panjang, ttl di luar 60-86400, atau algoritma tidak mendukung penerbitan lokal"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                INVALID_LOGIN:
+                  summary: parameter login tidak valid
+                  value:
+                    code: "400"
+                    message: "akunId wajib diisi (contoh AKN-0002)"
+                    data: null
+                    errorCode: INVALID_LOGIN
+                DEV_LOGIN_UNSUPPORTED:
+                  summary: algoritma token tidak mendukung penerbitan lokal
+                  value:
+                    code: "400"
+                    message: "Penerbitan token lokal hanya mendukung HS256/HS384/HS512"
+                    data: null
+                    errorCode: DEV_LOGIN_UNSUPPORTED
+        "404":
+          description: Endpoint tidak aktif (E1_DEV_LOGIN=false atau production)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                NOT_FOUND:
+                  summary: sumber daya tidak ditemukan
+                  value:
+                    code: "404"
+                    message: "Sumber daya tidak ditemukan"
+                    data: null
+                    errorCode: NOT_FOUND
   /api/v1/tax-invoices/extractions:
     post:
       operationId: extractTaxInvoice
@@ -1236,7 +1436,156 @@ components:
                 message: "Pengguna sah, akses tidak cukup"
                 data: null
                 errorCode: FORBIDDEN
+    TooManyRequests:
+      description: Terlalu banyak permintaan (pembatasan laju)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            TOO_MANY_REQUESTS:
+              summary: batas laju terlampaui
+              value:
+                code: "429"
+                message: "Terlalu banyak permintaan"
+                data: null
+                errorCode: TOO_MANY_REQUESTS
   schemas:
+    F1LoginRequest:
+      type: object
+      description: Kredensial login yang diteruskan ke F-1.
+      required:
+        - emailOrUsername
+        - password
+      properties:
+        emailOrUsername:
+          type: string
+          minLength: 1
+          maxLength: 254
+          description: Email atau username akun F-1.
+          examples:
+            - "admin@perusahaan.local"
+        password:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          format: password
+          description: Kata sandi akun F-1.
+    F1LoginResponse:
+      type: object
+      description: Respons berhasil login F-1; data berisi token dan identitas.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          type: object
+          required:
+            - accessToken
+            - tokenType
+            - expiresIn
+            - accountId
+            - roleCode
+          properties:
+            accessToken:
+              type: string
+              description: Token akses yang diterbitkan F-1.
+            tokenType:
+              type: string
+              const: Bearer
+              description: Tipe token.
+            expiresIn:
+              type: integer
+              minimum: 1
+              description: Masa berlaku token dalam detik.
+              examples:
+                - 3600
+            accountId:
+              type: string
+              description: ID akun (akunId) dari F-1.
+              examples:
+                - "AKN-0002"
+            roleCode:
+              type: string
+              description: Kode peran akun dari F-1.
+              examples:
+                - "Admin"
+    DevLoginRequest:
+      type: object
+      description: Permintaan penerbitan token tiruan F-1 untuk pengembangan lokal.
+      required:
+        - akunId
+        - kodePeran
+      properties:
+        akunId:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: ID akun tiruan.
+          examples:
+            - "AKN-0002"
+        kodePeran:
+          type: string
+          minLength: 1
+          maxLength: 32
+          description: Kode peran tiruan (contoh Admin, CEO, COO).
+          examples:
+            - "Admin"
+        ttl:
+          type: integer
+          minimum: 60
+          maximum: 86400
+          default: 3600
+          description: Masa berlaku token dalam detik (60-86400).
+    DevLoginResponse:
+      type: object
+      description: Respons berhasil penerbitan token tiruan.
+      required:
+        - code
+        - message
+        - data
+      properties:
+        code:
+          type: string
+          const: "200"
+          description: Status HTTP dalam bentuk string.
+        message:
+          type: string
+          description: Pesan keberhasilan.
+        data:
+          type: object
+          required:
+            - accessToken
+            - tokenType
+            - expiresIn
+            - akunId
+            - kodePeran
+          properties:
+            accessToken:
+              type: string
+              description: Token akses tiruan (JWT).
+            tokenType:
+              type: string
+              const: Bearer
+              description: Tipe token.
+            expiresIn:
+              type: integer
+              minimum: 1
+              description: Masa berlaku token dalam detik.
+            akunId:
+              type: string
+              description: ID akun tiruan.
+            kodePeran:
+              type: string
+              description: Kode peran tiruan.
     Money:
       type: string
       pattern: ^[0-9]{1,16}\.[0-9]{2}$
@@ -2170,6 +2519,11 @@ components:
             - METHOD_NOT_ALLOWED
             - PAYLOAD_TOO_LARGE
             - TOO_MANY_REQUESTS
+            - INVALID_LOGIN
+            - INVALID_CREDENTIALS
+            - F1_ACCOUNT_BLOCKED
+            - F1_INVALID_TOKEN
+            - DEV_LOGIN_UNSUPPORTED
             - VALIDATION_ERROR
             - HTTP_ERROR
             - INTERNAL_ERROR
