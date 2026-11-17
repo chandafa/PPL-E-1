@@ -35,6 +35,17 @@ class TaxInvoiceSeeder extends Seeder
                 config(['e1.d2.integration_catalog' => true]);
             }
             $fixtures = DemoDataset::fromReferences(app(InvoiceProvider::class)->catalog());
+            // Sisakan invoice tertentu tanpa faktur aktif agar form pencatatan
+            // (Buat Faktur) tetap memiliki pilihan setelah seed; satu invoice
+            // hanya boleh memiliki satu faktur aktif (Q-02). Aturan ini hanya
+            // untuk katalog HTTP integrasi yang besar; mode mock/uji (snapshot
+            // dan legacy) tetap difakturkan seluruhnya.
+            $reserved = (array) config('e1.demo.reserve_invoice_ids', []);
+            if ($driver === 'http' && $reserved !== [] && count($fixtures) > 10) {
+                foreach ($reserved as $id) {
+                    unset($fixtures[$id]);
+                }
+            }
             // Resolve after authentication: the writer's invoice client captures the current Bearer token.
             $writer = app(DemoFixtureWriter::class);
             $counts = $writer->write($fixtures, [], $actor);

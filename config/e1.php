@@ -74,6 +74,11 @@ return [
     'demo' => [
         'f1_username' => env('E1_DEMO_F1_USERNAME', 'super.admin'),
         'f1_password' => env('E1_DEMO_F1_PASSWORD', 'Password123!'),
+        // Invoice yang sengaja tidak difakturkan oleh seeder agar form pencatatan
+        // (Buat Faktur) selalu memiliki pilihan. Diterapkan hanya pada katalog
+        // besar; snapshot mock/uji yang kecil tetap difakturkan seluruhnya.
+        'reserve_invoice_ids' => $csv((string) env('E1_DEMO_RESERVE_INVOICE_IDS',
+            'inv-demo-sample,inv-demo-001,inv-demo-002,inv-demo-003,inv-demo-004,inv-demo-005,inv-demo-006,inv-demo-007,inv-demo-008,inv-demo-009,inv-demo-010')),
     ],
 
     /*
